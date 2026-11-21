@@ -1,0 +1,57 @@
+{
+ "dry_run": false,
+ "cancelled": [
+  {
+   "number": "INC0010238",
+   "rejected_run": null
+  },
+  {
+   "number": "INC0010234",
+   "rejected_run": null
+  },
+  {
+   "number": "INC0010242",
+   "rejected_run": null
+  },
+  {
+   "number": "INC0010231",
+   "rejected_run": null
+  },
+  {
+   "number": "INC0010230",
+   "rejected_run": "f24598d8-a2cd-475d-ab01-b4b77681d5f6"
+  },
+  {
+   "number": "INC0010236",
+   "rejected_run": "04179334-a8b8-4d81-a1df-df1a2003a8fd"
+  },
+  {
+   "number": "INC0010235",
+   "rejected_run": null
+  },
+  {
+   "number": "INC0010239",
+   "rejected_run": null
+  },
+  {
+   "number": "INC0010232",
+   "rejected_run": null
+  },
+  {
+   "number": "INC0010240",
+   "rejected_run": null
+  },
+  {
+   "number": "INC0010237",
+   "rejected_run": null
+  },
+  {
+   "number": "INC0010241",
+   "rejected_run": null
+  },
+  {
+   "number": "INC0010233",
+   "rejected_run": "89277679-e17e-497d-9587-18bccad31c4b"
+  }
+ ]
+}

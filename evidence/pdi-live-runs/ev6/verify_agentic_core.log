@@ -1,0 +1,14 @@
+== low_risk_resolved
+{"incident": "INC0010195", "checks": {"run_succeeded": true, "resolved": true, "resolved_by_agent": true, "routed": true, "ai_complete": true, "caller_got_the_fix": true}, "passed": true, "error": null}
+== engineer_fix_handed_over
+{"incident": "INC0010196", "checks": {"run_succeeded": true, "in_progress": true, "engineer_has_it": true, "fix_recorded": true, "caller_told_about_handoff": true}, "passed": true, "error": null}
+== p1_parks_then_approved
+{"incident": "INC0010197", "checks": {"parked": true, "nothing_applied_while_parked": true, "decision_accepted": true, "resolved_after_approval": true, "human_fix_applied": true}, "passed": true, "error": null}
+== p1_rejected
+{"incident": "INC0010198", "checks": {"parked": true, "decision_accepted": true, "not_resolved": true, "ai_failed_state": true}, "passed": true, "error": null}
+== injection_blocked
+{"incident": "INC0010199", "checks": {"not_resolved": true, "not_applied": true}, "passed": true, "error": null}
+== no_caller_suggested
+{"incident": "INC0010200", "checks": {"not_resolved": true, "started": true}, "passed": true, "error": null}
+== locked_untouched
+{"incident": "INC0010201", "checks": {"no_run": true, "untouched": true}, "passed": true, "error": null}

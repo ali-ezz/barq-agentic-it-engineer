@@ -1,0 +1,27 @@
+{
+ "checks": {
+  "opens_on_new_ticket_form": true,
+  "new_user_has_no_tickets": true,
+  "virtual_agent_bubble_hidden": true,
+  "header_has_barq_ai": true,
+  "working_banner_shown": true,
+  "answer_arrived_without_refresh": true,
+  "answer_within_90s": true,
+  "answer_is_readable": true,
+  "answer_has_steps": true,
+  "banner_gone_after_answer": true,
+  "closed_after_confirm": true,
+  "closed_ticket_folded": true,
+  "chat_answered": true,
+  "chat_is_readable": true,
+  "fits_a_phone": true,
+  "no_script_errors": true,
+  "engineer_sees_barq_card": true,
+  "closed_ticket_offers_no_buttons": true
+ },
+ "timings": {
+  "answer_on_screen_s": 10.0,
+  "chat_answer_s": 8.8
+ },
+ "passed": true
+}

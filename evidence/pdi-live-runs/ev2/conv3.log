@@ -1,0 +1,4 @@
+== approver_approves_on_page
+{"incident": "INC0010099", "checks": {"parked": true, "engineer_has_no_approve_button": true, "approver_pressed_approve": true, "resolved_after_approval": false, "edited_fix_applied": false, "backend_run_finished": false}, "passed": false, "error": null}
+== engineer_takes_over_parked
+{"incident": "INC0010100", "checks": {"parked": true, "take_over_pressed": true, "paused_run_closed": false, "locked": false, "nothing_resolved": true}, "passed": false, "error": null}

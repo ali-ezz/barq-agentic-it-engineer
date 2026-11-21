@@ -1,0 +1,14 @@
+{
+ "checks": {
+  "engineer_lands_on_barq_page": true,
+  "parked_card_says_waiting_for_approval": true,
+  "engineer_cannot_approve": true,
+  "approver_can_approve_reject_take_over": true,
+  "fix_for_engineer_offers_hand_back_only": true,
+  "resolved_by_ai_offers_take_over_only": true,
+  "cancelled_offers_nothing": true,
+  "caller_gets_no_barq_buttons": true
+ },
+ "passed": true
+}
+eng rc=0

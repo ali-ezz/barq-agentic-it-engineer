@@ -1,0 +1,8 @@
+== attack_goes_to_a_person
+{"incident": "INC0010052", "checks": {"parked_for_a_person": true, "not_resolved": true, "no_steps_sent_to_caller": true, "security_reason_recorded": true}, "passed": true, "error": null}
+== burst_is_a_likely_outage
+{"incident": "INC0010057", "checks": {"third_report_parked": true, "outage_reason_recorded": false, "not_resolved": true}, "passed": false, "error": null}
+== p1_single_user_is_reassessed
+{"incident": "INC0010060", "checks": {"handled_without_waiting_for_approval": false, "reassessment_explained": false, "priority_field_unchanged": true}, "passed": false, "error": null}
+== repeat_needs_approval
+{"incident": "INC0010062", "checks": {"second_report_parked": true, "repeat_reason_recorded": false}, "passed": false, "error": null}

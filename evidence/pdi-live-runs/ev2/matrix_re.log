@@ -1,0 +1,4 @@
+{"case": "outlook_resolved_fast", "incidents": ["INC0010128"], "timings": {"agent": 22.2}, "checks": {"run_succeeded": true, "resolved_by_agent": true, "ai_complete": true, "caller_got_steps": true, "caller_can_reply": true, "routed_to_software": true, "answered_within_60s": true}, "passed": true, "error": null}
+{"case": "mfa_new_phone", "incidents": ["INC0010129"], "timings": {"agent": 36.3}, "checks": {"run_finished": true, "not_self_service": true, "engineer_involved": true, "caller_told": true}, "passed": true, "error": null}
+{"case": "page_not_fixed_goes_to_engineer", "incidents": ["INC0010130"], "timings": {"agent": 12.1, "reopen_event": 2.0}, "checks": {"reopened": true, "engineer_has_it": true, "page_says_engineer": true, "ai_did_not_rerun": true, "reopen_event_fast": true}, "passed": true, "error": null}
+PASSED 3/3

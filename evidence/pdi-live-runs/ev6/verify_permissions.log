@@ -1,0 +1,17 @@
+{
+ "checks": {
+  "caller_reads_own_ticket": true,
+  "other_user_cannot_read_it": true,
+  "caller_reads_comments": true,
+  "caller_can_reply": true,
+  "caller_cannot_read_work_notes": true,
+  "caller_has_no_engineer_or_approver_role": true,
+  "caller_cannot_lock_or_enable_ai": true,
+  "engineer_reads_any_ticket": true,
+  "engineer_reads_work_notes": true,
+  "engineer_is_not_approver": true,
+  "approver_has_operator_role": true,
+  "barq_admin_has_app_admin_role": true
+ },
+ "passed": true
+}

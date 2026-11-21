@@ -1,0 +1,16 @@
+{
+ "incident": "INC0010229",
+ "checks": {
+  "page_loads_with_chat": true,
+  "new_caller_sees_no_tickets": true,
+  "chat_answers": true,
+  "problem_gets_ticket_proposal": true,
+  "ticket_created_as_the_caller": true,
+  "agent_worked_the_ticket": true,
+  "agent_message_visible_in_chat": true,
+  "no_work_notes_in_chat": true,
+  "follow_up_applied": true,
+  "other_users_ticket_refused": true
+ },
+ "passed": true
+}

@@ -1,0 +1,17 @@
+{
+ "incident": null,
+ "checks": {
+  "page_loads_with_chat": true,
+  "new_caller_sees_no_tickets": true,
+  "chat_answers": true,
+  "problem_gets_ticket_proposal": true,
+  "ticket_created_as_the_caller": false,
+  "agent_worked_the_ticket": false,
+  "agent_message_visible_in_chat": false,
+  "no_work_notes_in_chat": true,
+  "follow_up_applied": false,
+  "other_users_ticket_refused": true
+ },
+ "passed": false
+}
+uchat rc=1

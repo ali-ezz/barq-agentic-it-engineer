@@ -1,0 +1,3 @@
+== low_risk_resolved
+{"incident": "INC0010148", "checks": {"run_succeeded": true, "resolved": true, "resolved_by_agent": true, "routed": true, "ai_complete": true, "caller_got_the_fix": true}, "passed": true, "error": null}
+== engineer_fix_handed_over

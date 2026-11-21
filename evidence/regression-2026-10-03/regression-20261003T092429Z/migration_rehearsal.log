@@ -1,0 +1,16 @@
+Rehearsal database: barq_s2_2_test_rollback_20261003093343_3111852
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running downgrade 0009_article_feedback -> 0008_event_contract_v2, Article feedback: what happened after the agent resolved an incident with an article.
+INFO  [alembic.runtime.migration] Running downgrade 0008_event_contract_v2 -> 0007_chat_history_summary, Event contract v2: conversation event types and the acting user.
+INFO  [alembic.runtime.migration] Running downgrade 0007_chat_history_summary -> 0006_chat_tables, Chat conversation memory: rolling older-history summary.
+INFO  [alembic.runtime.migration] Running downgrade 0006_chat_tables -> 0005_cluster_waiters, Admin chatbot persistence: sessions, conversations, turns, messages.
+Downgrade passed; 280 event rows retained.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 0005_cluster_waiters -> 0006_chat_tables, Admin chatbot persistence: sessions, conversations, turns, messages.
+INFO  [alembic.runtime.migration] Running upgrade 0006_chat_tables -> 0007_chat_history_summary, Chat conversation memory: rolling older-history summary.
+INFO  [alembic.runtime.migration] Running upgrade 0007_chat_history_summary -> 0008_event_contract_v2, Event contract v2: conversation event types and the acting user.
+INFO  [alembic.runtime.migration] Running upgrade 0008_event_contract_v2 -> 0009_article_feedback, Article feedback: what happened after the agent resolved an incident with an article.
+Backup restoration passed: every public table has identical rows.
+Rehearsal copy removed; snapshot and fingerprints retained at /home/ubuntu/barq-backups/barq_s2_2_test_rollback_20261003093343_3111852

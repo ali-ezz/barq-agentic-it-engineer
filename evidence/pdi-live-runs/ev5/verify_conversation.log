@@ -1,0 +1,10 @@
+== ask_then_continue
+{"incident": "INC0010164", "checks": {"first_run_finished": true, "asked_one_question": true, "waited_on_hold": true, "reply_queued_the_agent_again": true, "agent_continued_to_a_result": true, "no_question_repeated": true}, "passed": true, "error": null}
+== engineer_takes_over_then_hands_back
+{"incident": "INC0010165", "checks": {"engineer_reply_locked_the_agent_out": true, "stood_down_note": true, "engineer_reply_recorded": true, "hand_back_button_offered_and_pressed": true, "hand_back_note_with_instruction": true, "agent_resumed": true, "lock_cleared": true}, "passed": true, "error": null}
+== caller_reopens_ai_resolution
+{"incident": "INC0010166", "checks": {"was_resolved_by_agent": true, "reopened_to_in_progress": true, "engineer_has_it": true, "hand_over_note": true, "reopen_recorded": true}, "passed": true, "error": null}
+== approver_approves_on_page
+{"incident": "INC0010167", "checks": {"parked": true, "engineer_has_no_approve_button": true, "approver_pressed_approve": true, "resolved_after_approval": true, "edited_fix_applied": true, "backend_run_finished": true}, "passed": true, "error": null}
+== engineer_takes_over_parked
+{"incident": "INC0010168", "checks": {"parked": true, "take_over_pressed": true, "paused_run_closed": true, "locked": true, "nothing_resolved": true}, "passed": true, "error": null}

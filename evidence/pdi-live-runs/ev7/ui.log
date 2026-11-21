@@ -1,0 +1,31 @@
+{
+ "checks": {
+  "opens_on_welcome": true,
+  "virtual_agent_bubble_hidden": true,
+  "no_buttons_besides_new_and_send": true,
+  "live_activity_shown": true,
+  "answer_types_itself_in": true,
+  "answer_without_refresh": true,
+  "answer_within_90s": true,
+  "answer_is_readable": true,
+  "status_tells_next_step": true,
+  "card_has_summary": true,
+  "card_said_vs_found": true,
+  "card_action_with_undo": true,
+  "card_one_control_button": true,
+  "old_form_buttons_gone": true,
+  "card_timeline_opens": true,
+  "card_trace_link": true,
+  "take_over_locks_agent_out": true,
+  "card_shows_agent_working_live": true,
+  "caller_sees_follow_up": true,
+  "closes_after_confirmation": true,
+  "no_script_errors": true
+ },
+ "timings": {
+  "answer_on_screen_s": 58.6,
+  "close_s": 15.9
+ },
+ "passed": true
+}
+rc=0
