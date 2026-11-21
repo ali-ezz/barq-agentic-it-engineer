@@ -1,0 +1,31 @@
+# secrets and local settings
+.env
+.env.*
+!.env.example
+!.env.*.example
+.secrets/
+*.pem
+*.key
+# python / node / tooling
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+# local runtime output and media
+*.log
+*.mp4
+*.mov
+.DS_Store
+.chart-data-*
+.presentation-edit/
+animation-validation-*.json
+tunnel_url.txt
