@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="media/inflow-logo.png" alt="Inflow logo" width="180">
+</p>
+
 # barq-agentic-it-engineer
 
 An agentic IT engineer for ServiceNow incidents. A ticket arrives, the agent investigates it
