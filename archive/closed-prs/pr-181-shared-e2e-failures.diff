@@ -1,0 +1,153 @@
+diff --git a/docs/demo_runbook.md b/docs/demo_runbook.md
+index a91baee1..01aef18f 100644
+--- a/docs/demo_runbook.md
++++ b/docs/demo_runbook.md
+@@ -18,6 +18,13 @@ not an end-to-end shared run. Before presenting EC2, run the shared incident
+ flow and read back the ServiceNow fields, approval row, knowledge article and
+ Qdrant hit. The local PDI script below is evidence for the local stack only.
+ 
++The shared EC2 runs `AGENT_MAX_SECURITY_LEVEL=restricted` (changed 2026-09-28).
++The application default is now `restricted` as well. The original `internal`
++default hid 5 of 11 corpus articles from the agent — the correct article was
++retrieved, scored 0.80–0.91, then filtered out before the agent saw it, and the
++run escalated as "no evidence." The `restricted` level makes the published
++retrieval numbers describe the running system.
++
+ The demo script is `scripts/demo_s34_hitl_live.py`. It exercises both halves of
+ the platform and prints `PASS`/`FAIL` per phase, exiting non-zero if anything
+ fails, so it works as a gate and not only as a transcript.
+diff --git a/src/agent/approval_capture.py b/src/agent/approval_capture.py
+index 954a5c09..62b7de1b 100644
+--- a/src/agent/approval_capture.py
++++ b/src/agent/approval_capture.py
+@@ -11,6 +11,7 @@
+     capture_human_resolution,
+     make_next_article_number,
+ )
++from agent.policy import _as_int
+ from agent.servicenow import IncidentGateway, build_servicenow_backend
+ from agent.state import IncidentSnapshot
+ from agent.tools import RefusalExplainer, build_servicenow_tool_registry
+@@ -81,17 +82,25 @@ def snapshot_from_incident(incident: Any) -> IncidentSnapshot:
+     Both decision routes hold a real ``Incident``; capture only needs the fields the
+     article is composed from, so this is the one place that mapping lives instead of
+     each route hand-rolling it.
++
++    The client ``Incident`` model declares neither ``impact``, ``urgency`` nor
++    ``service``: each is present only when the read that produced it fetched that
++    field. Missing or blank numeric fields coerce to ``None`` with the same
++    convention the graph's load path uses, so an accepted suggestion can always
++    be captured.
+     """
+     return IncidentSnapshot(
+         sys_id=incident.sys_id,
+         number=incident.number,
+         short_description=incident.short_description or "",
+         description=incident.description or "",
+-        priority=incident.priority,
+-        impact=incident.impact,
+-        urgency=incident.urgency,
++        priority=_as_int(getattr(incident, "priority", None)),
++        impact=_as_int(getattr(incident, "impact", None)),
++        urgency=_as_int(getattr(incident, "urgency", None)),
+         category=incident.category or "",
+-        service=incident.service,
++        # None means "no service was set", which the composer already maps to
++        # "general".
++        service=getattr(incident, "service", None),
+         ai_enabled=bool(incident.ai_enabled),
+         ai_human_lock=incident.ai_human_lock,
+     )
+diff --git a/src/agent/nodes/generate.py b/src/agent/nodes/generate.py
+index 5b1e7107..d28bbaa9 100644
+--- a/src/agent/nodes/generate.py
++++ b/src/agent/nodes/generate.py
+@@ -28,6 +28,7 @@
+     IncidentSnapshot,
+     RetrievalResult,
+ )
++from app.workers.retry_policy import RetryableError
+ 
+ #: ``ai_suggestion`` is a String(4000) (S1.1 field model).
+ MAX_SUGGESTION_CHARS = 4000
+@@ -128,6 +129,20 @@ def generate(state: AgentState, deps: AgentDependencies) -> dict[str, Any]:
+             for s in answer.steps
+             if s.article_id in allowed and s.text.strip()
+         ]
++        if not steps:
++            # An empty step list is schema-valid, so without this the node
++            # builds an empty draft, verification passes vacuously (zero
++            # citations to check), and safety_check kills it downstream as
++            # escalated_blocked — stranding a solvable incident (shared
++            # INC0010175, 2026-09-28: the same Outlook query drafted fine as
++            # INC0010173 minutes earlier). By this point diagnosis has matched
++            # supporting evidence, so zero steps is always a model failure,
++            # and the transient kind: retry the node rather than escalate.
++            raise RetryableError(
++                "generate returned no usable steps for incident "
++                f"'{incident.number}' despite {len(evidence)} supporting "
++                f"evidence items ({len(answer.steps)} raw steps, all dropped)"
++            )
+         rendered, sources = render(steps, evidence)
+         while len(rendered) > MAX_SUGGESTION_CHARS and steps:
+             steps = steps[:-1]
+diff --git a/tests/test_nodes.py b/tests/test_nodes.py
+index 3864e88d..005c5918 100644
+--- a/tests/test_nodes.py
++++ b/tests/test_nodes.py
+@@ -572,6 +572,22 @@ def test_generate_initial_attempt_uses_standard_prompt(self) -> None:
+         assert "<previous_resolution_steps>" not in prompt
+         assert "<critic_feedback>" not in prompt
+ 
++    def test_empty_model_steps_retry_instead_of_an_empty_draft(self) -> None:
++        """An empty step list must not become an empty draft.
++
++        A model answer with zero steps is schema-valid, so without this guard
++        the node built ``steps=[], rendered=""``, verification passed
++        vacuously, and safety_check parked a solvable incident as
++        escalated_blocked (shared INC0010175, 2026-09-28 — the same Outlook
++        query drafted fine as INC0010173 minutes earlier). Zero steps with
++        supporting evidence is always a model failure, and the transient kind,
++        so the node raises retryable and the worker retries it.
++        """
++        answers = vpn_answers()
++        answers["generate"] = GenerateOutput(steps=[])
++        with pytest.raises(RetryableError, match="no usable steps"):
++            generate(self._state(), make_deps(llm=FakeLLM(answers)))
++
+ 
+ # -- the Sprint 4 gates ---------------------------------------------------------------------
+ 
+diff --git a/tests/test_suggestions_router.py b/tests/test_suggestions_router.py
+index bdc95e02..225c225d 100644
+--- a/tests/test_suggestions_router.py
++++ b/tests/test_suggestions_router.py
+@@ -652,3 +652,28 @@ async def test_a_capture_failure_does_not_undo_a_recorded_decision(app_with_db)
+     assert body["decision"] == "approved"
+     assert body["ai_resolution_written"] is True
+     assert body["knowledge_capture"] == {"status": "failed"}
++
++
++def test_snapshot_survives_a_real_incident_without_service() -> None:
++    """Regression: the live suggestions path crashed knowledge capture.
++
++    The route's ServiceNow read does not fetch ``service`` (and the client
++    ``Incident`` model does not declare it), so ``snapshot_from_incident``
++    raised ``AttributeError: 'Incident' object has no attribute 'service'``
++    after a suggestion was accepted on the shared stack (INC0010173,
++    2026-09-28): the decision was recorded and the resolution written, but
++    ``knowledge_capture`` came back ``{"status": "failed"}`` and the human fix
++    never reached the KB. The route stubs use SimpleNamespace with
++    ``service=None`` and so could never catch this; this test uses the real
++    model exactly as the route holds it.
++    """
++    from agent.approval_capture import snapshot_from_incident
++    from app.models.incident import Incident
++
++    incident = Incident(sys_id="c" * 32, number="INC0010173")
++    assert not hasattr(incident, "service")
++
++    snapshot = snapshot_from_incident(incident)
++
++    assert snapshot.number == "INC0010173"
++    assert snapshot.service is None
