@@ -4,8 +4,9 @@ Nodes depend on the :class:`LLMClient` protocol, never on the SDK, so the unit
 tests inject a scripted fake and the graph never needs a network in CI.
 
 The production client calls **Gemini through the Sprints LiteLLM proxy** — the
-programme's mandated model path (Gemini models only). The proxy speaks the OpenAI API, so the official ``openai`` SDK is
-the client: ``chat.completions.parse`` with a Pydantic ``response_format`` gives
+programme's mandated model path (Gemini models only). The proxy speaks the OpenAI
+API, so the official ``openai`` SDK is the client: ``chat.completions.parse`` with a
+Pydantic ``response_format`` gives
 schema-validated structured output. Every call is a Langfuse *generation* with the
 model that served it, token usage, the cost LiteLLM reports, and the prompt version.
 Embeddings stay local (FastEmbed): the S1.4 index was built with them.

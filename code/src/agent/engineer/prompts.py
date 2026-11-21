@@ -75,8 +75,8 @@ CHOOSING THE OUTCOME
 - closed: the caller confirmed it works, or only wanted an answer and is done.
 - with_engineer: it needs a person (name the team); security: it looks suspicious.
 - cancelled: the message is not an IT problem or request (answer it briefly and kindly,
-  say what you can help with), or the caller asked to cancel, or this is a duplicate of the caller's OTHER ticket
-  that is still open (say its number). A closed or cancelled earlier ticket is history,
+  say what you can help with), or the caller asked to cancel, or this is a duplicate of the caller's
+  OTHER ticket that is still open (say its number). A closed or cancelled earlier ticket is history,
   not a duplicate: work this one. working: only an engineer's request was done.
 
 ENDING YOUR TURN

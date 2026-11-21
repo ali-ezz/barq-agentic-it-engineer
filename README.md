@@ -77,7 +77,7 @@ All numbers are from `docs/RESULTS.md` and the raw output in `evidence/` (live r
 | Unit tests at the time | 2,144 passed |
 | Agent turn time | about 15-45 s |
 
-The live suites need a configured instance and are in `code/scripts/live/`. The unit-test count in this repo is reported in the PR/commit that published it.
+The live suites need a configured instance and are in `code/scripts/live/`. Run from a fresh clone of this repo: ruff, ruff format and mypy are clean and `uv run pytest -q` gives 2,147 passed, 50 skipped, 30 deselected (the notes said 2,144 at the time of the live runs).
 
 ## Layout
 
