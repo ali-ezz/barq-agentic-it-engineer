@@ -1,0 +1,120 @@
+# Langfuse (self-hosted, v3) for the BARQ PDI copy: the same tracing tool the team uses,
+# but running only on this Mac. Web UI: http://localhost:13000 (login in .env).
+# The BARQ api/worker reach it as http://langfuse-web:3000 on the barqpdi network.
+# Use: docker compose -p barqpdi-langfuse --env-file .env up -d
+x-langfuse-env: &langfuse-env
+  DATABASE_URL: postgresql://langfuse:${LF_PG_PASSWORD}@langfuse-postgres:5432/langfuse
+  SALT: ${LF_SALT}
+  ENCRYPTION_KEY: ${LF_ENCRYPTION_KEY}
+  NEXTAUTH_URL: http://localhost:13000
+  NEXTAUTH_SECRET: ${LF_NEXTAUTH_SECRET}
+  TELEMETRY_ENABLED: "false"
+  CLICKHOUSE_MIGRATION_URL: clickhouse://langfuse-clickhouse:9000
+  CLICKHOUSE_URL: http://langfuse-clickhouse:8123
+  CLICKHOUSE_USER: langfuse
+  CLICKHOUSE_PASSWORD: ${LF_CH_PASSWORD}
+  CLICKHOUSE_CLUSTER_ENABLED: "false"
+  REDIS_HOST: langfuse-redis
+  REDIS_PORT: "6379"
+  REDIS_AUTH: ${LF_REDIS_PASSWORD}
+  LANGFUSE_S3_EVENT_UPLOAD_BUCKET: langfuse
+  LANGFUSE_S3_EVENT_UPLOAD_REGION: auto
+  LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: minio
+  LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${LF_MINIO_PASSWORD}
+  LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: http://langfuse-minio:9000
+  LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: "true"
+  LANGFUSE_S3_EVENT_UPLOAD_PREFIX: events/
+  LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: langfuse
+  LANGFUSE_S3_MEDIA_UPLOAD_REGION: auto
+  LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: minio
+  LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${LF_MINIO_PASSWORD}
+  LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: http://langfuse-minio:9000
+  LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: "true"
+  LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: media/
+
+services:
+  langfuse-worker:
+    image: langfuse/langfuse-worker:3
+    container_name: barqpdi-langfuse-worker
+    restart: unless-stopped
+    depends_on: [langfuse-postgres, langfuse-clickhouse, langfuse-redis, langfuse-minio]
+    environment: *langfuse-env
+    networks: [langfuse, barqpdi]
+
+  langfuse-web:
+    image: langfuse/langfuse:3
+    container_name: barqpdi-langfuse-web
+    restart: unless-stopped
+    depends_on: [langfuse-postgres, langfuse-clickhouse, langfuse-redis, langfuse-minio]
+    ports: ["127.0.0.1:13000:3000"]
+    environment:
+      <<: *langfuse-env
+      # First start creates the organisation, project, keys and Ali's login (no sign-up page).
+      LANGFUSE_INIT_ORG_ID: barq-pdi
+      LANGFUSE_INIT_ORG_NAME: BARQ PDI
+      LANGFUSE_INIT_PROJECT_ID: barq-pdi-agent
+      LANGFUSE_INIT_PROJECT_NAME: BARQ agent (PDI)
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: ${LF_PUBLIC_KEY}
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: ${LF_SECRET_KEY}
+      LANGFUSE_INIT_USER_EMAIL: ${LF_USER_EMAIL}
+      LANGFUSE_INIT_USER_NAME: Ali
+      LANGFUSE_INIT_USER_PASSWORD: ${LF_USER_PASSWORD}
+      AUTH_DISABLE_SIGNUP: "true"
+    networks:
+      langfuse: {}
+      barqpdi: {aliases: [langfuse-web]}
+
+  langfuse-clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: barqpdi-langfuse-clickhouse
+    restart: unless-stopped
+    user: "101:101"
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: langfuse
+      CLICKHOUSE_PASSWORD: ${LF_CH_PASSWORD}
+    volumes: [clickhouse_data:/var/lib/clickhouse, clickhouse_logs:/var/log/clickhouse-server]
+    networks: [langfuse]
+
+  langfuse-minio:
+    image: cgr.dev/chainguard/minio
+    container_name: barqpdi-langfuse-minio
+    restart: unless-stopped
+    entrypoint: sh
+    command: -c 'mkdir -p /data/langfuse && minio server --address ":9000" --console-address ":9001" /data'
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: ${LF_MINIO_PASSWORD}
+    volumes: [minio_data:/data]
+    networks: [langfuse]
+
+  langfuse-redis:
+    image: redis:7
+    container_name: barqpdi-langfuse-redis
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${LF_REDIS_PASSWORD}", "--maxmemory-policy", "noeviction"]
+    networks: [langfuse]
+
+  langfuse-postgres:
+    image: postgres:17
+    container_name: barqpdi-langfuse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: ${LF_PG_PASSWORD}
+      POSTGRES_DB: langfuse
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    networks: [langfuse]
+
+networks:
+  langfuse:
+    name: barqpdi-langfuse-network
+  barqpdi:
+    name: barqpdi-network
+    external: true
+
+volumes:
+  clickhouse_data: {name: barqpdi_langfuse_clickhouse}
+  clickhouse_logs: {name: barqpdi_langfuse_clickhouse_logs}
+  minio_data: {name: barqpdi_langfuse_minio}
+  postgres_data: {name: barqpdi_langfuse_postgres}
