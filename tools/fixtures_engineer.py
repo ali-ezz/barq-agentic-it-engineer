@@ -14,7 +14,7 @@ from pathlib import Path
 from setup_pdi_call import call
 from sn import get
 
-MANIFEST = Path(__file__).resolve().parent.parent / "manifest.jsonl"
+MANIFEST = Path(__file__).resolve().parent / "servicenow_change_manifest.jsonl"
 OFFICE = "10.20.30.41"  # the person's usual office address in the fixtures
 FOREIGN = "185.220.101.7"  # an address the person never used
 

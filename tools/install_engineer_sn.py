@@ -1,7 +1,7 @@
 """Install the ServiceNow side of the agentic engineer on the PDI (admin, setup only).
 
 Idempotent: every record is found by a stable key and updated in place; every create or
-change is appended to PDI/manifest.jsonl so it can be undone. Parts:
+change is appended to tools/servicenow_change_manifest.jsonl so it can be undone. Parts:
   include  global script include BarqAccount (sign-in events + the two account flags)
   rest     scripted REST "BARQ account" (facts + safe account actions), global scope
   fields   incident fields AI Report (JSON for the engineer card) and AI Activity (live line)
@@ -17,8 +17,8 @@ from setup_pdi_call import call
 from sn import get
 
 HERE = Path(__file__).resolve().parent
-LIVE = HERE.parent / "barq/servicenow/ai_incident_orchestrator/live"
-MANIFEST = HERE.parent / "manifest.jsonl"
+LIVE = HERE.parent / "code/servicenow/ai_incident_orchestrator/live"
+MANIFEST = HERE / "servicenow_change_manifest.jsonl"
 SCOPE = "51a63bbf738bc7502aedfed25ab8b789"
 parts = set(sys.argv[1:]) or {"include", "rest", "fields", "props", "ui"}
 

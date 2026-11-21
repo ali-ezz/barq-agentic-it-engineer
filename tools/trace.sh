@@ -1,8 +1,8 @@
 #!/bin/sh
 # Trace one ticket through the backend: what arrived, every run, every step, failures,
-# approvals, and the worker log lines of each run.  Usage: PDI/tools/trace.sh INC0010243
+# approvals, and the worker log lines of each run.  Usage: tools/trace.sh INC0010243
 N="$1"; [ -n "$N" ] || { echo "usage: trace.sh INC0010243"; exit 1; }
-cd "$(dirname "$0")/../barq" || exit 1
+cd "$(dirname "$0")/../code" || exit 1
 Q() { ./pdi.sh exec -T postgres sh -c "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -P pager=off -c \"$1\""; }
 
 echo "== Events from ServiceNow and the run each started"

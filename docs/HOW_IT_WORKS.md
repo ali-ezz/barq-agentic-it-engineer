@@ -70,7 +70,7 @@ Your PDI must be able to reach the backend over the internet.
 
 ## 5. The steps, in order
 
-1. Copy the code (PR #213 as it is) into `PDI/barq/` — a copy, the original is untouched.
+1. Copy the code (PR #213 as it is) into `code/` — a copy, the original is untouched.
 2. Write the `.env` with the PDI values above.
 3. Start the programs on the Mac; create the empty database; load the knowledge articles.
 4. Start the tunnel; note the link.

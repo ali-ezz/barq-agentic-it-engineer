@@ -12,7 +12,7 @@
    `python ../tools/setup_pdi.py <the new https link>`.
 3. Make the busy desk (about 4 minutes, prints READY and the links):
    ```
-   . ../liveenv.sh && uv run python scripts/live/demo_start.py --out ../ev8/demo.json
+   set -a; . ./.env.pdi; set +a && uv run python scripts/live/demo_start.py --out ../evidence/pdi-live-runs/ev8/demo.json
    ```
    Copy the "Engineer's desk" link it prints. Run this again before every new take.
 4. Chrome: window 1440 x 900, zoom 100 %, bookmarks bar hidden (Cmd+Shift+B), other tabs closed.

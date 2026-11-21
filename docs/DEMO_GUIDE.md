@@ -19,11 +19,11 @@ over or hand back with one button, tell it what to do next, and undo any change.
 
 ## Before you start (once)
 
-1. Docker running, backend up: `PDI/barq/pdi.sh ps` (all healthy).
+1. Docker running, backend up: `code/pdi.sh ps` (all healthy).
 2. Tunnel up: `cloudflared tunnel --url http://127.0.0.1:18000`; if the link changed:
-   `python PDI/tools/setup_pdi.py <new link>`.
+   `python tools/setup_pdi.py <new link>`.
 3. Test people ready (resets their accounts and sign-ins):
-   `cd PDI/barq && . ../liveenv.sh && uv run python -c "import sys; sys.path.insert(0,'scripts/live'); from engineer_fixtures import ensure_people, reset_signins; from verify_engineer_book import Instance; from verify_conversation import AdminSession; ensure_people(Instance()); reset_signins(AdminSession())"`
+   `cd code && set -a; . ./.env.pdi; set +a && uv run python -c "import sys; sys.path.insert(0,'scripts/live'); from engineer_fixtures import ensure_people, reset_signins; from verify_engineer_book import Instance; from verify_conversation import AdminSession; ensure_people(Instance()); reset_signins(AdminSession())"`
 
 ## Try it yourself (log in as admin, then **Impersonate user** from your profile menu)
 
@@ -54,6 +54,6 @@ open the Langfuse trace, press **Take over** (the agent stops), type an instruct
 
 ## If something looks wrong
 
-`PDI/tools/trace.sh INC00xxxxx` shows every event, step, failure and log line of a ticket;
-the card's "Open the full trace in Langfuse" shows every model step. Daily AI budget: `PDI/spend.sh`
+`tools/trace.sh INC00xxxxx` shows every event, step, failure and log line of a ticket;
+the card's "Open the full trace in Langfuse" shows every model step. Daily AI budget: the LiteLLM key-info endpoint of your proxy
 (the Google key takes over automatically when the $10 Sprints budget is used up).

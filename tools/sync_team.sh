@@ -4,9 +4,9 @@
 # team/feat/admin-chatbot on a scratch branch -> lint + unit tests -> move `pdi` forward
 # -> rebuild the running backend. If anything fails, `pdi` is left exactly as it was.
 # CI-only conflicts (.github/) keep our version; any other conflict stops for a person.
-# Log: PDI/sync.log. Usage: PDI/tools/sync_team.sh
+# Log: sync.log. Usage: tools/sync_team.sh
 export PATH=$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH
-REPO="$(cd "$(dirname "$0")/../barq" && pwd)"
+REPO="$(cd "$(dirname "$0")/../code" && pwd)"
 LOG="$REPO/../sync.log"
 cd "$REPO" || exit 1
 say() { echo "$(date '+%Y-%m-%d %H:%M') $*" >> "$LOG"; }
@@ -50,7 +50,7 @@ if [ $OK -eq 0 ]; then
 fi
 if [ $OK -ne 0 ]; then
   git switch -q -f pdi; git branch -q -D sync-tmp
-  alert "team update$NEW NOT taken: checks failed (see PDI/sync.log)"; exit 1
+  alert "team update$NEW NOT taken: checks failed (see sync.log)"; exit 1
 fi
 
 git switch -q pdi && git merge -q --ff-only sync-tmp && git branch -q -D sync-tmp
@@ -58,7 +58,7 @@ say "taken:$NEW -> pdi $(git rev-parse --short HEAD)"
 if docker ps --format '{{.Names}}' | grep -q '^barqpdi-api$'; then
   ./pdi.sh build -q api celery-worker >> "$LOG" 2>&1 && ./pdi.sh up -d api celery-worker >> "$LOG" 2>&1 \
     && ./pdi.sh exec -T api alembic upgrade head >> "$LOG" 2>&1 \
-    && alert "team updates taken and backend rebuilt" || alert "team updates taken, but the rebuild failed (see PDI/sync.log)"
+    && alert "team updates taken and backend rebuilt" || alert "team updates taken, but the rebuild failed (see sync.log)"
 else
   alert "team updates taken (backend not running, nothing rebuilt)"
 fi

@@ -1,7 +1,7 @@
 # BARQ on Ali's PDI — test results, 2026-10-04
 
 Everything below ran live on the PDI `dev434590` against our own backend (Mac + tunnel),
-on the final copy (`PDI/barq`, branch `pdi`, commit `36793ad`). Raw output: `PDI/ev6/`.
+on the final copy (`code`, branch `pdi`, commit `36793ad`). Raw output: `evidence/pdi-live-runs/ev6/`.
 
 | Suite | What it checks | Result |
 |---|---|---|
@@ -31,15 +31,15 @@ AI cost of all testing today: about $4.70 of the $10 daily budget.
 
 ## Running it
 
-- Start: `PDI/barq/pdi.sh up -d`, then `cloudflared tunnel --url http://127.0.0.1:18000`;
-  if the tunnel link changed: `python PDI/tools/setup_pdi.py <link>`.
+- Start: `code/pdi.sh up -d`, then `cloudflared tunnel --url http://127.0.0.1:18000`;
+  if the tunnel link changed: `python tools/setup_pdi.py <link>`.
 - Team updates: taken automatically at 09:00 and 21:00 (a scheduled task), only if
-  every check passes; log in `PDI/sync.log`.
+  every check passes; log in `sync.log`.
 
 
 ---
 
-# The agentic engineer — results, 2026-10-04 evening (copy commit `380da1b`, raw output `PDI/ev7/`)
+# The agentic engineer — results, 2026-10-04 evening (copy commit `380da1b`, raw output `evidence/pdi-live-runs/ev7/`)
 
 | Check | Result |
 |---|---|

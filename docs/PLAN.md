@@ -5,7 +5,7 @@ person, investigates the facts, checks the story, spots attacks, does small safe
 closes the ticket, and gives engineers the full picture of how it worked. Three parts must be
 excellent: **the user's screen, the engineer's screen, and the agent itself.**
 
-Isolated from the team: our copy `PDI/barq`, your PDI `dev434590`, your Langfuse project
+Isolated from the team: our copy `code`, your PDI `dev434590`, your Langfuse project
 "chatbot only", your Google AI Studio key. Nothing touches the team repo or shared systems.
 
 ---
@@ -99,7 +99,7 @@ Timing: steps 1–6 Sunday night–Monday, 7–9 Monday, Tuesday morning you tes
 After Tuesday (not rushed now): practice lab for "restart a service", catalog orders,
 password-reset link flow, bigger search models.
 
-## 6. Changes on your PDI (all recorded in PDI/manifest.jsonl, admin used for setup only)
+## 6. Changes on your PDI (all recorded in tools/servicenow_change_manifest.jsonl, admin used for setup only)
 - Read access for the agent's account to user status, sign-in events, group membership.
 - Write access for the agent's account to exactly two user fields (locked out, must change
   password), only through the new tools.
