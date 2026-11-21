@@ -1,0 +1,251 @@
+"""Agent runtime configuration (S2.5).
+
+The retrieval, safety and risk values default to the ones the BARQ IT Service
+Operations Manual (Edition 4.0, §11.7) states for the AI Suggested Response pilot:
+``top_k=5``, ``threshold=0.55``, ``floor=0.45``, ``risk_p=[1]``. The manual says to
+read them "from the repository, not from a photograph of somebody's screen" — this
+file is that repository copy, and every value can be overridden by environment
+variable under change control.
+"""
+
+from __future__ import annotations
+
+from enum import StrEnum
+from functools import lru_cache
+from typing import Literal
+
+from pydantic import Field, SecretStr, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+AGENT_VERSION = "s3.4-graph-1.0.0"
+
+
+class PIIDetectionMode(StrEnum):
+    """Deployment state for residual-PII detection."""
+
+    DISABLED = "disabled"
+    SHADOW = "shadow"
+    ENFORCED = "enforced"
+
+
+class AgentSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    agent_version: str = AGENT_VERSION
+    agent_graph_backend: Literal["langgraph", "stub", "engineer"] = Field(
+        default="langgraph",
+        description="'stub' keeps S2.3's simulated graph (failure-injection demo and the "
+        "S2.3 integration suite); 'langgraph' runs the eleven-node state machine; "
+        "'engineer' runs the agentic engineer (investigate, decide, act, verify, talk).",
+    )
+    agent_checkpointer_backend: Literal["postgres", "memory"] = Field(
+        default="postgres",
+        description="'postgres' persists checkpoints to workflow_state (S2.2); 'memory' "
+        "is for tests and local runs without a database.",
+    )
+
+    # -- model -------------------------------------------------------------------
+    litellm_base_url: str = Field(
+        default="https://management.sprints.ai/litellm",
+        description="Sprints LiteLLM proxy (OpenAI-compatible).",
+    )
+    litellm_api_key: SecretStr | None = Field(
+        default=None, description="Per-learner LiteLLM key (Gemini models only)."
+    )
+    google_ai_studio_key: SecretStr | None = Field(
+        default=None,
+        description="Optional Google AI Studio key: the same Gemini model is called directly "
+        "when the LiteLLM route is out of budget or unavailable (agentic engineer).",
+    )
+    agent_llm_own_key_first: bool = Field(
+        default=False,
+        description="Call the Google AI Studio key first and fall back to the LiteLLM key "
+        "(every call starts with the own key again).",
+    )
+    agent_engineer_max_steps: int = Field(
+        default=12,
+        ge=3,
+        le=30,
+        description="Most tool steps the agentic engineer may take in one turn.",
+    )
+    agent_llm_model: str = Field(
+        default="gemini/gemini-3.5-flash",
+        description=(
+            "Default fallback Gemini model for all agent calls: names must start with 'gemini/'."
+        ),
+    )
+    agent_diagnostic_model: str | None = Field(
+        default=None,
+        description=(
+            "Optional Gemini model override for the Diagnostic Agent (defaults to agent_llm_model)."
+        ),
+    )
+    agent_resolution_model: str | None = Field(
+        default=None,
+        description=(
+            "Optional Gemini model override for the Resolution Agent (defaults to agent_llm_model)."
+        ),
+    )
+    agent_critic_model: str | None = Field(
+        default=None,
+        description=(
+            "Optional Gemini model override for the Critic/Verifier Agent "
+            "(defaults to agent_llm_model)."
+        ),
+    )
+    agent_llm_reasoning_effort: Literal["low", "medium", "high"] | None = Field(
+        default=None, description="Unset = the model's default thinking level."
+    )
+    agent_llm_fast_purposes: list[str] = Field(
+        default_factory=lambda: [
+            "pii_detection",
+            "injection_classifier",
+            "caller_message",
+            "clarifying_question",
+            "chat_route",
+        ],
+        description=(
+            "Model calls that run without step-by-step thinking: narrow checks and rewording "
+            "that the model does accurately and several times faster without it. "
+            "Classification is not one: without thinking it copied the caller's category."
+        ),
+    )
+    agent_llm_max_tokens: int = Field(default=16000, gt=0)
+    agent_llm_timeout_seconds: float = Field(default=60.0, gt=0)
+    agent_llm_max_retries: int = Field(default=2, ge=0)
+    agent_prompt_version: str = "v1"
+
+    @field_validator(
+        "agent_llm_model",
+        "agent_diagnostic_model",
+        "agent_resolution_model",
+        "agent_critic_model",
+    )
+    @classmethod
+    def _gemini_only(cls, value: str | None) -> str | None:
+        """Hold the field to the promise its description makes.
+
+        The programme's LiteLLM key is provisioned for Gemini only. Without this,
+        an environment value such as ``openai/gpt-4`` is passed straight through to
+        the proxy, so the restriction would live in a docstring rather than in code.
+        """
+        if value is not None and not value.startswith("gemini/"):
+            raise ValueError(f"Model must name a Gemini model ('gemini/…'); got {value!r}")
+        return value
+
+    # -- manual §11.7: search ------------------------------------------------------
+    agent_query_rewrite_enabled: bool = Field(
+        default=False,
+        description="Add a focused, structured search query to the original sanitized incident. "
+        "Enable after evaluating the deployed KB; False restores the baseline query.",
+    )
+    agent_query_rewrite_timeout_seconds: float = Field(default=5.0, gt=0, le=60)
+    agent_retrieval_top_k: int = Field(default=5, gt=0)
+    agent_retrieval_threshold: float = Field(
+        default=0.55,
+        ge=0.0,
+        le=1.0,
+        description="Minimum dense cosine similarity of the best chunk for the evidence "
+        "to count. Below it the incident is escalated as 'no evidence'.",
+    )
+
+    agent_max_security_level: Literal["public", "internal", "restricted"] = Field(
+        default="restricted",
+        description="Highest article audience the agent may quote. This was 'internal' "
+        "(S1.4 #45) on the grounds that the draft lands in a field every support user "
+        "can read. That default hid 5 of the 11 corpus articles: the correct article "
+        "was retrieved and scored 0.80-0.91, then filtered out before the agent saw "
+        "it, and the incident escalated as 'no evidence' when evidence existed. "
+        "Measured on the eval set, 'internal' found the expected article for 14 of 23 "
+        "answerable cases and 'restricted' for 22 of 23. Lower this to 'internal' to "
+        "restore the confidentiality posture and accept those escalations.",
+    )
+
+    # -- manual §11.7: safety ------------------------------------------------------
+    agent_confidence_floor: float = Field(default=0.45, ge=0.0, le=1.0)
+    agent_risk_priorities: list[int] = Field(
+        default_factory=lambda: [1],
+        description="Priorities that leave the automated path before any search runs.",
+    )
+    agent_reassess_priority: bool = Field(
+        default=False,
+        description=(
+            "Let the agent handle a priority-1/2 incident as low risk when every hard rule "
+            "holds (no security or outage signal, no burst of similar incidents, no repeat "
+            "caller, no Tier-1 service) and a model check agrees it affects one person. "
+            "Always explained in a work note; the priority field is never changed."
+        ),
+    )
+    agent_outage_threshold: int = Field(
+        default=3,
+        ge=2,
+        description="Similar open incidents in the last hour that make a likely outage.",
+    )
+
+    # -- manual §11.3: eligibility -------------------------------------------------
+    agent_supported_categories: list[str] = Field(
+        default_factory=lambda: ["network", "software", "hardware", "inquiry"],
+        description="ServiceNow incident categories the corpus covers.",
+    )
+    agent_max_incident_chars: int = Field(
+        default=6000,
+        gt=0,
+        description="Length bound on incident text sent to the model (manual §11.6).",
+    )
+    agent_pii_detection_mode: PIIDetectionMode = Field(
+        default=PIIDetectionMode.DISABLED,
+        description=(
+            "Residual-PII deployment mode: disabled preserves the pre-detector pipeline, "
+            "shadow evaluates without enforcement, and enforced masks or fails closed."
+        ),
+    )
+
+    # -- write-back ------------------------------------------------------------------
+    agent_write_back_enabled: bool = Field(
+        default=True,
+        description="False = dry run: the act node records what it would write.",
+    )
+
+    # -- autonomy (docs/barq_agentic_platform_design.md §6) -------------------------
+    agent_autonomy_level: Literal["off", "suggest", "assist", "autonomous"] = Field(
+        default="suggest",
+        description=(
+            "How far the agent goes on its own. off = kill switch, events are recorded "
+            "but not processed; suggest = write the cited fix only (the behaviour before "
+            "autonomy existed); assist = also route the incident to its group and set it "
+            "In Progress; autonomous = also give the caller the fix and resolve the "
+            "incident, so the caller can confirm or reopen. High risk, low confidence, "
+            "no evidence and guardrail blocks always wait for a person at every level."
+        ),
+    )
+    agent_assignment_groups: dict[str, str] = Field(
+        default_factory=dict,
+        description=(
+            "Incident category -> assignment group sys_id. A category with no entry is "
+            "left for a person to route."
+        ),
+    )
+    agent_service_account_ids: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Caller sys_ids that are not people (integration and publisher accounts). "
+            "Nobody can confirm a fix for them, so their incidents are never resolved by "
+            "the agent."
+        ),
+    )
+
+    # -- Agent Specifications
+    agent_max_revisions: int = Field(
+        default=2,
+        ge=0,
+        le=5,
+        description="Maximum number of revisions the agent will attempt before escalating.",
+    )
+
+
+@lru_cache
+def get_agent_settings() -> AgentSettings:
+    return AgentSettings()
+
+
+__all__ = ["AGENT_VERSION", "AgentSettings", "PIIDetectionMode", "get_agent_settings"]

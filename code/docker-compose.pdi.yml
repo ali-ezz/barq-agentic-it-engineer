@@ -1,0 +1,43 @@
+# BARQ on Ali's PDI: our own container names, network and data, separate from any other
+# BARQ stack on this Mac. The services keep finding each other by the usual names
+# (barq-redis, barq-postgres, barq-qdrant) through aliases on our private network.
+# Use: docker compose -p barqpdi -f docker-compose.yml -f docker-compose.pdi.yml up -d
+services:
+  qdrant:
+    container_name: barqpdi-qdrant
+    networks: {barq-network: {aliases: [barq-qdrant]}}
+  postgres:
+    container_name: barqpdi-postgres
+    networks: {barq-network: {aliases: [barq-postgres]}}
+  redis:
+    container_name: barqpdi-redis
+    networks: {barq-network: {aliases: [barq-redis]}}
+  api:
+    container_name: barqpdi-api
+    env_file: !override [.env.pdi]
+    environment: {FASTEMBED_CACHE_PATH: /models/fastembed}
+    volumes: [models:/models]
+    networks: {barq-network: {aliases: [barq-api]}}
+  celery-worker:
+    container_name: barqpdi-celery-worker
+    env_file: !override [.env.pdi]
+    environment: {FASTEMBED_CACHE_PATH: /models/fastembed}
+    volumes: [models:/models]
+    networks: {barq-network: {aliases: [barq-celery-worker]}}
+  pgweb:
+    container_name: barqpdi-pgweb
+  redis-commander:
+    container_name: barqpdi-redis-commander
+networks:
+  barq-network:
+    name: barqpdi-network
+volumes:
+  qdrant_data:
+    name: barqpdi_qdrant_data
+  postgres_data:
+    name: barqpdi_postgres_data
+  redis_data:
+    name: barqpdi_redis_data
+  # search models survive rebuilds, so the first ticket after a rebuild does not download them
+  models:
+    name: barqpdi_models

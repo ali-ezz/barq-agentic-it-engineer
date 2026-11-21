@@ -1,0 +1,518 @@
+"""LLM and embedding clients, with dependency-injection providers (S2.5).
+
+Nodes depend on the :class:`LLMClient` protocol, never on the SDK, so the unit
+tests inject a scripted fake and the graph never needs a network in CI.
+
+The production client calls **Gemini through the Sprints LiteLLM proxy** — the
+programme's mandated model path (Gemini models only). The proxy speaks the OpenAI API, so the official ``openai`` SDK is
+the client: ``chat.completions.parse`` with a Pydantic ``response_format`` gives
+schema-validated structured output. Every call is a Langfuse *generation* with the
+model that served it, token usage, the cost LiteLLM reports, and the prompt version.
+Embeddings stay local (FastEmbed): the S1.4 index was built with them.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from functools import lru_cache
+from typing import Any, Protocol, TypeVar
+
+from pydantic import BaseModel
+
+from agent.config import AgentSettings, get_agent_settings
+from app.retrieval.embedding import EmbeddingEngine
+from app.workers.retry_policy import RetryableError, TerminalError
+from observability.redaction import redact_text
+from observability.tracing import Tracer, get_tracer
+
+M = TypeVar("M", bound=BaseModel)
+
+#: Response header in which the LiteLLM proxy reports the USD cost of the call.
+COST_HEADER = "x-litellm-response-cost"
+
+#: Receives one usage record per completed model call: purpose, token counts,
+#: the proxy-reported cost when the header was present, and the model used.
+UsageSink = Callable[[dict[str, Any]], None]
+
+
+class ModelRefusalError(TerminalError):
+    """The model declined the request (content filter)."""
+
+
+class InvalidModelOutputError(TerminalError):
+    """The model returned missing, truncated, or schema-invalid output."""
+
+
+class ModelTimeoutError(RetryableError):
+    """The model request exceeded the configured timeout."""
+
+
+class UnexpectedModelError(TerminalError):
+    """An unexpected model-client failure, sanitized at a sensitive boundary."""
+
+
+class LLMClient(Protocol):
+    @property
+    def model_name(self) -> str: ...
+
+    def model_for_purpose(self, purpose: str, override: str | None = None) -> str: ...
+
+    def structured(
+        self,
+        *,
+        purpose: str,
+        system: str,
+        prompt: str,
+        schema: type[M],
+        model: str | None = None,
+        trace_content: bool = True,
+        max_retries: int | None = None,
+        max_completion_tokens: int | None = None,
+        usage_sink: UsageSink | None = None,
+    ) -> M:
+        """Return ``schema`` parsed from the model's answer to ``prompt``.
+
+        ``max_completion_tokens``, when given, caps the completion size for this
+        call instead of ``settings.agent_llm_max_tokens`` — callers with their
+        own tighter bound (the admin chat) use it so their cost reservation
+        matches the enforced cap.
+
+        ``usage_sink``, when given, receives token/cost metadata for the call
+        (chat budget reconciliation); it is optional so existing callers and
+        fakes are unaffected.
+        """
+        ...
+
+
+def usage_details(usage: Any) -> dict[str, int]:
+    """OpenAI-shaped usage → Langfuse usage details."""
+    if usage is None:
+        return {}
+    details = {
+        "input": int(getattr(usage, "prompt_tokens", 0) or 0),
+        "output": int(getattr(usage, "completion_tokens", 0) or 0),
+    }
+    reasoning = getattr(getattr(usage, "completion_tokens_details", None), "reasoning_tokens", 0)
+    if reasoning:
+        details["reasoning_tokens"] = int(reasoning)
+    cached = getattr(getattr(usage, "prompt_tokens_details", None), "cached_tokens", 0)
+    if cached:
+        details["cached_tokens"] = int(cached)
+    return details
+
+
+def cost_details(header_value: str | None) -> dict[str, float] | None:
+    """The proxy's own cost figure, if it sent one."""
+    try:
+        return {"total": float(header_value)} if header_value else None
+    except ValueError:
+        return None
+
+
+class LiteLLMClient:
+    """Gemini via the LiteLLM proxy, through the OpenAI SDK (sync; the worker is sync)."""
+
+    def __init__(self, settings: AgentSettings, tracer: Tracer, client: Any | None = None) -> None:
+        self._settings = settings
+        self._tracer = tracer
+        if client is None:
+            import openai
+
+            if settings.litellm_api_key is None or not settings.litellm_api_key.get_secret_value():
+                raise TerminalError("LITELLM_API_KEY is not configured")
+            client = openai.OpenAI(
+                base_url=settings.litellm_base_url,
+                api_key=settings.litellm_api_key.get_secret_value(),
+                timeout=settings.agent_llm_timeout_seconds,
+                max_retries=settings.agent_llm_max_retries,
+            )
+        self._client = client
+        self._last_model_used: str | None = None
+        self._purpose_models: dict[str, str] = {}
+
+    def model_for_purpose(self, purpose: str, override: str | None = None) -> str:
+        """Resolve purpose-specific model name, taking into account overrides."""
+        if override:
+            return override
+        if purpose == "diagnose":
+            return self._settings.agent_diagnostic_model or self._settings.agent_llm_model
+        if purpose in ("generate", "resolution"):
+            return self._settings.agent_resolution_model or self._settings.agent_llm_model
+        if purpose in ("verify_evidence", "critic"):
+            return self._settings.agent_critic_model or self._settings.agent_llm_model
+        return self._settings.agent_llm_model
+
+    _model_for_purpose = model_for_purpose  # Preserves internal alias
+
+    @property
+    def model_name(self) -> str:
+        """Return the exact model selected and used for execution, or the default configured model.
+
+        When a resolution procedure is drafted, this returns the resolution model used
+        for drafting. Otherwise, it returns the model used in the most recent LLM execution,
+        falling back to `agent_llm_model`.
+        """
+        if "generate" in self._purpose_models:
+            return self._purpose_models["generate"]
+        if "resolution" in self._purpose_models:
+            return self._purpose_models["resolution"]
+        if self._last_model_used is not None:
+            return self._last_model_used
+        return self._settings.agent_llm_model
+
+    @property
+    def last_model_used(self) -> str | None:
+        """Return the model that was used in the most recent LLM invocation."""
+        return self._last_model_used
+
+    def get_used_model(self, purpose: str) -> str | None:
+        """Return the model that was resolved and used for a given purpose, if called."""
+        return self._purpose_models.get(purpose)
+
+    def structured(
+        self,
+        *,
+        purpose: str,
+        system: str,
+        prompt: str,
+        schema: type[M],
+        model: str | None = None,
+        trace_content: bool = True,
+        max_retries: int | None = None,
+        max_completion_tokens: int | None = None,
+        usage_sink: UsageSink | None = None,
+    ) -> M:
+        import openai
+
+        settings = self._settings
+        selected_model = self.model_for_purpose(purpose, model)
+        self._last_model_used = selected_model
+        self._purpose_models[purpose] = selected_model
+        options: dict[str, Any] = {
+            "max_completion_tokens": max_completion_tokens or settings.agent_llm_max_tokens
+        }
+        if purpose in settings.agent_llm_fast_purposes:
+            options["reasoning_effort"] = "none"
+        elif settings.agent_llm_reasoning_effort:
+            options["reasoning_effort"] = settings.agent_llm_reasoning_effort
+        trace_input = (
+            {"system": system, "prompt": prompt}
+            if trace_content
+            else {
+                "content_suppressed": True,
+                "request_chars": len(system) + len(prompt),
+                "schema": schema.__name__,
+            }
+        )
+        trace_metadata: dict[str, Any] = {
+            "prompt_name": purpose,
+            "prompt_version": settings.agent_prompt_version,
+        }
+        if not trace_content:
+            trace_metadata["content_suppressed"] = True
+        with self._tracer.span(
+            f"llm.{purpose}",
+            as_type="generation",
+            model=selected_model,
+            input=trace_input,
+            version=settings.agent_prompt_version,
+            model_parameters=options,
+            metadata=trace_metadata,
+            record_exception_details=trace_content,
+        ) as generation:
+            sensitive_error: Exception | None = None
+            try:
+                request_client = (
+                    self._client
+                    if max_retries is None
+                    else self._client.with_options(max_retries=max_retries)
+                )
+                if purpose == "query_rewrite":
+                    # Optional retrieval assistance must not consume the graph's
+                    # general model retry budget before falling back to the source.
+                    request_client = request_client.with_options(
+                        timeout=settings.agent_query_rewrite_timeout_seconds,
+                        max_retries=0,
+                    )
+                raw = request_client.chat.completions.with_raw_response.parse(
+                    model=selected_model,
+                    messages=[
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": prompt},
+                    ],
+                    response_format=schema,
+                    **options,
+                )
+                completion = raw.parse()
+            except openai.APITimeoutError as exc:
+                timeout_error = ModelTimeoutError("model call timed out")
+                if trace_content:
+                    raise timeout_error from exc
+                sensitive_error = timeout_error
+            except (openai.RateLimitError, openai.APIConnectionError) as exc:
+                transient_error = RetryableError(
+                    f"model call failed transiently: {type(exc).__name__}"
+                )
+                if trace_content:
+                    raise transient_error from exc
+                sensitive_error = transient_error
+            except openai.APIStatusError as exc:
+                if exc.status_code >= 500 or exc.status_code == 408:
+                    status_error: RetryableError | TerminalError = RetryableError(
+                        f"model call failed: HTTP {exc.status_code}"
+                    )
+                else:
+                    status_error = TerminalError(f"model call rejected: HTTP {exc.status_code}")
+                if trace_content:
+                    raise status_error from exc
+                sensitive_error = status_error
+            except openai.LengthFinishReasonError as exc:
+                unusable_error = InvalidModelOutputError(
+                    f"{purpose} output unusable: {type(exc).__name__}"
+                )
+                if trace_content:
+                    raise unusable_error from exc
+                sensitive_error = unusable_error
+            except openai.ContentFilterFinishReasonError as exc:
+                refusal_error = ModelRefusalError(f"model declined the {purpose} request")
+                if trace_content:
+                    raise refusal_error from exc
+                sensitive_error = refusal_error
+            except ValueError as exc:  # pydantic: the model broke the schema
+                validation_error = InvalidModelOutputError(f"{purpose} output failed validation")
+                if trace_content:
+                    raise validation_error from exc
+                sensitive_error = validation_error
+            except Exception as exc:
+                if trace_content:
+                    raise
+                sensitive_error = UnexpectedModelError(
+                    f"{purpose} failed unexpectedly: {type(exc).__name__}"
+                )
+
+            # Raise only after the provider exception handler has exited. This
+            # prevents Python from retaining the original sensitive exception in
+            # ``__context__`` even when a caller inspects the mapped error object.
+            if sensitive_error is not None:
+                raise sensitive_error
+
+            sensitive_processing_error: UnexpectedModelError | None = None
+            try:
+                choice = completion.choices[0] if completion.choices else None
+                completion_metadata = {
+                    "finish_reason": getattr(choice, "finish_reason", None),
+                    **(
+                        {"request_id": completion.id}
+                        if trace_content
+                        else {"content_suppressed": True}
+                    ),
+                }
+                generation.update(
+                    model=str(completion.model or settings.agent_llm_model),
+                    usage_details=usage_details(completion.usage),
+                    cost_details=cost_details(raw.headers.get(COST_HEADER)),
+                    metadata=completion_metadata,
+                )
+                if usage_sink is not None:
+                    usage = usage_details(completion.usage)
+                    reported = cost_details(raw.headers.get(COST_HEADER))
+                    usage_sink(
+                        {
+                            "purpose": purpose,
+                            "input_tokens": usage.get("input", 0),
+                            "output_tokens": usage.get("output", 0),
+                            "cost_usd": reported["total"] if reported else None,
+                            "model": str(completion.model or settings.agent_llm_model),
+                        }
+                    )
+                if choice is None:
+                    raise InvalidModelOutputError(f"{purpose} returned no choices")
+                if choice.finish_reason == "content_filter" or choice.message.refusal:
+                    raise ModelRefusalError(f"model declined the {purpose} request")
+                if choice.finish_reason == "length":
+                    raise InvalidModelOutputError(f"{purpose} output was truncated")
+                parsed = choice.message.parsed
+                if parsed is None:
+                    raise InvalidModelOutputError(f"{purpose} returned no structured output")
+                generation.update(
+                    output=(
+                        parsed.model_dump(mode="json")
+                        if trace_content
+                        else {"content_suppressed": True}
+                    )
+                )
+                return parsed
+            except (RetryableError, TerminalError):
+                raise
+            except Exception as exc:
+                if trace_content:
+                    raise
+                sensitive_processing_error = UnexpectedModelError(
+                    f"{purpose} failed unexpectedly: {type(exc).__name__}"
+                )
+
+            if sensitive_processing_error is not None:
+                raise sensitive_processing_error
+
+
+class ToolStepClient:
+    """One step of a tool-using conversation (the agentic engineer's working loop).
+
+    Sends the running message list and the tool definitions, returns the assistant
+    message as a plain dict (``model_dump``) so it can be appended to the list unchanged:
+    Gemini 3 carries its reasoning across steps in provider fields on the tool calls
+    (thought signatures), which must go back exactly as received.
+
+    The Sprints LiteLLM key is the primary route. When it is out of budget (or down) and a
+    Google AI Studio key is configured, the same Gemini model is called directly on Google's
+    OpenAI-compatible endpoint, so a used-up daily budget does not stop the agent.
+    """
+
+    GOOGLE_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
+    def __init__(self, settings: AgentSettings, tracer: Tracer) -> None:
+        import openai
+
+        self._settings = settings
+        self._tracer = tracer
+        self._routes: list[tuple[str, Any, str]] = []
+        if settings.litellm_api_key is not None and settings.litellm_api_key.get_secret_value():
+            self._routes.append(
+                (
+                    "litellm",
+                    openai.OpenAI(
+                        base_url=settings.litellm_base_url,
+                        api_key=settings.litellm_api_key.get_secret_value(),
+                        timeout=settings.agent_llm_timeout_seconds,
+                        max_retries=1,
+                    ),
+                    settings.agent_llm_model,
+                )
+            )
+        google_key = settings.google_ai_studio_key
+        if google_key is not None and google_key.get_secret_value():
+            self._routes.append(
+                (
+                    "google",
+                    openai.OpenAI(
+                        base_url=self.GOOGLE_BASE_URL,
+                        api_key=google_key.get_secret_value(),
+                        timeout=settings.agent_llm_timeout_seconds,
+                        max_retries=1,
+                    ),
+                    settings.agent_llm_model.removeprefix("gemini/"),
+                )
+            )
+        if not self._routes:
+            raise TerminalError(
+                "no model route configured (LITELLM_API_KEY / GOOGLE_AI_STUDIO_KEY)"
+            )
+        if settings.agent_llm_own_key_first and len(self._routes) == 2:
+            # Ali's own Google key first; the Sprints key only when it cannot answer.
+            self._routes.reverse()
+        self._own_key_first = settings.agent_llm_own_key_first
+        self._preferred = 0
+
+    def step(
+        self,
+        *,
+        purpose: str,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        tool_choice: str | dict[str, Any] = "auto",
+    ) -> dict[str, Any]:
+        import openai
+
+        last_error: Exception | None = None
+        start = 0 if self._own_key_first else self._preferred
+        order = list(range(start, len(self._routes))) + list(range(start))
+        for index in order:
+            route, client, model = self._routes[index]
+            with self._tracer.span(
+                f"llm.{purpose}",
+                as_type="generation",
+                model=model,
+                input={"messages": messages[-6:], "message_count": len(messages)},
+                metadata={"route": route, "prompt_name": purpose},
+            ) as generation:
+                try:
+                    completion = client.chat.completions.create(
+                        model=model, messages=messages, tools=tools, tool_choice=tool_choice
+                    )
+                except (
+                    openai.RateLimitError,
+                    openai.APIConnectionError,
+                    openai.APITimeoutError,
+                ) as exc:
+                    last_error = exc
+                    generation.update(metadata={"route_failed": type(exc).__name__})
+                    continue
+                except openai.APIStatusError as exc:
+                    last_error = exc
+                    generation.update(metadata={"route_failed": f"HTTP {exc.status_code}"})
+                    if exc.status_code >= 500 or exc.status_code in (408, 429):
+                        continue
+                    raise TerminalError(f"model call rejected: HTTP {exc.status_code}") from exc
+                choice = completion.choices[0] if completion.choices else None
+                if choice is None:
+                    raise InvalidModelOutputError(f"{purpose} returned no choices")
+                message = choice.message.model_dump(exclude_none=True)
+                generation.update(
+                    model=str(completion.model or model),
+                    usage_details=usage_details(completion.usage),
+                    output=message,
+                    metadata={"finish_reason": choice.finish_reason, "route": route},
+                )
+                # Stay on the route that answered until it fails (a spent budget stays spent).
+                self._preferred = index
+                return message
+        raise RetryableError(
+            f"every model route failed: {type(last_error).__name__ if last_error else 'none'}"
+        )
+
+
+@lru_cache
+def get_tool_step_client() -> ToolStepClient:
+    return ToolStepClient(get_agent_settings(), get_tracer())
+
+
+def bounded(text: str, limit: int) -> str:
+    """Redact, then cap length (manual §11.6: length and encoding bounds)."""
+    cleaned = redact_text(text.encode("utf-8", "replace").decode("utf-8"))
+    return cleaned if len(cleaned) <= limit else cleaned[:limit] + " …[truncated]"
+
+
+# -- providers ------------------------------------------------------------------------
+
+
+@lru_cache
+def get_llm() -> LLMClient:
+    """Process-wide LLM client singleton."""
+    return LiteLLMClient(get_agent_settings(), get_tracer())
+
+
+@lru_cache
+def get_embedding_engine() -> EmbeddingEngine:
+    """Process-wide embedding engine singleton: model weights load once per worker."""
+    from app.retrieval.embedding import FastEmbedEngine
+
+    return FastEmbedEngine()
+
+
+__all__ = [
+    "COST_HEADER",
+    "InvalidModelOutputError",
+    "LLMClient",
+    "LiteLLMClient",
+    "ModelRefusalError",
+    "ToolStepClient",
+    "ModelTimeoutError",
+    "UnexpectedModelError",
+    "UsageSink",
+    "bounded",
+    "cost_details",
+    "get_embedding_engine",
+    "get_llm",
+    "get_tool_step_client",
+    "usage_details",
+]

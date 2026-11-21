@@ -1,0 +1,254 @@
+# =============================================================================
+# Docker Compose — BARQ AI Agentic Incident Resolution Platform
+# =============================================================================
+# Services:
+#   1. qdrant        : Vector store for dual dense (384d) + sparse (BM25) KB retrieval
+#   2. postgres      : Relational store for incident tracking, execution logs, audit
+#   3. redis         : In-memory cache and Celery task queue broker
+#   4. api           : FastAPI ingestion and REST API surface (port 8000)
+#   5. celery-worker : Background Celery worker executing incident resolution graph
+# =============================================================================
+
+# Shared application environment inherited by both API and Worker
+x-app-environment: &app-environment
+  REDIS_HOST: barq-redis
+  REDIS_PORT: 6379
+  REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+  POSTGRES_HOST: barq-postgres
+  POSTGRES_PORT: 5432
+  POSTGRES_DB: ${POSTGRES_DB:-barq_incident_dev}
+  POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+  QDRANT_URL: http://barq-qdrant:6333
+  WEBHOOK_AUTH_TOKEN: ${WEBHOOK_AUTH_TOKEN:?WEBHOOK_AUTH_TOKEN must be set in .env}
+  WEBHOOK_OAUTH_CLIENT_ID: ${WEBHOOK_OAUTH_CLIENT_ID:?WEBHOOK_OAUTH_CLIENT_ID must be set in .env}
+  WEBHOOK_OAUTH_CLIENT_SECRET: ${WEBHOOK_OAUTH_CLIENT_SECRET:?WEBHOOK_OAUTH_CLIENT_SECRET must be set in .env}
+  WEBHOOK_OAUTH_SIGNING_KEY: ${WEBHOOK_OAUTH_SIGNING_KEY:?WEBHOOK_OAUTH_SIGNING_KEY must be set in .env}
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1. Qdrant — Vector Database (Sprint 1+)
+  # ---------------------------------------------------------------------------
+  qdrant:
+    # Pinned in lockstep with qdrant-client in pyproject.toml. Bump both in the
+    # same PR - see the comment there. tests/repo/test_qdrant_client_server_pin.py
+    # fails if they drift apart.
+    image: qdrant/qdrant:v1.14.0
+    container_name: barq-qdrant
+    restart: unless-stopped
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${QDRANT_HTTP_PORT:-6333}:6333"
+      - "${BIND_IP:-127.0.0.1}:${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+      - QDRANT__LOG_LEVEL=${QDRANT_LOG_LEVEL:-INFO}
+    healthcheck:
+      test: ["CMD", "perl", "-MIO::Socket::INET", "-e", "$$s = IO::Socket::INET->new(PeerAddr => '127.0.0.1:6333', Timeout => 2); exit($$s ? 0 : 1);"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - barq-network
+
+  # ---------------------------------------------------------------------------
+  # 2. PostgreSQL — Relational Database (Sprint 2+)
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: barq-postgres
+    restart: unless-stopped
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-barq_incident_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-barq_incident_dev} || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - barq-network
+
+  # ---------------------------------------------------------------------------
+  # 3. Redis — Caching & Message Broker (Sprint 2+)
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: barq-redis
+    restart: unless-stopped
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    command: >
+      sh -c '
+        if [ -n "$$REDIS_PASSWORD" ]; then
+          redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"
+        else
+          redis-server --appendonly yes
+        fi
+      '
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - barq-network
+
+  # ---------------------------------------------------------------------------
+  # 4. FastAPI Ingestion API (Sprint 2+)
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: barq-api
+    restart: unless-stopped
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${API_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      <<: *app-environment
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - barq-network
+
+  # ---------------------------------------------------------------------------
+  # 5. Celery Worker — Execution Substrate (Sprint 2, Task S2.3)
+  # ---------------------------------------------------------------------------
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: barq-celery-worker
+    restart: unless-stopped
+    # SIGTERM → warm shutdown finishes the in-flight task; grace period must
+    # exceed the worst-case remaining task time (see worker_soft_time_limit).
+    stop_grace_period: 30s
+    # --beat is required, not optional: `beat_schedule` on its own schedules
+    # nothing, because beat is a separate process from the worker. Without the
+    # flag the crash reaper was registered and never ran — merged as part of
+    # #174 and caught by watching the deployed worker, not by any test, because
+    # the tests exercise the sweep function directly rather than the scheduler.
+    #
+    # The worker must also *consume* the maintenance queue: beat only publishes
+    # the sweep there, and an unconsumed queue would leave it to expire unheard.
+    #
+    # Embedded beat is the right shape here because there is exactly one worker
+    # container. If this is ever scaled to more than one replica, beat must move
+    # to its own single-instance service, or every replica runs its own sweep.
+    command: >
+      celery -A app.workers.celery_app worker
+      --beat
+      --queues=${BARQ_EVENTS_QUEUE:-barq:incident:events},${BARQ_MAINTENANCE_QUEUE:-barq:incident:maintenance}
+      --concurrency=${WORKER_CONCURRENCY:-4}
+      --loglevel=INFO
+    env_file:
+      - .env
+    environment:
+      <<: *app-environment
+      WORKER_MAX_RETRIES: ${WORKER_MAX_RETRIES:-5}
+      WORKER_BACKOFF_BASE: ${WORKER_BACKOFF_BASE:-1.0}
+      WORKER_BACKOFF_MAX: ${WORKER_BACKOFF_MAX:-60.0}
+      WORKER_BACKOFF_JITTER: ${WORKER_BACKOFF_JITTER:-true}
+      WORKER_SOFT_TIME_LIMIT: ${WORKER_SOFT_TIME_LIMIT:-120}
+      WORKER_TIME_LIMIT: ${WORKER_TIME_LIMIT:-150}
+      WORKER_REPO_BACKEND: ${WORKER_REPO_BACKEND:-postgres}
+      # S2.5: the graph retrieves from Qdrant on the compose network.
+      QDRANT_URL: http://barq-qdrant:6333
+      AGENT_GRAPH_BACKEND: ${AGENT_GRAPH_BACKEND:-langgraph}
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      # Celery responds to `inspect ping` on its own control bus.
+      test: ["CMD-SHELL", "celery -A app.workers.celery_app inspect ping -d celery@$$HOSTNAME --timeout=5 | grep -q pong || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - barq-network
+
+  # ---------------------------------------------------------------------------
+  # 7. PostgreSQL Web UI (pgweb)
+  # ---------------------------------------------------------------------------
+  pgweb:
+    image: sosedoff/pgweb:latest
+    container_name: barq-pgweb
+    restart: unless-stopped
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${PGWEB_PORT:-8081}:8081"
+    environment:
+      PGWEB_DATABASE_URL: "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@barq-postgres:5432/${POSTGRES_DB:-barq_incident_dev}?sslmode=disable"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - barq-network
+
+  # ---------------------------------------------------------------------------
+  # 7. Redis Web UI (redis-commander)
+  # ---------------------------------------------------------------------------
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: barq-redis-commander
+    restart: unless-stopped
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${REDIS_COMMANDER_PORT:-8082}:8081"
+    environment:
+      REDIS_HOSTS: "local:barq-redis:6379:0:${REDIS_PASSWORD:-}"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - barq-network
+
+# -----------------------------------------------------------------------------
+# Networks
+# -----------------------------------------------------------------------------
+networks:
+  barq-network:
+    name: barq-network
+    driver: bridge
+
+# -----------------------------------------------------------------------------
+# Named Volumes (Persistent across container lifecycle)
+# -----------------------------------------------------------------------------
+volumes:
+  qdrant_data:
+    name: barq_qdrant_data
+  postgres_data:
+    name: barq_postgres_data
+  redis_data:
+    name: barq_redis_data

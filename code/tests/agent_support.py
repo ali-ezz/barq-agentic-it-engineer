@@ -1,0 +1,643 @@
+"""Fakes and fixtures for the S2.5 agent tests — no network, no model, no database.
+
+The incidents mirror the worked cases in the BARQ IT Service Operations Manual
+(Edition 4.0, §7) and the W0.3 Task 0 test set: a VPN failure with a clear article
+(INC0010023), a mechanical printer fault with none (INC0010047), a P1 on a Tier 1
+service (INC0010052) and an identity case needing approval (INC0010064).
+"""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
+from types import SimpleNamespace
+from typing import Any
+
+from pydantic import BaseModel
+
+from agent.config import AgentSettings
+from agent.dependencies import AgentDependencies
+from agent.prompts import (
+    ClassifyOutput,
+    CriticOutput,
+    DiagnoseOutput,
+    GenerateOutput,
+    InjectionClassification,
+    PIIWordDetectionOutput,
+    StepOutput,
+)
+from agent.servicenow import AsyncRunner, IncidentGateway
+from agent.state import EvidenceItem, RetrievalResult
+from agent.tools import build_servicenow_tool_registry
+from agent.tools.registry import ApprovalCheckResult
+from app.exceptions.servicenow import ServiceNowHumanLockError
+from app.models.execution_log import ExecutionLogCreatePayload
+from app.models.incident import Incident, IncidentUpdatePayload
+from app.models.knowledge import Classification
+from observability.tracing import Tracer
+
+SCOPE = "x_2215032_ai_inc_0"
+FIXED_NOW = datetime(2026, 9, 8, 6, 14, tzinfo=UTC)
+EXECUTION_ID = "0b6f7c1e-2f7d-4c55-9a51-6d2f4b7f3c10"
+
+_RUNNER: AsyncRunner | None = None
+
+
+def shared_runner() -> AsyncRunner:
+    global _RUNNER
+    if _RUNNER is None:
+        _RUNNER = AsyncRunner()
+    return _RUNNER
+
+
+def incident_record(
+    number: str,
+    *,
+    short: str,
+    description: str,
+    category: str,
+    priority: str,
+    impact: str,
+    urgency: str,
+    service: str | None,
+    sys_id: str | None = None,
+    state: str = "1",
+    ai_enabled: str = "true",
+    human_lock: str = "false",
+    ai_state: str = "pending",
+) -> dict[str, Any]:
+    """A Table API incident record, as ServiceNow returns it (strings, scoped names)."""
+    record: dict[str, Any] = {
+        "sys_id": sys_id or (number.lower().replace("inc", "a") + "0" * 32)[:32],
+        "number": number,
+        "short_description": short,
+        "description": description,
+        "state": state,
+        "priority": priority,
+        "impact": impact,
+        "urgency": urgency,
+        "category": category,
+        "subcategory": "",
+        "active": "true",
+        f"{SCOPE}_ai_enabled": ai_enabled,
+        f"{SCOPE}_ai_human_lock": human_lock,
+        f"{SCOPE}_ai_processing_state": ai_state,
+    }
+    if service is not None:
+        record["business_service"] = {"display_value": service, "value": "f" * 32}
+    return record
+
+
+VPN = incident_record(
+    "INC0010023",
+    short="VPN authentication fails after password reset",
+    description="Can reach the internet but the VPN client says invalid credentials since I "
+    "reset my password this morning. Call me on +971 50 123 4567.",
+    category="network",
+    priority="3",
+    impact="3",
+    urgency="2",
+    service="corporate-vpn",
+)
+PRINTER = incident_record(
+    "INC0010047",
+    short="Printer in meeting room 4 makes a grinding noise",
+    description="Paper feed grinds and nothing comes out.",
+    category="hardware",
+    priority="4",
+    impact="3",
+    urgency="3",
+    service="print-services",
+)
+ORDER_P1 = incident_record(
+    "INC0010052",
+    short="order-processing returning 500s",
+    description="Monitoring alert: connection pool saturation on order-processing.",
+    category="software",
+    priority="1",
+    impact="1",
+    urgency="1",
+    service="order-processing",
+)
+MFA = incident_record(
+    "INC0010064",
+    short="New phone, cannot approve MFA prompts",
+    description="I replaced my phone and my authenticator is gone.",
+    category="inquiry",
+    priority="3",
+    impact="3",
+    urgency="2",
+    service="identity",
+)
+LEAVE = incident_record(
+    "INC0010071",
+    short="Request: annual leave approval",
+    description="I would like to take next week off.",
+    category="inquiry",
+    priority="4",
+    impact="3",
+    urgency="3",
+    service=None,
+)
+
+INCIDENTS = {r["number"]: r for r in (VPN, PRINTER, ORDER_P1, MFA, LEAVE)}
+
+
+def event_for(record: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "event_id": f"evt-{record['number']}",
+        "sys_id": record["sys_id"],
+        "number": record["number"],
+        "event_type": "incident.created",
+        "contract_version": "v1",
+    }
+
+
+def evidence(
+    article: str = "KB0001",
+    *,
+    version: str = "2",
+    section: str = "Resolution",
+    relevance: float = 0.847,
+    title: str = "VPN authentication fails after a password change",
+    text: str = "1. Confirm the password changed. 2. Sign out of the VPN client. "
+    "3. Clear the cached credential. 4. Reconnect.",
+    chunk: int = 2,
+) -> EvidenceItem:
+    return EvidenceItem(
+        article_id=f"{article}-v{version}",
+        article_number=article,
+        version=version,
+        title=title,
+        section=section,
+        chunk_index=chunk,
+        text=text,
+        fused_score=0.5,
+        relevance=relevance,
+    )
+
+
+# -- fakes ------------------------------------------------------------------------------
+
+
+@dataclass
+class FakeLLM:
+    """Scripted model: one answer (or callable, or exception) per purpose."""
+
+    answers: dict[str, Any] = field(default_factory=dict)
+    calls: list[dict[str, Any]] = field(default_factory=list)
+    model_name: str = "gemini/gemini-3.5-flash"
+    last_model_used: str | None = None
+    purpose_models: dict[str, str] = field(default_factory=dict)
+
+    def model_for_purpose(self, purpose: str, override: str | None = None) -> str:
+        return override or self.model_name
+
+    def structured(
+        self,
+        *,
+        purpose: str,
+        system: str,
+        prompt: str,
+        schema: type[Any],
+        model: str | None = None,
+        trace_content: bool = True,
+        max_retries: int | None = None,
+        max_completion_tokens: int | None = None,
+        usage_sink: Any = None,
+    ) -> Any:
+        selected_model = self.model_for_purpose(purpose, model)
+        self.last_model_used = selected_model
+        self.purpose_models[purpose] = selected_model
+        self.calls.append(
+            {
+                "purpose": purpose,
+                "system": system,
+                "prompt": prompt,
+                "schema": schema,
+                "model": selected_model,
+                "trace_content": trace_content,
+                "max_retries": max_retries,
+                "max_completion_tokens": max_completion_tokens,
+            }
+        )
+        if usage_sink is not None:
+            # Mirror the FakeOpenAISDK usage shape so chat budget reconciliation
+            # is exercisable without a network.
+            usage_sink(
+                {
+                    "purpose": purpose,
+                    "input_tokens": 900,
+                    "output_tokens": 150,
+                    "cost_usd": None,
+                    "model": selected_model,
+                }
+            )
+        answer = self.answers.get(purpose)
+        if answer is None and purpose == "approval_brief":
+            from agent.prompts import ApprovalBriefOutput
+
+            answer = ApprovalBriefOutput(
+                incident_summary="Paused incident awaiting a human decision.",
+                gate="escalated",
+                planned_action="Write the composed work note to ServiceNow.",
+                judgment_required="Approve or reject the planned write.",
+            )
+        if answer is None and purpose == "caller_message":
+            from agent.caller_message import CallerMessageOutput
+
+            answer = CallerMessageOutput(
+                caller_can_do_it=True,
+                steps=["Sign out of the VPN client completely.", "Sign in with your new password."],
+                reason="Both steps are on the caller's own device.",
+            )
+        if answer is None and purpose == "triage":
+            from agent.triage import TriageOutput
+
+            # Default: conservative, so nothing is lowered unless a test opts in.
+            answer = TriageOutput(
+                affects_one_person=False,
+                business_critical=True,
+                outage_likely=False,
+                security_related=False,
+            )
+        if answer is None and purpose == "clarifying_question":
+            from agent.conversation import ClarifyingQuestionOutput
+
+            # Default: nothing the caller could add, so behaviour is unchanged unless a
+            # test opts in by setting an answer.
+            answer = ClarifyingQuestionOutput(useful=False)
+        if isinstance(answer, list):
+            answer = answer.pop(0)
+        if isinstance(answer, BaseException):
+            raise answer
+        if callable(answer) and not isinstance(answer, BaseModel):
+            answer = answer(prompt)
+        assert isinstance(answer, schema), f"{purpose} answer is not a {schema.__name__}"
+        return answer
+
+    def purposes(self) -> list[str]:
+        return [c["purpose"] for c in self.calls]
+
+
+def vpn_answers(confidence: float = 0.82) -> dict[str, Any]:
+    return {
+        "pii_detection": PIIWordDetectionOutput(findings=[]),
+        "injection_classifier": InjectionClassification(
+            is_injection=False, reason="ordinary VPN incident, no manipulation attempt"
+        ),
+        "classify": ClassifyOutput(
+            label="network", rationale="VPN auth after password reset", confidence=0.93
+        ),
+        "diagnose": DiagnoseOutput(
+            probable_cause="The VPN client presents the cached old credential.",
+            matched_article_ids=["KB0001-v2"],
+            symptom_match=True,
+            confidence=confidence,
+            rationale="KB0001 symptom matches exactly.",
+        ),
+        "generate": GenerateOutput(
+            steps=[
+                StepOutput(
+                    text="Confirm the password was changed in the last 24 hours.",
+                    article_id="KB0001-v2",
+                    section="Resolution",
+                ),
+                StepOutput(
+                    text="Sign out of the VPN client completely.",
+                    article_id="KB0001-v2",
+                    section="Resolution",
+                ),
+                StepOutput(
+                    text="Clear the cached VPN credential and reconnect with the new password.",
+                    article_id="KB0001-v2",
+                    section="Resolution",
+                ),
+            ]
+        ),
+        "verify_evidence": CriticOutput(
+            passed=True,
+            invalid_citations=[],
+            unsupported_claims=[],
+            feedback_instructions="",
+        ),
+    }
+
+
+class FakeOpenAISDK:
+    """Stands in for ``openai.OpenAI`` pointed at the LiteLLM proxy:
+    ``chat.completions.with_raw_response.parse`` answers from a script keyed by
+    output schema, so the real :class:`LiteLLMClient` (and its Langfuse
+    generations) run without a network."""
+
+    SCHEMA_PURPOSE = {
+        "InjectionClassification": "injection_classifier",
+        "ClassifyOutput": "classify",
+        "DiagnoseOutput": "diagnose",
+        "GenerateOutput": "generate",
+        "CriticOutput": "verify_evidence",
+        "ApprovalBriefOutput": "approval_brief",
+        "PIIWordDetectionOutput": "pii_detection",
+    }
+
+    def __init__(
+        self,
+        answers: dict[str, Any],
+        *,
+        finish_reason: str = "stop",
+        refusal: str | None = None,
+        cost: str | None = "0.0016455",
+    ) -> None:
+        self.answers = answers
+        self.finish_reason = finish_reason
+        self.refusal = refusal
+        self.cost = cost
+        self.requests: list[dict[str, Any]] = []
+        self.with_options_calls: list[dict[str, Any]] = []
+        self.request_max_retries: list[int | None] = []
+        raw = SimpleNamespace(parse=lambda **request: self._parse(None, **request))
+        self.chat = SimpleNamespace(completions=SimpleNamespace(with_raw_response=raw))
+
+    def with_options(self, *, max_retries: int) -> Any:
+        self.with_options_calls.append({"max_retries": max_retries})
+        raw = SimpleNamespace(parse=lambda **request: self._parse(max_retries, **request))
+        return SimpleNamespace(
+            chat=SimpleNamespace(completions=SimpleNamespace(with_raw_response=raw))
+        )
+
+    def _parse(self, max_retries: int | None, **request: Any) -> Any:
+        self.request_max_retries.append(max_retries)
+        self.requests.append(request)
+        val = self.answers[self.SCHEMA_PURPOSE[request["response_format"].__name__]]
+        if isinstance(val, list):
+            answer = val.pop(0)
+        else:
+            answer = val
+        if isinstance(answer, BaseException):
+            raise answer
+        completion = SimpleNamespace(
+            id="chatcmpl-test",
+            model=request["model"],
+            usage=SimpleNamespace(
+                prompt_tokens=900,
+                completion_tokens=150,
+                completion_tokens_details=SimpleNamespace(reasoning_tokens=40),
+                prompt_tokens_details=None,
+            ),
+            choices=[
+                SimpleNamespace(
+                    finish_reason=self.finish_reason,
+                    message=SimpleNamespace(parsed=answer, refusal=self.refusal),
+                )
+            ],
+        )
+        headers = {"x-litellm-response-cost": self.cost} if self.cost else {}
+        return SimpleNamespace(headers=headers, parse=lambda: completion)
+
+
+def sdk_llm(tracer: Tracer, answers: dict[str, Any] | None = None) -> Any:
+    from agent.llm import LiteLLMClient
+
+    return LiteLLMClient(
+        AgentSettings(_env_file=None),
+        tracer,
+        client=FakeOpenAISDK(answers or vpn_answers()),
+    )
+
+
+@dataclass
+class FakeRetriever:
+    hits: list[EvidenceItem] = field(default_factory=lambda: [evidence()])
+    calls: list[dict[str, Any]] = field(default_factory=list)
+    error: BaseException | None = None
+
+    def search(
+        self,
+        query: str,
+        *,
+        classification: Classification,
+        top_k: int,
+        threshold: float,
+        incident_category: str | None = None,
+    ) -> RetrievalResult:
+        self.calls.append(
+            {
+                "query": query,
+                "classification": classification,
+                "top_k": top_k,
+                "incident_category": incident_category,
+            }
+        )
+        if self.error is not None:
+            raise self.error
+        best = max((h.relevance for h in self.hits), default=0.0)
+        return RetrievalResult(
+            query=query,
+            category_filter="network",
+            hits=self.hits[:top_k],
+            best_relevance=best,
+            threshold=threshold,
+            sufficient=bool(self.hits) and best >= threshold,
+            latency_ms=1.0,
+        )
+
+
+class FakeServiceNow:
+    """Async stand-in for ``ServiceNowClient`` over an in-memory incident table."""
+
+    def __init__(self, records: dict[str, dict[str, Any]] | None = None) -> None:
+        self.records = {r["sys_id"]: dict(r) for r in (records or INCIDENTS).values()}
+        self.updates: list[tuple[str, IncidentUpdatePayload]] = []
+        self.notes: list[tuple[str, str]] = []
+        self.execution_logs: list[ExecutionLogCreatePayload] = []
+        self.calls: list[str] = []
+        self.read_error: BaseException | None = None
+        self.write_error: BaseException | None = None
+        self.crash_after_write: BaseException | None = None
+        self.crash_before_log_recorded: BaseException | None = None
+        self.on_update: Callable[[str], None] | None = None
+        self.write_calls: list[tuple[str, IncidentUpdatePayload]] = []  # Track AI field writes
+        self.fulfilments: list[tuple[str, Any]] = []
+        self.journal: list[tuple[str, str, str]] = []
+        #: Display-form journals per incident, as ``read_conversation`` returns them.
+        self.conversations: dict[str, dict[str, str]] = {}
+
+    #: What ``find_related_incidents`` returns; tests fill it to build a situation.
+    related: dict[str, list[dict[str, str]]] = {"recent_same_category": [], "caller_recent": []}
+
+    async def related_incidents(
+        self, sys_id: str, *, category: str, caller_id: str
+    ) -> dict[str, list[dict[str, str]]]:
+        self.calls.append("find_related_incidents")
+        return self.related
+
+    async def get_conversation(self, sys_id: str) -> dict[str, str]:
+        self.calls.append("read_conversation")
+        return self.conversations.get(sys_id, {"comments": "", "work_notes": "", "caller_name": ""})
+
+    async def get_incident(self, sys_id: str) -> Incident:
+        self.calls.append("read_incident")
+        if self.read_error is not None:
+            raise self.read_error
+        return Incident.model_validate(self.records[sys_id])
+
+    async def update_incident(self, sys_id: str, payload: IncidentUpdatePayload) -> Incident:
+        self.calls.append("write_ai_fields")
+        if self.on_update is not None:
+            self.on_update(sys_id)
+        if self.write_error is not None:
+            raise self.write_error
+        self.updates.append((sys_id, payload))
+        self.records[sys_id].update(payload.to_table_api_body())
+        if self.crash_after_write is not None:
+            # ServiceNow applied the PATCH; the caller dies before recording it.
+            raise self.crash_after_write
+        return Incident.model_validate(self.records[sys_id])
+
+    async def add_work_note(self, sys_id: str, note: str) -> Incident:
+        self.calls.append("write_work_note")
+        self.notes.append((sys_id, note))
+        return Incident.model_validate(self.records[sys_id])
+
+    async def write_execution_log(self, payload: ExecutionLogCreatePayload) -> None:
+        self.calls.append("write_execution_log")
+        if self.crash_before_log_recorded is not None:
+            # Simulate the worker dying after the incident PATCH landed but before
+            # the execution-log row existed — the window a single receipt phase
+            # cannot describe, and the one that used to duplicate the log.
+            raise self.crash_before_log_recorded
+        self.execution_logs.append(payload)
+
+    async def fulfil_incident(
+        self,
+        sys_id: str,
+        payload: Any,
+        *,
+        expected_states: frozenset[str],
+        done_states: frozenset[str],
+    ) -> str:
+        """Mirror ``ServiceNowClient.fulfil_incident`` over the in-memory record."""
+        self.calls.append("fulfil_incident")
+        record = self.records[sys_id]
+        lock = record.get("x_2215032_ai_inc_0_ai_human_lock")
+        if lock not in (False, "false"):
+            raise ServiceNowHumanLockError(f"Incident {sys_id} is locked")
+        state = str(record.get("state") or "")
+        if state in done_states:
+            return "already_applied"
+        if state not in expected_states:
+            return "skipped_state_changed"
+        if payload.assignment_group and record.get("assignment_group"):
+            payload = payload.model_copy(update={"assignment_group": None})
+        self.fulfilments.append((sys_id, payload))
+        body = payload.to_table_api_body()
+        for journal in ("comments", "work_notes"):
+            if journal in body:
+                self.journal.append((sys_id, journal, body.pop(journal)))
+        record.update(body)
+        return "applied"
+
+    async def write_ai_fields(self, sys_id: str, payload: IncidentUpdatePayload) -> None:
+        """Track AI field writes for crash-recovery idempotency tests."""
+        self.write_calls.append((sys_id, payload))
+        self.records[sys_id].update(payload.to_table_api_body())
+
+
+class NoHighRiskApprovalChecker:
+    async def check(self, *, execution_id: Any, tool_name: str) -> ApprovalCheckResult:
+        raise AssertionError("the graph's registered ServiceNow tools are not high-risk")
+
+
+def make_deps(
+    *,
+    llm: FakeLLM | None = None,
+    retriever: FakeRetriever | None = None,
+    servicenow: FakeServiceNow | None = None,
+    tracer: Tracer | None = None,
+    **settings: Any,
+) -> AgentDependencies:
+    tracer = tracer or Tracer(None)
+    backend = servicenow or FakeServiceNow()
+    gateway = IncidentGateway(lambda: backend, tracer, runner=shared_runner())
+    settings.setdefault("agent_pii_detection_mode", "enforced")
+    return AgentDependencies(
+        settings=AgentSettings(_env_file=None, agent_checkpointer_backend="memory", **settings),
+        llm=llm or FakeLLM(vpn_answers()),
+        retriever=retriever or FakeRetriever(),
+        tools=build_servicenow_tool_registry(
+            gateway,
+            approval_checker=NoHighRiskApprovalChecker(),
+        ),
+        tracer=tracer,
+        clock=lambda: FIXED_NOW,
+    )
+
+
+def build_fake_deps(
+    *,
+    llm: FakeLLM | None = None,
+    retriever: FakeRetriever | None = None,
+    servicenow: FakeServiceNow | None = None,
+    tracer: Tracer | None = None,
+    **settings: Any,
+) -> AgentDependencies:
+    """Build fake dependencies with MemoryAuditStore for S3.4 tests."""
+    from agent.audit_store import MemoryGraphAuditStore
+
+    deps = make_deps(llm=llm, retriever=retriever, servicenow=servicenow, tracer=tracer, **settings)
+    # Replace the audit store with a fresh memory store
+    deps.audit = MemoryGraphAuditStore()
+    return deps
+
+
+def build_graph_with_checkpointer(deps: AgentDependencies):
+    """Build a graph with a memory checkpointer for interrupt/resume tests."""
+    from agent.checkpointer import build_checkpointer
+    from agent.graph import build_graph
+
+    checkpointer = build_checkpointer("memory", None)
+    return build_graph(deps, checkpointer=checkpointer)
+
+
+def minimal_event():
+    """Return a minimal event payload for tests using VPN incident."""
+    from agent.state import EventPayload
+
+    # Use the VPN incident from the default INCIDENTS dict
+    return EventPayload(
+        event_id="test-event-1",
+        sys_id=VPN["sys_id"],
+        number="INC0010023",
+        event_type="incident.created",
+    )
+
+
+def state_before_act(
+    deps: AgentDependencies,
+    record: dict[str, Any] | None = None,
+    *,
+    execution_id: str = EXECUTION_ID,
+) -> Any:
+    """Run every node up to ``confidence_check`` and stop before ``act``.
+
+    This is the state a worker's checkpoint holds when it is killed at the write
+    boundary: every gate has passed, the ServiceNow write has not happened, and
+    no receipt exists. Nodes are driven directly (outside the compiled graph) so
+    the test controls exactly which node is left undone.
+    """
+    from agent.nodes import NODE_ORDER, NODES
+    from agent.state import AgentState, EventPayload, initial_state
+
+    state: AgentState = initial_state(
+        EventPayload.model_validate(event_for(record or VPN)),
+        execution_id=execution_id,
+        correlation_id="corr-crash",
+        started_at=FIXED_NOW.isoformat(),
+    )
+    path: list[str] = []
+    for name in NODE_ORDER[:-1]:
+        update = NODES[name](state, deps)
+        path.append(name)
+        state = {**state, **update, "current_node": name, "path": list(path)}  # type: ignore[typeddict-item]
+    return state

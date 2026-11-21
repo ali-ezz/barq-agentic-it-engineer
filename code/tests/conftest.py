@@ -1,0 +1,85 @@
+"""Shared pytest configuration and fixtures."""
+
+import json
+import os
+from copy import deepcopy
+from pathlib import Path
+
+import pytest
+
+from app.models.knowledge import Article
+from tests.fixtures.articles import POSTGRES_V1, POSTGRES_V2, REDIS_DRAFT
+
+_REQUIRED_TEST_ENV = {
+    "SERVICENOW_INSTANCE_URL": "https://dev00000.service-now.com",
+    "SERVICENOW_CLIENT_ID": "test-client-id",
+    "SERVICENOW_CLIENT_SECRET": "test-client-secret",
+    "SERVICENOW_USERNAME": "test_service_account",
+    "SERVICENOW_PASSWORD": "test-password",
+    "WEBHOOK_AUTH_TOKEN": "dev-webhook-secret-token",
+    "WEBHOOK_OAUTH_CLIENT_ID": "barq-servicenow-test",
+    "WEBHOOK_OAUTH_CLIENT_SECRET": "client-secret-for-tests",
+    "WEBHOOK_OAUTH_SIGNING_KEY": "test-signing-key-that-is-at-least-32-characters",
+}
+
+if os.environ.get("SERVICENOW_LIVE_TESTS") != "1":
+    for _key, _value in _REQUIRED_TEST_ENV.items():
+        os.environ.setdefault(_key, _value)
+
+# S2.5: a developer .env holds real Langfuse keys; unit tests must never trace to
+# them. Tests that need tracing build their own client explicitly.
+for _key, _value in {
+    "TRACING_ENABLED": "false",
+    "LANGFUSE_PUBLIC_KEY": "",
+    "LANGFUSE_SECRET_KEY": "",
+}.items():
+    os.environ[_key] = _value
+
+# S3.4: the same reasoning for the checkpointer/audit store. The default suite
+# must not need Postgres, so the audit copy of an interrupt lives in memory.
+# ``tests/test_checkpointer.py`` builds the Postgres saver explicitly and is
+# marked ``integration``.
+os.environ.setdefault("AGENT_CHECKPOINTER_BACKEND", "memory")
+
+
+@pytest.fixture
+def settings():
+    """Settings built from the test environment above."""
+    from app.core.config import get_settings
+
+    return get_settings()
+
+
+def make_article(data: dict) -> Article:
+    return Article.model_validate(data)
+
+
+@pytest.fixture
+def article_dicts() -> list[dict]:
+    return [deepcopy(POSTGRES_V2), deepcopy(POSTGRES_V1), deepcopy(REDIS_DRAFT)]
+
+
+@pytest.fixture
+def sample_articles(article_dicts: list[dict]) -> list[Article]:
+    return [make_article(data) for data in article_dicts]
+
+
+@pytest.fixture
+def corpus_file(tmp_path: Path, article_dicts: list[dict]) -> Path:
+    path = tmp_path / "articles.json"
+    path.write_text(json.dumps(article_dicts), encoding="utf-8")
+    return path
+
+
+@pytest.fixture(scope="session", autouse=True)
+def close_shared_agent_test_runner():
+    """Stop the shared test loop before interpreter/native-library teardown."""
+    yield
+    from tests import agent_support
+
+    runner = agent_support._RUNNER
+    if runner is not None:
+        runner.close()
+        if not runner._thread.is_alive():
+            runner._loop.close()
+        agent_support._RUNNER = None

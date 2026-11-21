@@ -1,0 +1,549 @@
+import re
+import time
+from typing import Any
+
+import httpx
+import structlog
+from fastapi import status
+from pydantic import ValidationError
+
+from app.auth.token_manager import ServiceNowTokenManager
+from app.core.config import Settings
+from app.exceptions.servicenow import (
+    ServiceNowAuthenticationError,
+    ServiceNowAuthorizationError,
+    ServiceNowConflictError,
+    ServiceNowConnectionError,
+    ServiceNowError,
+    ServiceNowHumanLockError,
+    ServiceNowNotFoundError,
+    ServiceNowRateLimitError,
+    ServiceNowServerError,
+    ServiceNowTimeoutError,
+    ServiceNowValidationError,
+    ServiceNowWriteRejectedError,
+)
+from app.models.execution_log import (
+    EXECUTION_LOG_TABLE,
+    ExecutionLogCreatePayload,
+    ExecutionLogEntry,
+)
+from app.models.incident import (
+    FulfilmentResult,
+    Incident,
+    IncidentFulfilmentPayload,
+    IncidentUpdatePayload,
+)
+from app.models.work_note import WorkNoteUpdate
+from app.utils.servicenow import parse_retry_after, values_equal
+
+logger = structlog.getLogger(__name__)
+
+# fullmatch, not match, is what enforces this at the call site below. In a regex "$"
+# also matches immediately before a trailing newline, so `re.match` accepts
+# "INC0010001\n" and the newline is carried into sysparm_query. The anchors are kept
+# so the intent stays readable even though fullmatch makes them redundant.
+_INCIDENT_NUMBER_RE = re.compile(r"^[A-Z]+[0-9]+$")
+
+
+class ServiceNowClient:
+    def __init__(
+        self,
+        settings: Settings,
+        *,
+        http_client: httpx.AsyncClient | None = None,
+        token_manager: ServiceNowTokenManager | None = None,
+    ) -> None:
+        self._settings = settings
+        self._http = http_client or httpx.AsyncClient(timeout=settings.servicenow_timeout_seconds)
+        self._owns_http_client = http_client is None
+        self._tokens = token_manager or ServiceNowTokenManager(settings, self._http)
+
+    async def aclose(self) -> None:
+        if self._owns_http_client:
+            await self._http.aclose()
+
+    async def __aenter__(self) -> "ServiceNowClient":
+        return self
+
+    async def __aexit__(self, *exc_info: object) -> None:
+        await self.aclose()
+
+    @staticmethod
+    def _parse_incident(result: Any, sys_id: str) -> Incident:
+        """Validate a Table API record; raise ServiceNowValidationError if it does not fit."""
+        try:
+            return Incident.model_validate(result)
+        except ValidationError as exc:
+            raise ServiceNowValidationError(
+                f"Incident {sys_id} could not be parsed: the stored record does not "
+                f"match the expected field model ({exc.error_count()} validation "
+                "error(s)). The record may predate the current field model, or a "
+                "choice value may have been added on the instance.",
+                details={"sys_id": sys_id, "errors": exc.errors()},
+            ) from None
+
+    async def get_incident(self, sys_id: str) -> Incident:
+        result = await self._request("GET", f"/api/now/table/incident/{sys_id}")
+        return self._parse_incident(result, sys_id)
+
+    async def get_conversation(self, sys_id: str) -> dict[str, str]:
+        """The incident's journal as ServiceNow renders it, plus the caller's name.
+
+        Returns the display values of ``comments`` (customer visible) and
+        ``work_notes`` (engineers only), newest entry first, and ``caller_name`` so the
+        caller's own entries can be told apart. Parsing is done by the agent.
+        """
+        result = await self._request(
+            "GET",
+            f"/api/now/table/incident/{sys_id}",
+            params={
+                "sysparm_fields": "comments,work_notes,caller_id",
+                "sysparm_display_value": "true",
+                "sysparm_exclude_reference_link": "true",
+            },
+        )
+        record = result if isinstance(result, dict) else {}
+        return {
+            "comments": str(record.get("comments") or ""),
+            "work_notes": str(record.get("work_notes") or ""),
+            "caller_name": str(record.get("caller_id") or ""),
+        }
+
+    async def related_incidents(
+        self, sys_id: str, *, category: str, caller_id: str
+    ) -> dict[str, list[dict[str, str]]]:
+        """Incidents around this one: open in the same category in the last hour, and the
+        caller's other incidents in the last seven days. Short fields only."""
+        fields = "sys_id,number,short_description,state,opened_at,category"
+
+        async def query(text: str) -> list[dict[str, str]]:
+            result = await self._request(
+                "GET",
+                "/api/now/table/incident",
+                params={
+                    "sysparm_query": text,
+                    "sysparm_fields": fields,
+                    "sysparm_limit": 50,
+                    "sysparm_exclude_reference_link": "true",
+                },
+            )
+            rows = result if isinstance(result, list) else []
+            return [{key: str(row.get(key) or "") for key in fields.split(",")} for row in rows]
+
+        recent: list[dict[str, str]] = []
+        history: list[dict[str, str]] = []
+        if category:
+            recent = await query(
+                # Open and not yet resolved: resolved incidents are not evidence of an
+                # ongoing outage.
+                f"active=true^stateNOT IN6,7,8^category={category}^sys_id!={sys_id}"
+                "^opened_at>javascript:gs.minutesAgoStart(60)"
+            )
+        if caller_id:
+            history = await query(
+                f"caller_id={caller_id}^sys_id!={sys_id}^opened_at>javascript:gs.daysAgoStart(7)"
+            )
+        return {"recent_same_category": recent, "caller_recent": history}
+
+    # -- agentic engineer -----------------------------------------------------------------
+
+    async def get_ticket_view(self, sys_id: str) -> dict[str, Any]:
+        """The incident as the agent reads it: raw values plus readable names, and both
+        journals (newest first, as ServiceNow renders them)."""
+        fields = (
+            "sys_id,number,short_description,description,state,hold_reason,priority,impact,"
+            "urgency,category,subcategory,caller_id,assignment_group,assigned_to,opened_at,"
+            "active,contact_type,comments,work_notes,close_code,close_notes,"
+            "x_2215032_ai_inc_0_ai_enabled,x_2215032_ai_inc_0_ai_human_lock,"
+            "x_2215032_ai_inc_0_ai_human_review_required,"
+            "x_2215032_ai_inc_0_ai_processing_state,x_2215032_ai_inc_0_ai_report"
+        )
+        result = await self._request(
+            "GET",
+            f"/api/now/table/incident/{sys_id}",
+            params={"sysparm_fields": fields, "sysparm_display_value": "all"},
+        )
+        record = result if isinstance(result, dict) else {}
+        view: dict[str, Any] = {}
+        for key, value in record.items():
+            if isinstance(value, dict):
+                view[key] = str(value.get("value") or "")
+                view[f"{key}__name"] = str(value.get("display_value") or "")
+            else:
+                view[key] = str(value or "")
+        return view
+
+    async def account_facts(self, incident_sys_id: str, user: str | None = None) -> dict[str, Any]:
+        """BARQ account API: what the agent may know about the caller (or another person)."""
+        params = {"incident": incident_sys_id}
+        if user:
+            params["user"] = user
+        result = await self._request(
+            "GET", "/api/x_2215032_ai_inc_0/barq_account/facts", params=params
+        )
+        return result if isinstance(result, dict) else {}
+
+    async def account_action(self, incident_sys_id: str, action: str) -> dict[str, Any]:
+        """BARQ account API: one safe change to the caller's own account (enforced there)."""
+        result = await self._request(
+            "POST",
+            "/api/x_2215032_ai_inc_0/barq_account/action",
+            json={"incident": incident_sys_id, "action": action},
+        )
+        return result if isinstance(result, dict) else {}
+
+    async def patch_ticket(self, sys_id: str, body: dict[str, str]) -> dict[str, Any]:
+        """Write incident fields for the agent, refusing when a person holds the incident.
+
+        The lock is re-read first (as for every agent write), so an engineer who took over
+        a second ago is never overwritten."""
+        current = await self._request(
+            "GET",
+            f"/api/now/table/incident/{sys_id}",
+            params={"sysparm_fields": "x_2215032_ai_inc_0_ai_human_lock"},
+        )
+        lock = str((current or {}).get("x_2215032_ai_inc_0_ai_human_lock") or "")
+        if lock != "false":
+            raise ServiceNowHumanLockError(
+                f"Incident {sys_id} is held by a person and cannot be updated by the agent",
+                details={"sys_id": sys_id, "ai_human_lock": lock},
+            )
+        result = await self._request("PATCH", f"/api/now/table/incident/{sys_id}", json=body)
+        persisted = result if isinstance(result, dict) else {}
+        self._verify_write_persisted(requested=body, persisted=persisted, sys_id=sys_id)
+        return persisted
+
+    async def set_activity(self, sys_id: str, line: str) -> None:
+        """The caller's live line, written without the lock re-read: ServiceNow's write ACL
+        on this one field already refuses it once a person holds the incident."""
+        await self._request(
+            "PATCH",
+            f"/api/now/table/incident/{sys_id}",
+            params={"sysparm_fields": "sys_id"},
+            json={"x_2215032_ai_inc_0_ai_activity": line[:250]},
+        )
+
+    async def find_incident_by_number(self, number: str) -> Incident | None:
+        if not _INCIDENT_NUMBER_RE.fullmatch(number):
+            raise ValueError(f"Invalid incident number format: {number!r}")
+
+        result = await self._request(
+            "GET",
+            "/api/now/table/incident",
+            params={"sysparm_query": f"number={number}", "sysparm_limit": 2},
+        )
+        incidents = result if isinstance(result, list) else []
+        if not incidents:
+            return None
+        if len(incidents) > 1:
+            raise ServiceNowError(
+                f"Expected at most one incident for number={number}, "
+                f"ServiceNow returned {len(incidents)}",
+                details={"number": number, "count": len(incidents)},
+            )
+        return self._parse_incident(incidents[0], str(incidents[0].get("sys_id", number)))
+
+    async def update_incident(
+        self,
+        sys_id: str,
+        payload: IncidentUpdatePayload,
+    ) -> Incident:
+        current_incident = await self.get_incident(sys_id)
+
+        if current_incident.ai_human_lock is not False:
+            state = current_incident.ai_human_lock
+            reason = (
+                "is locked for human review"
+                if state is True
+                else "has an unknown/unconfirmed lock state"
+            )
+            raise ServiceNowHumanLockError(
+                f"Incident {sys_id} {reason} and cannot be updated by the agent",
+                details={"sys_id": sys_id, "ai_human_lock": state},
+            )
+
+        # Start and end are written in separate updates, so check end against the stored start.
+        if payload.ai_processing_end is not None and payload.ai_processing_start is None:
+            stored_start = current_incident.ai_processing_start
+            if stored_start is not None and payload.ai_processing_end < stored_start:
+                raise ServiceNowValidationError(
+                    f"Incident {sys_id}: ai_processing_end "
+                    f"{payload.ai_processing_end.isoformat()} precedes the stored "
+                    f"ai_processing_start {stored_start.isoformat()}.",
+                    details={
+                        "sys_id": sys_id,
+                        "ai_processing_end": payload.ai_processing_end.isoformat(),
+                        "stored_ai_processing_start": stored_start.isoformat(),
+                    },
+                )
+
+        body = payload.to_table_api_body()
+
+        result = await self._request(
+            "PATCH",
+            f"/api/now/table/incident/{sys_id}",
+            json=body,
+        )
+
+        returned_incident = self._parse_incident(result, sys_id)
+
+        self._verify_write_persisted(
+            requested=body,
+            persisted=result,
+            sys_id=sys_id,
+        )
+
+        return returned_incident
+
+    async def add_work_note(self, sys_id: str, note: str) -> Incident:
+        current_incident = await self.get_incident(sys_id)
+        if current_incident.ai_human_lock is not False:
+            state = current_incident.ai_human_lock
+            reason = (
+                "is locked for human review"
+                if state is True
+                else "has an unknown/unconfirmed lock state"
+            )
+            raise ServiceNowHumanLockError(
+                f"Incident {sys_id} {reason} and cannot be updated by the agent",
+                details={"sys_id": sys_id, "ai_human_lock": state},
+            )
+
+        body = WorkNoteUpdate(note=note).to_table_api_body()
+        result = await self._request("PATCH", f"/api/now/table/incident/{sys_id}", json=body)
+        return Incident.model_validate(result)
+
+    async def fulfil_incident(
+        self,
+        sys_id: str,
+        payload: IncidentFulfilmentPayload,
+        *,
+        expected_states: frozenset[str],
+        done_states: frozenset[str],
+    ) -> FulfilmentResult:
+        """Apply one fulfilment step (assign, start, resolve) only if it is still safe.
+
+        The incident is re-read first. A Human Lock refuses the write, as for every agent
+        write. If the incident is already in a ``done_states`` value the step landed on
+        an earlier attempt and is not repeated (journal fields would otherwise be
+        appended twice). If it is in neither set, a person moved it on while the agent
+        was working, and the agent leaves it alone. A group a person already set is
+        never overwritten.
+        """
+        current = await self.get_incident(sys_id)
+        if current.ai_human_lock is not False:
+            raise ServiceNowHumanLockError(
+                f"Incident {sys_id} is locked for human review and cannot be updated by the agent",
+                details={"sys_id": sys_id, "ai_human_lock": current.ai_human_lock},
+            )
+        current_state = str(current.state or "")
+        if current_state in done_states:
+            return "already_applied"
+        if current_state not in expected_states:
+            return "skipped_state_changed"
+        if payload.assignment_group and current.assignment_group:
+            payload = payload.model_copy(update={"assignment_group": None})
+        body = payload.to_table_api_body()
+        result = await self._request("PATCH", f"/api/now/table/incident/{sys_id}", json=body)
+        self._verify_write_persisted(requested=body, persisted=result, sys_id=sys_id)
+        return "applied"
+
+    async def write_execution_log(
+        self, payload: ExecutionLogCreatePayload
+    ) -> ExecutionLogEntry | None:
+        body = payload.to_table_api_body()
+        start_time = time.perf_counter()
+
+        try:
+            result = await self._request(
+                "POST",
+                f"/api/now/table/{EXECUTION_LOG_TABLE}",
+                json=body,
+            )
+        except ServiceNowError:
+            latency_ms = (time.perf_counter() - start_time) * 1000
+            logger.exception(
+                "execution_log_write_failed",
+                execution_id=payload.execution_id,
+                incident_sys_id=payload.incident_sys_id,
+                agent=payload.agent,
+                action=payload.action,
+                latency_ms=latency_ms,
+            )
+            return None
+
+        try:
+            entry = ExecutionLogEntry.model_validate(result)
+        except ValidationError:
+            latency_ms = (time.perf_counter() - start_time) * 1000
+            logger.exception(
+                "execution_log_response_unparseable",
+                execution_id=payload.execution_id,
+                incident_sys_id=payload.incident_sys_id,
+                agent=payload.agent,
+                action=payload.action,
+                latency_ms=latency_ms,
+            )
+            return None
+
+        latency_ms = (time.perf_counter() - start_time) * 1000
+        logger.info(
+            "execution_log_written",
+            execution_id=payload.execution_id,
+            incident_sys_id=payload.incident_sys_id,
+            latency_ms=latency_ms,
+        )
+        return entry
+
+    ################################################
+
+    async def _request(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: dict[str, Any] | None = None,
+        json: dict[str, Any] | None = None,
+        _retry_on_auth_failure: bool = True,
+    ) -> Any:
+        url = f"{self._settings.servicenow_instance_url}{path}"
+        params = {
+            **(params or {}),
+            "sysparm_exclude_reference_link": "true",
+        }
+
+        token = await self._tokens.get_token()
+        headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
+        if json is not None:
+            headers["Content-Type"] = "application/json"
+
+        try:
+            response = await self._http.request(
+                method,
+                url,
+                headers=headers,
+                params=params,
+                json=json,
+                timeout=self._settings.servicenow_timeout_seconds,
+            )
+        # "from None", not "from exc", for the same reason as the token manager: the
+        # frame these are raised from holds `headers`, which carries the bearer token.
+        # Chaining the httpx error keeps that frame in the traceback, so pytest's
+        # --showlocals or a rich traceback would print the token. The transport error
+        # carries no diagnostic the message below does not already give.
+        except httpx.TimeoutException:
+            raise ServiceNowTimeoutError(
+                f"Timed out requesting {method} {url} after "
+                f"{self._settings.servicenow_timeout_seconds} seconds"
+            ) from None
+        except httpx.ConnectError:
+            raise ServiceNowConnectionError(f"Failed to connect to {url}") from None
+        except httpx.TransportError:
+            raise ServiceNowConnectionError(
+                f"Transport error while requesting {method} {url}"
+            ) from None
+
+        if response.status_code == status.HTTP_401_UNAUTHORIZED and _retry_on_auth_failure:
+            logger.warning(
+                "servicenow_401_received",
+                method=method,
+                path=path,
+                action="refresh_and_retry_once",
+            )
+            await self._tokens.get_token(force_refresh=True, failed_token=token)
+            return await self._request(
+                method, path, params=params, json=json, _retry_on_auth_failure=False
+            )
+
+        return self._parse_response(response, method=method, path=path)
+
+    @staticmethod
+    def _parse_response(response: httpx.Response, *, method: str, path: str) -> Any:
+        if response.status_code == status.HTTP_401_UNAUTHORIZED:
+            raise ServiceNowAuthenticationError(
+                f"Still unauthorized after token refresh for {method} {path}",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                details={"body": response.text[:500]},
+            )
+        if response.status_code == status.HTTP_403_FORBIDDEN:
+            raise ServiceNowAuthorizationError(
+                f"ServiceNow denied access (403) for {method} {path} - "
+                "the integration identity likely lacks the required role/ACL",
+                status_code=status.HTTP_403_FORBIDDEN,
+                details={"body": response.text[:500]},
+            )
+        if response.status_code == status.HTTP_404_NOT_FOUND:
+            raise ServiceNowNotFoundError(
+                f"Resource not found for {method} {path}",
+                status_code=status.HTTP_404_NOT_FOUND,
+                details={"body": response.text[:500]},
+            )
+        if response.status_code == status.HTTP_409_CONFLICT:
+            raise ServiceNowConflictError(
+                f"ServiceNow reported a conflict for {method} {path}",
+                status_code=status.HTTP_409_CONFLICT,
+                details={"body": response.text[:500]},
+            )
+        if response.status_code == status.HTTP_429_TOO_MANY_REQUESTS:
+            retry_after = parse_retry_after(response.headers.get("Retry-After"))
+            raise ServiceNowRateLimitError(
+                f"Rate limited on {method} {path}",
+                retry_after=retry_after,
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                details={"body": response.text[:500]},
+            )
+        if response.status_code in (
+            status.HTTP_400_BAD_REQUEST,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+        ):
+            raise ServiceNowValidationError(
+                f"ServiceNow rejected the payload for {method} {path}",
+                status_code=response.status_code,
+                details={"body": response.text[:500]},
+            )
+        if status.HTTP_500_INTERNAL_SERVER_ERROR <= response.status_code < 600:
+            raise ServiceNowServerError(
+                f"ServiceNow server error on {method} {path}",
+                status_code=response.status_code,
+                details={"body": response.text[:500]},
+            )
+        if not (status.HTTP_200_OK <= response.status_code < status.HTTP_300_MULTIPLE_CHOICES):
+            raise ServiceNowError(
+                f"Unexpected status on {method} {path}",
+                status_code=response.status_code,
+                details={"body": response.text[:500]},
+            )
+
+        try:
+            data = response.json()
+        except ValueError as exc:
+            raise ServiceNowError(f"Non-JSON response from {method} {path}") from exc
+        return data.get("result", data)
+
+    def _verify_write_persisted(
+        self,
+        requested: dict[str, str],
+        persisted: dict[str, Any],
+        sys_id: str,
+    ) -> None:
+        rejected_fields = []
+        JOURNAL_FIELDS = {"work_notes", "comments"}
+
+        for field, requested_value in requested.items():
+            if field in JOURNAL_FIELDS:
+                continue
+
+            persisted_value = persisted.get(field)
+
+            if not values_equal(requested_value, persisted_value):
+                rejected_fields.append(field)
+
+        if rejected_fields:
+            raise ServiceNowWriteRejectedError(
+                f"ServiceNow rejected writes for fields: {', '.join(rejected_fields)}",
+                details={
+                    "sys_id": sys_id,
+                    "rejected_fields": rejected_fields,
+                },
+            )

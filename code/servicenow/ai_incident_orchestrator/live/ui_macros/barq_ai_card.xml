@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null">
+<!--
+  BARQ AI card: the top of the engineer's incident page (form view "BARQ AI").
+  Drawn in the browser by the UI script x_2215032_ai_inc_0.barq_card from the agent's
+  report (BarqAjax.card), so it stays live while the agent works. One button
+  (Take over / Hand back), one box to instruct the agent, Undo on each account change.
+-->
+<g:requires name="x_2215032_ai_inc_0.barq_card.jsdbx" />
+<style>
+#barq-card { margin: 4px 0 18px; padding: 16px 20px; border: 1px solid #dfe3e8; border-radius: 10px; background: #fff; font-size: 13px; line-height: 1.55; color: #1f2933; box-shadow: 0 1px 2px rgba(16,24,40,.05); transition: border-color .3s; }
+#barq-card.barq-info { border-left: 5px solid #2f6fdb; }
+#barq-card.barq-good { border-left: 5px solid #2e8540; }
+#barq-card.barq-warn { border-left: 5px solid #d98c00; }
+#barq-card.barq-bad { border-left: 5px solid #c62828; }
+#barq-card.barq-muted { border-left: 5px solid #8a96a3; }
+#barq-card .barq-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+#barq-card .barq-logo { font-weight: 800; letter-spacing: .06em; color: #1d4fa3; }
+#barq-card .barq-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: 14px; background: #eef2f7; font-weight: 600; }
+#barq-card.barq-info .barq-chip { background: #e4eefc; color: #1d4fa3; }
+#barq-card.barq-good .barq-chip { background: #dff1e3; color: #1f5f2c; }
+#barq-card.barq-warn .barq-chip { background: #fdeccb; color: #8a5a00; }
+#barq-card.barq-bad .barq-chip { background: #fbe0e0; color: #8e1c1c; }
+#barq-card .barq-owner { margin-left: auto; color: #52606d; }
+#barq-card .barq-btn { border: 1px solid #1d4fa3; background: #1d4fa3; color: #fff; border-radius: 6px; padding: 5px 14px; font-weight: 600; cursor: pointer; }
+#barq-card .barq-btn:hover { background: #163e80; }
+#barq-card .barq-btn:disabled { opacity: .6; cursor: default; }
+#barq-card .barq-live { margin-top: 10px; padding: 8px 12px; border-radius: 8px; background: #f2f6fd; color: #1d4fa3; font-weight: 500; animation: barq-fade .4s ease; }
+#barq-card .barq-dots { display: inline-flex; gap: 3px; margin-right: 10px; vertical-align: middle; }
+#barq-card .barq-dots i { width: 6px; height: 6px; border-radius: 50%; background: #2f6fdb; animation: barq-bounce 1.2s infinite ease-in-out; }
+#barq-card .barq-dots i:nth-child(2) { animation-delay: .15s; }
+#barq-card .barq-dots i:nth-child(3) { animation-delay: .3s; }
+#barq-card .barq-pulse { width: 8px; height: 8px; border-radius: 50%; background: #2f6fdb; animation: barq-pulse 1.4s infinite; }
+#barq-card .barq-summary { margin-top: 12px; font-size: 15px; font-weight: 600; color: #102a43; }
+#barq-card .barq-conclusion { margin-top: 2px; color: #52606d; }
+#barq-card .barq-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 12px; margin-top: 12px; }
+#barq-card .barq-panel { padding: 10px 12px; border-radius: 8px; background: #f7f9fb; border: 1px solid #edf0f3; }
+#barq-card .barq-label { margin: 12px 0 4px; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #7b8794; }
+#barq-card .barq-panel .barq-label { margin-top: 0; }
+#barq-card .barq-quote { font-style: italic; color: #334e68; white-space: pre-wrap; }
+#barq-card .barq-facts, #barq-card .barq-actions, #barq-card .barq-flags ul { margin: 0; padding-left: 0; list-style: none; }
+#barq-card .barq-facts li { margin: 3px 0; }
+#barq-card .barq-src { display: inline-block; min-width: 64px; margin-right: 8px; padding: 0 6px; border-radius: 6px; background: #e4e7eb; color: #3e4c59; font-size: 11px; text-align: center; }
+#barq-card .barq-none { color: #9aa5b1; }
+#barq-card .barq-actions li { margin: 3px 0; }
+#barq-card .barq-tick { display: inline-block; width: 18px; color: #2e8540; font-weight: 700; }
+#barq-card .barq-undone { color: #7b8794; text-decoration: line-through; }
+#barq-card .barq-undo { margin-left: 8px; color: #c62828; font-weight: 600; }
+#barq-card .barq-time { margin-left: 6px; color: #9aa5b1; font-size: 11px; }
+#barq-card .barq-muted-text { color: #9aa5b1; font-size: 11px; }
+#barq-card .barq-flags { margin-top: 10px; padding: 8px 12px; border-radius: 8px; background: #fff4f4; color: #8e1c1c; }
+#barq-card .barq-flags li::before { content: "⚠ "; }
+#barq-card .barq-reco { margin-top: 10px; padding: 8px 12px; border-radius: 8px; background: #fffaf0; color: #6b4a00; }
+#barq-card .barq-meta { margin-top: 12px; color: #52606d; display: flex; flex-wrap: wrap; align-items: center; }
+#barq-card .barq-sep { display: inline-block; width: 1px; height: 12px; background: #cbd2d9; margin: 0 12px; }
+#barq-card .barq-bar { display: inline-block; width: 70px; height: 6px; margin-left: 6px; background: #e4e7eb; border-radius: 3px; vertical-align: middle; overflow: hidden; }
+#barq-card .barq-bar span { display: block; height: 100%; background: #2e8540; transition: width .6s ease; }
+#barq-card .barq-toggle { display: inline-block; margin-top: 12px; color: #1d4fa3; font-weight: 600; }
+#barq-card .barq-trace { display: inline-block; margin: 12px 0 0 18px; color: #52606d; }
+#barq-card .barq-timeline { margin: 8px 0 0; padding: 0 0 0 18px; border-left: 2px solid #e4e7eb; list-style: none; }
+#barq-card .barq-timeline li { position: relative; margin: 0 0 10px; padding-left: 8px; animation: barq-fade .3s ease; }
+#barq-card .barq-timeline li::before { content: ""; position: absolute; left: -25px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: #cbd2d9; border: 2px solid #fff; }
+#barq-card .barq-timeline li.barq-k-check::before { background: #2f6fdb; }
+#barq-card .barq-timeline li.barq-k-act::before { background: #2e8540; }
+#barq-card .barq-timeline li.barq-k-reply::before { background: #7c5cdb; }
+#barq-card .barq-timeline li.barq-k-decision::before { background: #102a43; }
+#barq-card .barq-timeline li.barq-k-undo::before { background: #c62828; }
+#barq-card .barq-timeline li.barq-failed b { color: #8e1c1c; }
+#barq-card .barq-timeline .barq-time { margin: 0 8px 0 0; }
+#barq-card .barq-why { color: #52606d; }
+#barq-card .barq-detail { margin-top: 3px; padding: 6px 8px; max-height: 84px; overflow: auto; border-radius: 6px; background: #f5f7fa; color: #616e7c; font: 11px/1.45 SFMono-Regular, Menlo, Consolas, monospace; word-break: break-word; }
+#barq-card .barq-ask { display: flex; gap: 8px; margin-top: 14px; align-items: flex-end; }
+#barq-card .barq-ask textarea { flex: 1; resize: vertical; padding: 8px 10px; border: 1px solid #cbd2d9; border-radius: 8px; font: inherit; }
+#barq-card .barq-ask textarea:focus { outline: none; border-color: #2f6fdb; box-shadow: 0 0 0 3px rgba(47,111,219,.15); }
+@keyframes barq-bounce { 0%, 80%, 100% { transform: scale(.6); opacity: .5; } 40% { transform: scale(1); opacity: 1; } }
+@keyframes barq-pulse { 0% { box-shadow: 0 0 0 0 rgba(47,111,219,.5); } 70% { box-shadow: 0 0 0 8px rgba(47,111,219,0); } 100% { box-shadow: 0 0 0 0 rgba(47,111,219,0); } }
+@keyframes barq-fade { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } }
+</style>
+<div id="barq-card" class="barq-card barq-muted"><div class="barq-head"><span class="barq-logo">BARQ AI</span><span class="barq-chip">Loading…</span></div></div>
+<script>addLoadEvent(function() { if (window.barqCardStart) window.barqCardStart(); });</script>
+</j:jelly>

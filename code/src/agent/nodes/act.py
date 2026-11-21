@@ -1,0 +1,1033 @@
+"""``act`` — the single terminal node: write the suggestion, or escalate.
+
+Every path through the graph ends here, so there is exactly one place that writes
+to ServiceNow and exactly one record of the outcome. The writes are the manual's
+§11.6 permitted actions only — AI fields, an internal work note and the human
+review flag — sent as one PATCH through the allow-listed gateway. Nothing resolves,
+closes, reassigns or contacts the requester: those actions do not exist.
+"""
+
+from __future__ import annotations
+
+import asyncio
+from datetime import UTC, datetime
+from typing import Any
+
+import structlog
+from langgraph.types import interrupt
+
+from agent.approval_brief import render_brief
+from agent.caller_message import compose_caller_message
+from agent.conversation import MAX_AGENT_REPLIES, MAX_QUESTIONS, compose_clarifying_question
+from agent.dependencies import AgentDependencies
+from agent.errors import HumanLockedError
+from agent.nodes.retrieve import build_query
+from agent.state import (
+    AgentState,
+    ClassificationResult,
+    ConfidenceResult,
+    Diagnosis,
+    Draft,
+    Eligibility,
+    FinalOutput,
+    GateResult,
+    IncidentSnapshot,
+    Outcome,
+    RetrievalResult,
+    RiskAssessment,
+    RiskLevel,
+)
+from agent.tools import ToolCallContext
+from app.feedback import cited_articles, weak_articles
+from app.models.execution_log import (
+    ExecutionAction,
+    ExecutionLogCreatePayload,
+    ExecutionStatus,
+)
+from app.models.incident import AIProcessingState, IncidentUpdatePayload
+from app.utils.async_bridge import run_blocking
+
+PREFIX = "AI Suggested Response"
+logger = structlog.getLogger(__name__)
+
+#: S1.1 field model: ``complete`` means an accepted resolution was applied and needs
+#: ``ai_resolution`` in the same write; ``awaiting_approval`` "pauses automation".
+#: A draft or an escalation both leave the incident waiting for a person, and
+#: processing end stays blank because the state is not terminal.
+PAUSED = AIProcessingState.AWAITING_APPROVAL.value
+
+#: Every escalation that needs a human answer parks on the same approval path.
+#: In particular, a human solution to a no-evidence case is the input to S3.5.
+INTERRUPT_OUTCOMES = frozenset(
+    {
+        Outcome.ESCALATED_HIGH_RISK,
+        Outcome.ESCALATED_NO_EVIDENCE,
+        Outcome.ESCALATED_BLOCKED,
+        Outcome.ESCALATED_LOW_CONFIDENCE,
+    }
+)
+
+
+#: How the caller hears each routing category ("inquiry" is the Service Desk).
+_TEAM_NAMES: dict[str, str] = {
+    "network": "the network team",
+    "software": "the software team",
+    "hardware": "the hardware team",
+    "inquiry": "the Service Desk",
+}
+
+
+def decide_outcome(state: AgentState) -> Outcome:
+    """The outcome implied by the recorded state. Mirrors the edge conditions."""
+    guardrail = state.get("input_guardrail")
+    if guardrail is not None and not GateResult.model_validate(guardrail).passed:
+        return Outcome.ESCALATED_BLOCKED
+    eligibility = state.get("eligibility")
+    if eligibility is not None and not Eligibility.model_validate(eligibility).eligible:
+        return Outcome.SKIPPED_INELIGIBLE
+    risk = state.get("risk")
+    if risk is None or RiskAssessment.model_validate(risk).level is RiskLevel.HIGH:
+        return Outcome.ESCALATED_HIGH_RISK
+    retrieval = state.get("retrieval")
+    if retrieval is None or not RetrievalResult.model_validate(retrieval).sufficient:
+        return Outcome.ESCALATED_NO_EVIDENCE
+    diagnosis = state.get("diagnosis")
+    if diagnosis is None or not Diagnosis.model_validate(diagnosis).matched_article_ids:
+        return Outcome.ESCALATED_NO_EVIDENCE
+    for key in ("verification", "safety"):
+        gate = state.get(key)
+        if gate is None or not GateResult.model_validate(gate).passed:
+            return Outcome.ESCALATED_BLOCKED
+    confidence = state.get("confidence")
+    if confidence is None or not ConfidenceResult.model_validate(confidence).passed:
+        return Outcome.ESCALATED_LOW_CONFIDENCE
+    if state.get("draft") is None:
+        # Every other section is present and passing but generate recorded no
+        # draft, so there is nothing to suggest. Escalate instead of claiming one.
+        return Outcome.ESCALATED_NO_EVIDENCE
+    return Outcome.SUGGESTED
+
+
+def _blocked_gate(state: AgentState) -> GateResult | None:
+    for key in ("input_guardrail", "verification", "safety"):
+        gate = state.get(key)
+        if gate is not None and not GateResult.model_validate(gate).passed:
+            return GateResult.model_validate(gate)
+    return None
+
+
+def _search_finding(retrieval: RetrievalResult, classification: str | None) -> str:
+    """What was searched and what was found, in the manual's run-log wording."""
+    if retrieval.category_filter is None:
+        return (
+            f"The classification '{classification or 'unknown'}' has no knowledge-base "
+            "category, so no search was run."
+        )
+    scope = retrieval.category_filter.replace(",", ", ")
+    best = max(retrieval.hits, key=lambda h: h.relevance, default=None)
+    if best is None:
+        # "Nothing matched" and "nothing was allowed to match" are different
+        # facts. A clearance ceiling below the corpus hides articles that do
+        # describe the fault, and reporting that as an empty search tells the
+        # operator to go write a new article for a fault the KB already covers.
+        from agent.config import get_agent_settings
+
+        ceiling = get_agent_settings().agent_max_security_level
+        if ceiling != "restricted":
+            return (
+                f"Searched published {scope} articles up to the '{ceiling}' clearance "
+                "ceiling: nothing in scope matched. Articles above that ceiling are "
+                "excluded from this search, so an empty result does not mean the "
+                "knowledge base lacks an answer."
+            )
+        return f"Searched published {scope} articles: nothing matched."
+    found = (
+        f"Searched published {scope} articles. Best match {best.article_number} "
+        f"v{best.version} ({best.title}) scored {best.relevance:.2f}"
+    )
+    if retrieval.sufficient:
+        return f"{found}, but none of the retrieved articles describes this fault."
+    return f"{found} against a threshold of {retrieval.threshold:.2f}."
+
+
+def compose(state: AgentState, outcome: Outcome) -> FinalOutput:
+    classification = (
+        ClassificationResult.model_validate(state["classification"]).label.value
+        if state.get("classification")
+        else None
+    )
+    risk = RiskAssessment.model_validate(state["risk"]) if state.get("risk") else None
+    if outcome is Outcome.SKIPPED_INELIGIBLE:
+        ineligible = Eligibility.model_validate(state["eligibility"]).reasons
+        return FinalOutput(
+            outcome=outcome,
+            summary="Not eligible: " + "; ".join(ineligible),
+            human_review_required=False,
+            processing_state=AIProcessingState.PENDING.value,
+        )
+    if outcome is Outcome.ESCALATED_HIGH_RISK:
+        reasons = "; ".join(risk.reasons) if risk else "risk not assessed"
+        note = (
+            f"{PREFIX}: risk assessed as high before retrieval — {reasons}. "
+            "No action taken. Escalated for human decision."
+        )
+        return FinalOutput(
+            outcome=outcome,
+            summary=note,
+            classification=classification,
+            work_note=note,
+            human_review_required=True,
+            processing_state=PAUSED,
+        )
+    if outcome is Outcome.ESCALATED_NO_EVIDENCE:
+        # decide_outcome selects this outcome precisely when the retrieval section
+        # is missing, so it must not be indexed here: that would turn the
+        # fail-closed route into a KeyError.
+        retrieval = state.get("retrieval")
+        if retrieval is not None:
+            finding = _search_finding(RetrievalResult.model_validate(retrieval), classification)
+            note = f"{PREFIX}: no matching knowledge article found. {finding}"
+        else:
+            note = f"{PREFIX}: no search result was recorded, so no evidence was considered."
+        note += " No draft written. Escalated for human handling."
+        return FinalOutput(
+            outcome=outcome,
+            summary=note,
+            classification=classification,
+            work_note=note,
+            human_review_required=True,
+            processing_state=PAUSED,
+        )
+    if outcome is Outcome.ESCALATED_BLOCKED:
+        gate = _blocked_gate(state)
+        detail = f"the {gate.gate} check: {gate.reason or 'failed'}" if gate else "a missing check"
+        note = f"{PREFIX}: draft blocked by {detail}. No draft written. Escalated."
+        return FinalOutput(
+            outcome=outcome,
+            summary=note,
+            classification=classification,
+            work_note=note,
+            human_review_required=True,
+            processing_state=PAUSED,
+        )
+    # Same reasoning as the retrieval section above: a missing confidence check is
+    # itself what selects ESCALATED_LOW_CONFIDENCE, so read it defensively.
+    recorded_confidence = state.get("confidence")
+    confidence = (
+        ConfidenceResult.model_validate(recorded_confidence) if recorded_confidence else None
+    )
+    if outcome is Outcome.ESCALATED_LOW_CONFIDENCE:
+        if confidence is not None:
+            detail = f"confidence {confidence.score:.2f} is below the {confidence.floor:.2f} floor"
+        else:
+            detail = "no confidence check was recorded"
+        note = f"{PREFIX}: draft withheld — {detail}. Escalated for human handling."
+        return FinalOutput(
+            outcome=outcome,
+            summary=note,
+            confidence=confidence.score if confidence else None,
+            classification=classification,
+            work_note=note,
+            human_review_required=True,
+            processing_state=PAUSED,
+        )
+
+    # Only SUGGESTED reaches here, and decide_outcome returns it only once the
+    # confidence and draft sections are both present and passing.
+    if confidence is None:
+        raise ValueError("SUGGESTED outcome without a recorded confidence check")
+    draft = Draft.model_validate(state["draft"])
+    approval = bool(risk and risk.approval_required)
+    note = (
+        f"{PREFIX} drafted. Confidence {confidence.score:.2f}. "
+        f"Source {'; '.join(draft.sources)}. "
+        + ("Human approval required." if approval else "Guarded suggestion completed.")
+    )
+    if approval and risk:
+        note += " Approval required before any action: " + "; ".join(risk.reasons) + "."
+    return FinalOutput(
+        outcome=outcome,
+        summary=note,
+        suggestion=draft.rendered,
+        resolution=None if approval else draft.rendered,
+        confidence=confidence.score,
+        classification=classification,
+        work_note=note,
+        human_review_required=approval,
+        processing_state=PAUSED if approval else AIProcessingState.COMPLETE.value,
+        approval_required=approval,
+    )
+
+
+def interrupt_payload(state: AgentState, output: FinalOutput, outcome: Outcome) -> dict[str, Any]:
+    """NFR-07 audit payload persisted next to the checkpoint at interrupt time."""
+    incident = state.get("incident") or {}
+    return {
+        "outcome": outcome.value,
+        "gate": outcome.value,
+        "summary": output.summary,
+        "work_note": output.work_note,
+        "planned_action": output.work_note,
+        "suggestion": output.suggestion,
+        "confidence": output.confidence,
+        "classification": output.classification,
+        "approval_required": output.approval_required,
+        "incident": {
+            "sys_id": incident.get("sys_id"),
+            "number": incident.get("number"),
+            "priority": incident.get("priority"),
+            "impact": incident.get("impact"),
+            "urgency": incident.get("urgency"),
+            "service": incident.get("service"),
+            "short_description": incident.get("short_description"),
+            "description": incident.get("description"),
+            "category": incident.get("category"),
+        },
+        "risk": state.get("risk"),
+        "retrieval": _slim_retrieval(state.get("retrieval")),
+        "draft": state.get("draft"),
+        "verification": state.get("verification"),
+        "safety": state.get("safety"),
+        "confidence_gate": state.get("confidence"),
+        "execution_id": state.get("execution_id"),
+        "correlation_id": state.get("correlation_id"),
+        "lifecycle": "interrupt",
+    }
+
+
+def _slim_retrieval(section: Any) -> dict[str, Any] | None:
+    if not isinstance(section, dict):
+        return None
+    hits = section.get("hits") or []
+    return {k: v for k, v in section.items() if k != "hits"} | {
+        "hit_count": len(hits),
+        "top_articles": [
+            {
+                "article_number": h.get("article_number"),
+                "version": h.get("version"),
+                "section": h.get("section"),
+                "relevance": h.get("relevance"),
+            }
+            for h in hits[:5]
+            if isinstance(h, dict)
+        ],
+    }
+
+
+def _request_human_decision(payload: dict[str, Any]) -> dict[str, Any]:
+    """Pause inside a compiled graph and return the human decision it resumes with."""
+    try:
+        value = interrupt(payload)
+    except RuntimeError as exc:
+        # Outside a compiled graph there is nobody to ask. Failing closed means a
+        # paused outcome can never be written as if a human had approved it.
+        raise RuntimeError("act reached a human decision outside a compiled graph") from exc
+    if isinstance(value, dict):
+        return value
+    return {"decision": str(value), "decided_by": "operator"}
+
+
+def _apply_human_decision(output: FinalOutput, decision: dict[str, Any]) -> FinalOutput:
+    verdict = str(decision.get("decision") or "approved").lower()
+    who = str(decision.get("decided_by") or "operator")
+    why = str(decision.get("reason") or verdict)
+    solution = str(decision.get("solution") or "").strip() or None
+    if verdict == "approved":
+        if solution:
+            note = (
+                f"{PREFIX}: human resolution approved by {who}. {why}. "
+                f"Original review: {output.summary}. Resolution: {solution}"
+            )
+            return output.model_copy(
+                update={
+                    "summary": note,
+                    "work_note": note,
+                    "resolution": solution,
+                    "suggestion": solution,
+                    "processing_state": AIProcessingState.COMPLETE.value,
+                    "processing_end": datetime.now(UTC).isoformat(),
+                    "human_review_required": False,
+                }
+            )
+        return output
+    note = (
+        f"{PREFIX}: human {verdict} by {who}. {why}. "
+        f"Original outcome {output.outcome.value}. No automated action applied."
+    )
+    return output.model_copy(
+        update={
+            "summary": note,
+            "work_note": note,
+            "suggestion": "",
+            "resolution": "",
+            "approval_required": False,
+            "human_review_required": False,
+            "processing_state": AIProcessingState.FAILED.value,
+            "processing_end": datetime.now(UTC).isoformat(),
+        }
+    )
+
+
+def _safe_async_run(coro: Any) -> Any:
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+
+    if loop and loop.is_running():
+        import concurrent.futures
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            return pool.submit(asyncio.run, coro).result()
+    return asyncio.run(coro)
+
+
+def _write_escalation_to_servicenow(
+    state: AgentState,
+    deps: AgentDependencies,
+    output: FinalOutput,
+) -> None:
+    """Publish the escalation state and note to ServiceNow before pausing for human approval."""
+    if not deps.settings.agent_write_back_enabled:
+        return
+    incident = IncidentSnapshot.model_validate(state["incident"])
+    started = _parse_ts(state.get("started_at"))
+    fields: dict[str, Any] = {
+        "work_notes": output.work_note,
+        "ai_processing_state": AIProcessingState.AWAITING_APPROVAL,
+        "ai_classification": output.classification,
+        "ai_confidence": output.confidence,
+        "ai_model_name": deps.llm.model_name if state.get("classification") else None,
+        "ai_agent_version": deps.settings.agent_version,
+        "ai_human_review_required": True,
+    }
+    if started is not None:
+        fields["ai_processing_start"] = started
+    payload = IncidentUpdatePayload(**fields)
+    try:
+        _safe_async_run(
+            deps.tools.invoke(
+                "write_ai_fields",
+                context=_tool_context(state),
+                arguments={"sys_id": incident.sys_id, "payload": payload},
+            )
+        )
+    except Exception as exc:
+        logger.warning("pre_interrupt_servicenow_write_failed", error=str(exc))
+
+
+def act(state: AgentState, deps: AgentDependencies) -> dict[str, Any]:
+    execution_id = str(state.get("execution_id") or "")
+    receipt = deps.audit.get_receipt(execution_id) if execution_id else None
+    if receipt and receipt.get("output"):
+        phase = receipt.get("phase")
+        if phase in (None, "logged", "written"):
+            # "logged" is terminal: both ServiceNow calls landed and only the final
+            # receipt save was lost, so replaying it would duplicate the execution
+            # log. A receipt saved without a phase predates the boundary markers and
+            # can only have been written after the write completed.
+            return {"output": receipt["output"]}
+        # The previous attempt died inside the write boundary. Resume at the boundary
+        # with the output it was writing rather than recomputing the decision, which
+        # would interrupt the same human again.
+        return _perform_write(
+            state,
+            deps,
+            FinalOutput.model_validate(receipt["output"]),
+            resume_phase=phase,
+        )
+
+    outcome = decide_outcome(state)
+    output = compose(state, outcome)
+    output = _explain_reassessment(state, output)
+    if outcome is Outcome.SKIPPED_INELIGIBLE:
+        if deps.settings.agent_write_back_enabled:
+            incident = IncidentSnapshot.model_validate(state["incident"])
+            _write_execution_log(
+                state,
+                deps,
+                incident,
+                output,
+                status=ExecutionStatus.BLOCKED,
+            )
+        return {"output": output.model_dump(mode="json")}
+
+    asked = _ask_caller_instead(state, deps, outcome, output)
+    if asked is not None:
+        return _perform_write(state, deps, _explain_reassessment(state, asked))
+
+    if outcome in INTERRUPT_OUTCOMES or output.approval_required:
+        payload = interrupt_payload(state, output, outcome)
+        payload["brief"] = render_brief(payload, deps)
+        if not deps.audit.get_interrupt(execution_id):
+            _write_escalation_to_servicenow(state, deps, output)
+        deps.audit.save_interrupt(execution_id, payload)
+        decision = _request_human_decision(payload)
+        if (
+            decision.get("decision") == "approved"
+            and not decision.get("solution")
+            and decision.get("source") != "no_graph"
+        ):
+            draft = Draft.model_validate(state["draft"]) if state.get("draft") else None
+            if draft and draft.steps and not draft.length_exceeded and len(draft.rendered) <= 4000:
+                decision = {**decision, "solution": draft.rendered}
+            elif decision.get("source") != "no_graph":
+                raise ValueError("Approval requires a complete draft or an operator solution.")
+        output = _apply_human_decision(output, decision)
+
+    return _perform_write(state, deps, output)
+
+
+def _explain_reassessment(state: AgentState, output: FinalOutput) -> FinalOutput:
+    """Put the reasons first in the work note when the agent lowered a priority-high risk."""
+    risk = state.get("risk")
+    if not risk or not RiskAssessment.model_validate(risk).reassessed:
+        return output
+    reasons = " ".join(RiskAssessment.model_validate(risk).reasons)
+    note = f"{reasons}\nAn engineer can undo this with Take over from AI."
+    work_note = f"{note}\n\n{output.work_note}" if output.work_note else note
+    return output.model_copy(update={"work_note": work_note[:4000]})
+
+
+#: Outcomes where the caller may hold the missing detail. High risk and blocked runs
+#: always go to a person; they are never turned into a question.
+ASKABLE_OUTCOMES = frozenset({Outcome.ESCALATED_NO_EVIDENCE, Outcome.ESCALATED_LOW_CONFIDENCE})
+
+
+def _ask_caller_instead(
+    state: AgentState, deps: AgentDependencies, outcome: Outcome, output: FinalOutput
+) -> FinalOutput | None:
+    """Ask the caller one question instead of parking for an engineer, when that can help.
+
+    Only at the autonomous level, only for a real caller, only for the outcomes in
+    ``ASKABLE_OUTCOMES`` and at most ``MAX_QUESTIONS`` times per incident; after that
+    the incident parks for an engineer exactly as before.
+    """
+    if outcome not in ASKABLE_OUTCOMES or output.approval_required:
+        return None
+    # Raised risk (repeat, Tier 1, MFA, outage, attack) always goes to a person, even
+    # when there is no fix to approve yet.
+    risk = state.get("risk")
+    if risk is None or RiskAssessment.model_validate(risk).level is not RiskLevel.LOW:
+        return None
+    if deps.settings.agent_autonomy_level != "autonomous":
+        return None
+    incident = IncidentSnapshot.model_validate(state["incident"])
+    caller = incident.caller_id
+    if not caller or caller in deps.settings.agent_service_account_ids:
+        return None
+    if incident.questions_asked >= MAX_QUESTIONS or incident.agent_replies >= MAX_AGENT_REPLIES:
+        return None
+    question = compose_clarifying_question(
+        deps, incident.short_description, incident.description, output.summary
+    )
+    if question is None:
+        return None
+    return FinalOutput(
+        outcome=Outcome.ASKED_CALLER,
+        summary="No confident fix yet; asked the caller for one missing detail.",
+        classification=output.classification,
+        confidence=output.confidence,
+        work_note=(
+            f"{AGENT_NAME} asked the caller for more detail before suggesting a fix "
+            f"(question {incident.questions_asked + 1} of {MAX_QUESTIONS}). "
+            f"Reason: {output.summary}"
+        )[:4000],
+        human_review_required=False,
+        # In progress, not complete: there is no resolution yet, and the caller's
+        # answer brings the incident back to the agent.
+        processing_state=AIProcessingState.IN_PROGRESS.value,
+        caller_question=question,
+    )
+
+
+def _perform_write(
+    state: AgentState,
+    deps: AgentDependencies,
+    output: FinalOutput,
+    *,
+    resume_phase: str | None = None,
+) -> dict[str, Any]:
+    incident = IncidentSnapshot.model_validate(state["incident"])
+    fields: dict[str, Any] = {
+        "work_notes": output.work_note,
+        "ai_processing_state": AIProcessingState(output.processing_state),
+        "ai_classification": output.classification,
+        "ai_confidence": output.confidence,
+        "ai_suggestion": output.suggestion,
+        "ai_model_name": deps.llm.model_name if state.get("classification") else None,
+        "ai_agent_version": deps.settings.agent_version,
+        "ai_human_review_required": output.human_review_required,
+    }
+    if output.resolution is not None:
+        fields["ai_resolution"] = output.resolution
+    if output.processing_end:
+        fields["ai_processing_end"] = _parse_ts(output.processing_end)
+    elif output.processing_state == AIProcessingState.COMPLETE.value:
+        fields["ai_processing_end"] = datetime.now(UTC)
+    started = _parse_ts(state.get("started_at"))
+    if output.processing_state == AIProcessingState.FAILED.value:
+        fields["ai_failure_reason"] = f"Human rejected AI action: {output.summary}"[:4000]
+    if started is not None:
+        # The S1.1 model rejects an explicit None timestamp, so it is omitted instead.
+        fields["ai_processing_start"] = started
+    payload = IncidentUpdatePayload(**fields)
+    actions = [
+        "write_ai_fields",
+        "write_work_note",
+        "flag_human_review",
+        "write_execution_log",
+    ]
+    if not deps.settings.agent_write_back_enabled:
+        output = output.model_copy(update={"actions": actions, "write_back": "dry_run"})
+        return {"output": output.model_dump(mode="json")}
+    execution_id = str(state["execution_id"])
+    lifecycle = "interrupt_resume" if deps.audit.get_interrupt(execution_id) else "direct"
+    receipt_base: dict[str, Any] = {
+        "lifecycle": lifecycle,
+        "incident_sys_id": incident.sys_id,
+    }
+    in_flight = output.model_dump(mode="json")
+
+    # Resuming after a crash inside this boundary: the PATCH is skipped only when
+    # ServiceNow itself says it landed, so a kill between the write and the receipt
+    # cannot append the work note twice.
+    #
+    # ``logged`` is a further terminal phase, saved once the execution-log row has
+    # landed. Without it a kill between that write and the final receipt save
+    # restarted the log write, because the receipt still said ``fields_written``.
+    #
+    # Known residual, deliberately not closed here: a kill in the window *after*
+    # the log row lands but *before* the receipt reaches ``logged`` still replays
+    # the log. Closing it needs a read-back probe for the execution-log table the
+    # way _write_already_landed probes the incident, and execution_id is not unique
+    # on that table, so existence cannot distinguish this attempt from an earlier
+    # one. The duplicate is an extra audit row; the authoritative record of the run
+    # is executions + workflow_state. See docs/sprint3_recovery_design.md.
+    write_fields = True
+    if resume_phase in ("fields_written", "fulfilled", "logged"):
+        write_fields = False
+    elif resume_phase is not None:
+        write_fields = not _write_already_landed(state, deps, incident, payload)
+
+    if write_fields:
+        # The intent receipt is saved before the call that can die, so a restarted
+        # worker can always tell "in flight" from "never started".
+        deps.audit.save_receipt(
+            execution_id, {**receipt_base, "phase": "writing", "output": in_flight}
+        )
+        # Act-node writes currently run on synchronous Celery/graph worker threads
+        # without a running event loop, so asyncio.run() bridges to ToolRegistry. If
+        # execution moves to an async worker/task context, replace this bridge rather
+        # than nest asyncio.run().
+        try:
+            asyncio.run(
+                deps.tools.invoke(
+                    "write_ai_fields",
+                    context=_tool_context(state),
+                    arguments={"sys_id": incident.sys_id, "payload": payload},
+                )
+            )
+        except HumanLockedError:
+            output = FinalOutput(
+                outcome=Outcome.SKIPPED_HUMAN_LOCK,
+                summary="An analyst locked the incident before the write; nothing was written.",
+                human_review_required=False,
+                processing_state=AIProcessingState.PENDING.value,
+            )
+            _write_execution_log(
+                state,
+                deps,
+                incident,
+                output,
+                status=ExecutionStatus.BLOCKED,
+                error="Human lock prevented incident write-back.",
+            )
+            return {"output": output.model_dump(mode="json")}
+        deps.audit.save_receipt(
+            execution_id,
+            {**receipt_base, "phase": "fields_written", "output": in_flight},
+        )
+    if resume_phase not in ("fulfilled", "logged"):
+        steps = _fulfil(state, deps, incident, output)
+        if steps:
+            output = output.model_copy(update={"fulfilment": steps})
+            deps.audit.save_receipt(
+                execution_id,
+                {**receipt_base, "phase": "fulfilled", "output": output.model_dump(mode="json")},
+            )
+    log_status = (
+        ExecutionStatus.SUCCEEDED
+        if output.processing_state == AIProcessingState.COMPLETE.value
+        or output.outcome is Outcome.ASKED_CALLER
+        else ExecutionStatus.FAILED
+        if output.processing_state == AIProcessingState.FAILED.value
+        else ExecutionStatus.AWAITING_APPROVAL
+    )
+    _write_execution_log(
+        state,
+        deps,
+        incident,
+        output,
+        status=log_status,
+    )
+    final = output.model_copy(update={"actions": actions, "write_back": "written"})
+    dumped = final.model_dump(mode="json")
+    # Both terminal phases carry the *final* payload, not the in-flight one, so a
+    # restart from either returns the run as it actually completed.
+    deps.audit.save_receipt(execution_id, {**receipt_base, "phase": "logged", "output": dumped})
+    deps.audit.save_receipt(execution_id, {**receipt_base, "phase": "written", "output": dumped})
+    return {"output": dumped}
+
+
+AGENT_NAME = "BARQ AI Agent"
+_COMMENT_HEAD = (
+    f"Hello, this is {AGENT_NAME}. I looked into your incident and this is how to fix it:\n\n"
+)
+_COMMENT_TAIL = "\n\nIf this did not fix it, reply on this incident and an engineer will take over."
+
+
+def _bounded(head: str, body: str, tail: str, limit: int = 4000) -> str:
+    room = limit - len(head) - len(tail)
+    if len(body) > room:
+        body = body[: max(room - 1, 0)].rstrip() + "…"
+    return f"{head}{body}{tail}"
+
+
+def caller_comment(fix: str) -> str:
+    """The customer-visible comment that carries the fix and the way back to a person."""
+    return _bounded(_COMMENT_HEAD, fix.strip(), _COMMENT_TAIL)
+
+
+def close_notes(fix: str, confidence: float | None) -> str:
+    score = f" with confidence {confidence:.2f}" if confidence is not None else ""
+    return _bounded(f"Resolved by {AGENT_NAME}{score}.\n\n", fix.strip(), "")
+
+
+def _fulfil(
+    state: AgentState,
+    deps: AgentDependencies,
+    incident: IncidentSnapshot,
+    output: FinalOutput,
+) -> list[str]:
+    """Work the incident itself after the graph applied a fix (see ``fulfil_applied_fix``).
+
+    Runs only for an applied fix (processing state ``complete`` with a resolution),
+    which is either a low-risk draft that passed every gate or a fix a person approved.
+    """
+    label = (state.get("classification") or {}).get("label")
+    if output.outcome is Outcome.ASKED_CALLER and output.caller_question:
+        return _fulfil_question(deps, incident, output.caller_question, _tool_context(state), label)
+    if output.processing_state != AIProcessingState.COMPLETE.value or not output.resolution:
+        return []
+    return fulfil_applied_fix(
+        deps,
+        incident,
+        resolution=output.resolution,
+        confidence=output.confidence,
+        context=_tool_context(state),
+        classification=label,
+        article_category=fix_owner(state, output.resolution),
+    )
+
+
+def fix_owner(state: AgentState, resolution: str) -> str | None:
+    """The team category of the first knowledge article the fix cites, if retrieved."""
+    evidence = (state.get("retrieval") or {}).get("hits") or []
+    owners = {
+        str(item.get("article_number")): str(item.get("category") or "")
+        for item in evidence
+        if isinstance(item, dict)
+    }
+    for article in cited_articles(resolution):
+        if owners.get(article):
+            return owners[article]
+    return None
+
+
+def route(
+    deps: AgentDependencies,
+    incident: IncidentSnapshot,
+    label: str | None,
+    article_category: str | None = None,
+) -> tuple[str, str | None]:
+    """The team for an incident, first that names a team: the team owning the knowledge
+    article the fix comes from (printing belongs to hardware), what the agent found the
+    problem to be (an Outlook fault filed under Network is software), the caller's own
+    category. Returns the team key and its assignment group, or no group."""
+    groups = deps.settings.agent_assignment_groups
+    for key in (article_category, label, incident.category):
+        if key and groups.get(key):
+            return key, groups[key]
+    return incident.category, None
+
+
+def fulfil_applied_fix(
+    deps: AgentDependencies,
+    incident: IncidentSnapshot,
+    *,
+    resolution: str,
+    confidence: float | None,
+    context: ToolCallContext,
+    classification: str | None = None,
+    article_category: str | None = None,
+) -> list[str]:
+    """Route, start and resolve the incident as far as the autonomy level allows.
+
+    Shared by the graph and by a semantic-cache follower that passed its own gates, so
+    both paths behave the same. Each step is a registered tool that re-reads the
+    incident and stops if a person locked it or moved it on, so it is safe to repeat
+    after a crash. A failed step is recorded and the run continues: the cited fix is
+    already on the incident.
+    """
+    level = deps.settings.agent_autonomy_level
+    if level not in ("assist", "autonomous") or not resolution:
+        return []
+    steps: list[str] = []
+    category, group = route(deps, incident, classification, article_category)
+    routed = f"routed it to the {category} group and " if group else ""
+    calls: list[tuple[str, dict[str, Any]]] = [
+        (
+            "assign_incident",
+            {
+                "sys_id": incident.sys_id,
+                "assignment_group": group,
+                "work_note": f"{AGENT_NAME} {routed}started work on this incident.",
+            },
+        )
+    ]
+    caller = incident.caller_id
+    caller_can_confirm = bool(caller) and caller not in deps.settings.agent_service_account_ids
+    needs_engineer = False
+    reply_limit = incident.agent_replies >= MAX_AGENT_REPLIES
+    # Learning from outcomes: an article that keeps getting reopened no longer lets the
+    # agent resolve on its own; the cited fix stays for an engineer.
+    weak = weak_articles(deps.article_trust, resolution)
+    if level == "autonomous" and caller_can_confirm and not reply_limit and not weak:
+        # Resolve only when the caller can carry out the fix alone; a fix that needs IT
+        # staff stays In Progress with the cited steps for an engineer.
+        # The caller's own words (title, text, answers) let the model see what is
+        # already known, e.g. "only me, webmail works".
+        message = compose_caller_message(deps, build_query(incident), resolution)
+        if message is None:
+            needs_engineer = True
+        else:
+            calls.append(
+                (
+                    "resolve_incident",
+                    {
+                        "sys_id": incident.sys_id,
+                        "caller_comment": caller_comment(message),
+                        "close_notes": close_notes(resolution, confidence),
+                    },
+                )
+            )
+    for tool, arguments in calls:
+        try:
+            result = run_blocking(deps.tools.invoke(tool, context=context, arguments=arguments))
+        except HumanLockedError:
+            steps.append(f"{tool}:skipped_human_lock")
+            return steps
+        except Exception as exc:  # noqa: BLE001 - the fix is already on the incident
+            logger.warning("fulfilment_step_failed", tool=tool, error_type=type(exc).__name__)
+            steps.append(f"{tool}:failed:{type(exc).__name__}")
+            return steps
+        steps.append(f"{tool}:{result}")
+        if result == "skipped_state_changed":
+            return steps
+    if (
+        level == "autonomous"
+        and caller_can_confirm
+        and (needs_engineer or weak)
+        and not reply_limit
+    ):
+        # The caller is never left in silence: say who has it and that they will hear back.
+        team = _TEAM_NAMES.get(category, f"the {category} team") if group else "an engineer"
+        try:
+            result = run_blocking(
+                deps.tools.invoke(
+                    "update_caller",
+                    context=context,
+                    arguments={
+                        "sys_id": incident.sys_id,
+                        "message": (
+                            f"Hello, this is {AGENT_NAME}. I looked into your incident. The fix "
+                            f"needs {team}, who now have it together with the steps to fix it. "
+                            "You will hear from them here, and you can add details at any time."
+                        ),
+                    },
+                )
+            )
+            steps.append(f"update_caller:{result}")
+            # From here the engineers own it: the review flag stops the caller's next
+            # message from returning the incident to the agent (conversation rule).
+            run_blocking(
+                deps.tools.invoke(
+                    "write_ai_fields",
+                    context=context,
+                    arguments={
+                        "sys_id": incident.sys_id,
+                        "payload": IncidentUpdatePayload(ai_human_review_required=True),
+                    },
+                )
+            )
+            steps.append("flag_human_review:applied")
+        except Exception as exc:  # noqa: BLE001 - the fix is with the engineer already
+            steps.append(f"update_caller:failed:{type(exc).__name__}")
+    if level == "autonomous" and not caller_can_confirm:
+        steps.append("resolve_incident:skipped_no_caller")
+    elif level == "autonomous" and reply_limit:
+        steps.append("resolve_incident:skipped_reply_limit")
+    elif level == "autonomous" and weak:
+        steps.append("resolve_incident:skipped_weak_article:" + ",".join(weak))
+    elif needs_engineer:
+        steps.append("resolve_incident:skipped_needs_engineer")
+    return steps
+
+
+def _fulfil_question(
+    deps: AgentDependencies,
+    incident: IncidentSnapshot,
+    question: str,
+    context: ToolCallContext,
+    label: str | None = None,
+) -> list[str]:
+    """Route and start the incident, then ask the caller and wait (On Hold, Awaiting Caller)."""
+    category, group = route(deps, incident, label)
+    routed = f"routed it to the {category} group and " if group else ""
+    calls: list[tuple[str, dict[str, Any]]] = [
+        (
+            "assign_incident",
+            {
+                "sys_id": incident.sys_id,
+                "assignment_group": group,
+                "work_note": f"{AGENT_NAME} {routed}started work on this incident.",
+            },
+        ),
+        ("ask_caller", {"sys_id": incident.sys_id, "question": question}),
+    ]
+    steps: list[str] = []
+    for tool, arguments in calls:
+        try:
+            result = run_blocking(deps.tools.invoke(tool, context=context, arguments=arguments))
+        except HumanLockedError:
+            steps.append(f"{tool}:skipped_human_lock")
+            return steps
+        except Exception as exc:  # noqa: BLE001 - recorded; an engineer sees the note
+            logger.warning("fulfilment_step_failed", tool=tool, error_type=type(exc).__name__)
+            steps.append(f"{tool}:failed:{type(exc).__name__}")
+            return steps
+        steps.append(f"{tool}:{result}")
+        if result == "skipped_state_changed":
+            return steps
+    return steps
+
+
+#: Fields whose ServiceNow-side values describe this attempt's PATCH, used to prove a
+#: write landed when its receipt never did.
+_LANDED_PROBE_FIELDS = (
+    "work_notes",
+    "ai_classification",
+    "ai_suggestion",
+    "ai_agent_version",
+    "ai_model_name",
+)
+
+
+def _write_already_landed(
+    state: AgentState,
+    deps: AgentDependencies,
+    incident: IncidentSnapshot,
+    payload: IncidentUpdatePayload,
+) -> bool:
+    """Ask ServiceNow whether the PATCH this attempt was about to send is already there.
+
+    Recovery only: called when a receipt says a write was in flight. ``False`` (write
+    again) is the safe answer on any read failure -- at worst the work note is appended
+    twice, which is the pre-existing failure, rather than a write silently skipped.
+    """
+    sent = payload.model_dump(exclude_none=True)
+    try:
+        current = asyncio.run(
+            deps.tools.invoke(
+                "read_incident",
+                context=_tool_context(state),
+                arguments={"sys_id": incident.sys_id},
+            )
+        )
+    except Exception:  # noqa: BLE001 — a failed probe must never block the retry
+        return False
+    if not isinstance(current, dict):
+        return False
+
+    expected_start = sent.get("ai_processing_start")
+    if expected_start is not None:
+        # This run's own processing-start timestamp: it is written by the same PATCH,
+        # so ServiceNow handing it back proves *this* attempt landed, not an earlier
+        # run that left similar fields behind.
+        started = _as_utc(expected_start)
+        return started is not None and started == _as_utc(current.get("ai_processing_start"))
+
+    probes = {k: str(v) for k, v in sent.items() if k in _LANDED_PROBE_FIELDS and v is not None}
+    if not probes:
+        return False
+    return all(str(current.get(k)) == v for k, v in probes.items())
+
+
+def _as_utc(value: Any) -> datetime | None:
+    """Normalise a written or read-back timestamp to UTC.
+
+    ``to_table_api_body`` formats datetimes as UTC text without an offset, so a value
+    read back from ServiceNow arrives naive; it is UTC by construction.
+    """
+    if isinstance(value, datetime):
+        parsed = value
+    elif isinstance(value, str):
+        try:
+            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    else:
+        return None
+    return parsed.replace(tzinfo=UTC) if parsed.tzinfo is None else parsed.astimezone(UTC)
+
+
+def _write_execution_log(
+    state: AgentState,
+    deps: AgentDependencies,
+    incident: IncidentSnapshot,
+    output: FinalOutput,
+    *,
+    status: ExecutionStatus,
+    error: str | None = None,
+) -> None:
+    action = (
+        ExecutionAction.PROPOSE if output.outcome is Outcome.SUGGESTED else ExecutionAction.ESCALATE
+    )
+    payload = ExecutionLogCreatePayload(
+        incident_sys_id=incident.sys_id,
+        execution_id=state["execution_id"],
+        agent=deps.settings.agent_version,
+        action=action,
+        status=status,
+        result=output.summary,
+        error=error,
+    )
+    asyncio.run(
+        deps.tools.invoke(
+            "write_execution_log",
+            context=_tool_context(state),
+            arguments={"sys_id": incident.sys_id, "payload": payload},
+        )
+    )
+
+
+def _tool_context(state: AgentState) -> ToolCallContext:
+    return ToolCallContext(
+        execution_id=state["execution_id"],
+        correlation_id=state.get("correlation_id"),
+    )
+
+
+def _parse_ts(value: str | None) -> datetime | None:
+    return datetime.fromisoformat(value) if value else None

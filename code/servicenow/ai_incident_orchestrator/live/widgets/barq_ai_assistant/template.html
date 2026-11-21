@@ -1,0 +1,69 @@
+<div class="barq-app">
+  <aside class="barq-side">
+    <button type="button" class="barq-new" ng-click="c.newChat()">
+      <span class="barq-plus">+</span> New conversation
+    </button>
+    <div class="barq-side-title">Your conversations</div>
+    <div class="barq-empty-list" ng-if="!c.tickets.length">Nothing yet. Tell BARQ AI what's wrong and it starts here.</div>
+    <a href="" class="barq-item" ng-repeat="t in c.tickets track by t.sys_id"
+       ng-class="{'barq-active': c.ticket.sys_id === t.sys_id}" ng-click="c.open(t)">
+      <div class="barq-item-title" ng-bind="t.title"></div>
+      <div class="barq-item-meta">
+        <span class="barq-status barq-{{t.tone}}">
+          <span class="barq-live-dot" ng-if="t.working"></span><span ng-bind="t.status"></span>
+        </span>
+        <span class="barq-number" ng-bind="t.number"></span>
+      </div>
+    </a>
+  </aside>
+
+  <section class="barq-main">
+    <header class="barq-top" ng-if="c.ticket">
+      <div>
+        <div class="barq-top-title" ng-bind="c.ticket.title"></div>
+        <div class="barq-top-number" ng-bind="c.ticket.number"></div>
+      </div>
+      <span class="barq-status barq-{{c.ticket.tone}}">
+        <span class="barq-live-dot" ng-if="c.ticket.working"></span><span ng-bind="c.ticket.status"></span>
+      </span>
+    </header>
+
+    <div class="barq-messages">
+      <div class="barq-welcome" ng-if="!c.ticket">
+        <div class="barq-avatar barq-avatar-lg">B</div>
+        <h2>Hi {{c.data.first_name}}, I'm BARQ AI.</h2>
+        <p>Tell me what's going wrong — in your own words, English or Arabic. I'll look into it, fix what I can, and keep you posted right here.</p>
+      </div>
+
+      <div ng-repeat="m in c.ticket.messages track by m.id" class="barq-msg barq-{{m.role}}">
+        <div class="barq-avatar" ng-if="m.role !== 'me'" ng-bind="m.role === 'agent' ? 'B' : m.who.charAt(0)"></div>
+        <div class="barq-bubble">
+          <div class="barq-who" ng-if="m.role === 'engineer'" ng-bind="m.who + ' (IT engineer)'"></div>
+          <div class="barq-text" ng-bind="c.shown(m)"></div>
+          <div class="barq-at" ng-bind="c.time(m.at)"></div>
+        </div>
+      </div>
+
+      <div class="barq-msg barq-agent barq-typing" ng-if="c.ticket.working">
+        <div class="barq-avatar">B</div>
+        <div class="barq-bubble">
+          <span class="barq-dots"><i></i><i></i><i></i></span>
+          <span class="barq-activity" ng-bind="c.ticket.activity"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="barq-error" ng-if="c.error" ng-bind="c.error"></div>
+
+    <div class="barq-closed" ng-if="c.ticket && !c.ticket.open">
+      This conversation is {{c.ticket.status | lowercase}}. <a href="" ng-click="c.newChat()">Start a new one</a> any time.
+    </div>
+    <form class="barq-compose" ng-if="!c.ticket || c.ticket.open" ng-submit="c.send()">
+      <textarea ng-model="c.text" ng-keydown="c.keydown($event)" rows="2" maxlength="4000"
+                placeholder="{{c.ticket ? 'Write to BARQ AI…' : 'Describe the problem, e.g. I can’t sign in, my account says locked'}}"></textarea>
+      <button type="submit" class="barq-send" ng-disabled="c.busy || !c.text.trim()" aria-label="Send">
+        <span ng-if="!c.busy">➤</span><span ng-if="c.busy" class="barq-spin"></span>
+      </button>
+    </form>
+  </section>
+</div>

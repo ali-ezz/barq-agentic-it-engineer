@@ -1,0 +1,43 @@
+version: 2
+updates:
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    ignore:
+      # kombu[redis] == 5.6.2 pins redis < 6.5, and the only kombu that accepts
+      # redis 8 is 5.7.0a1 -- a pre-release. Every redis 6.x/7.x/8.x bump is
+      # therefore unmergeable and opened a PR that could never pass (#151).
+      # Remove this once kombu's pin moves.
+      - dependency-name: "redis"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(ci)"
+    # codeql-action/init and /analyze share one SHA and must be bumped together.
+    groups:
+      codeql:
+        patterns:
+          - "github/codeql-action*"
+
+  # The ServiceNow SDK project has its own npm manifest and lockfile
+  # (@servicenow/sdk, @servicenow/glide). Unwatched until now.
+  - package-ecosystem: "npm"
+    directory: "/servicenow/ai_incident_orchestrator/sdk-app"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps-sdk)"
+    ignore:
+      # The SDK is pinned to 4.8.0, the version that rebuilds the exported update set
+      # exactly (see #54). Remove this once a newer release is verified to do the same.
+      - dependency-name: "@servicenow/sdk"
+        update-types: ["version-update:semver-major"]

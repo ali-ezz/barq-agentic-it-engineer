@@ -1,0 +1,64 @@
+name: CodeQL
+
+# Advanced setup (a workflow file) rather than default setup, because default
+# setup requires repository admin access, which this token does not have.
+# Scoped to Python and to hand-written ServiceNow JavaScript. The generated
+# Fluent/SDK output under sdk-app/src/fluent/generated/ is excluded as noise,
+# but the hand-written server scripts and scaffolds are real logic that runs
+# with platform privileges, so they are scanned.
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "scripts/**"
+      - "tests/**"
+      - "servicenow/**"
+      - ".github/workflows/codeql.yml"
+  push:
+    branches: [main, dev]
+    paths:
+      - "src/**"
+      - "scripts/**"
+      - "tests/**"
+      - "servicenow/**"
+      - ".github/workflows/codeql.yml"
+  schedule:
+    - cron: "0 3 * * 1" # weekly, Monday 03:00 UTC
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # GITHUB_TOKEN cannot be granted security-events: write on a pull_request
+    # run from a fork, so the upload step in analyze fails there even when
+    # the code is fine. Skip that case; push and the weekly schedule still
+    # cover forked contributions once merged.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, javascript-typescript]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          languages: ${{ matrix.language }}
+          # Generated Fluent/SDK output is machine-written and would be noise.
+          # The hand-written server scripts and scaffolds are not excluded.
+          config: |
+            paths-ignore:
+              - servicenow/**/sdk-app/src/fluent/generated/**
+              - "**/node_modules/**"
+              - "**/*.min.js"
+
+      - uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          category: "/language:${{ matrix.language }}"

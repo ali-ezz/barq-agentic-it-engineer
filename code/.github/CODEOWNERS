@@ -1,0 +1,42 @@
+# Review routing by workstream.
+#
+# `main` is protected: one approving review from someone other than the author is
+# required, enforced for admins. "Require review from Code Owners" is not enabled, so
+# the entries below route review to the person who knows the area; they do not yet
+# block a merge on that specific person.
+#
+# A fallback owner is set first so no file is left unowned; later, more specific rules
+# win.
+
+*                                                           @ali-ezz
+
+# S1.1 — scoped application and Incident field model. The field model is the
+# contract every other workstream writes against, so schema changes need its owner.
+/servicenow/ai_incident_orchestrator/sdk-app/                @ali-ezz
+/servicenow/ai_incident_orchestrator/ai_incident_orchestrator_s1_1.xml @ali-ezz
+/servicenow/ai_incident_orchestrator/README.md                @ali-ezz
+/docs/sprint-1/s1.1-scoped-app-and-field-model/               @ali-ezz
+
+# S1.2 — audit trail, OAuth identity, ACLs.
+# The S1.2 update set carries every Incident and log-table ACL, so it needs its owner.
+/scripts/verify_permissions.py                            @MohamedAbdelaiem
+/servicenow/ai_incident_orchestrator/ai_incident_orchestrator_s1_2.xml @MohamedAbdelaiem
+/docs/sprint-1/s1.2-execution-log-and-oauth-identity/     @MohamedAbdelaiem
+
+# S1.3 — eligibility Business Rule, outbound event
+/servicenow/ai_incident_orchestrator/ai_incident_orchestrator_s1_3.xml @ahmedtamer101
+/docs/sprint-1/s1.3-eligibility-rule-and-event/           @ahmedtamer101
+
+# S1.4 — knowledge corpus, Qdrant, retrieval and publishing
+/src/app/retrieval/                                        @kerolos-mohsen
+/src/app/publishing/                                       @kerolos-mohsen
+/data/                                                     @kerolos-mohsen
+/docs/sprint-1/s1.4-knowledge-and-qdrant/                 @kerolos-mohsen
+
+# S1.5 — ServiceNow Table API client
+/src/app/clients/                                          @Tasneemmohammed0
+/src/app/auth/                                              @Tasneemmohammed0
+/docs/sprint-1/s1.5-servicenow-client/                    @Tasneemmohammed0
+
+# Build, CI and repository configuration
+/.github/           @ali-ezz
