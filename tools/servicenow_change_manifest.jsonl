@@ -1,0 +1,110 @@
+{"op": "create", "table": "sys_script_include", "sys_id": "5af4a41073fb87d02aedfed25ab8b74e", "at": "2026-10-03T20:27:48.432370+00:00"}
+{"op": "create", "table": "sys_script_include", "sys_id": "87f4e41073fb87d02aedfed25ab8b7f8", "at": "2026-10-03T20:27:50.904197+00:00"}
+{"op": "create", "table": "sys_ui_action", "sys_id": "eff468dc73bb87d02aedfed25ab8b709", "at": "2026-10-03T20:27:52.910609+00:00"}
+{"op": "create", "table": "sys_ui_action", "sys_id": "5405281073fb87d02aedfed25ab8b7eb", "at": "2026-10-03T20:27:54.942439+00:00"}
+{"op": "create", "table": "sys_ui_action", "sys_id": "3405681073fb87d02aedfed25ab8b74f", "at": "2026-10-03T20:27:57.022043+00:00"}
+{"op": "create", "table": "sys_ui_action", "sys_id": "5105281073fb87d02aedfed25ab8b775", "at": "2026-10-03T20:27:59.612359+00:00"}
+{"op": "update", "table": "sys_properties", "sys_id": "34242c5c73bb87d02aedfed25ab8b705", "before": {"name": "x_2215032_ai_inc_0.agent_user_name", "description": "", "sys_scope": {"link": "https://dev434590.service-now.com/api/now/table/sys_scope/51a63bbf738bc7502aedfed25ab8b789", "value": "51a63bbf738bc7502aedfed25ab8b789"}, "type": "string", "value": "ai_orchestrator_svc"}, "at": "2026-10-03T20:28:07.983205+00:00"}
+{"op": "create", "table": "sysevent_register", "sys_id": "9825ec1073fb87d02aedfed25ab8b749", "at": "2026-10-03T20:28:28.832161+00:00"}
+{"op": "create", "table": "sysevent_script_action", "sys_id": "c925ec1073fb87d02aedfed25ab8b7b2", "at": "2026-10-03T20:28:31.615772+00:00"}
+{"op": "create", "table": "sys_script", "sys_id": "7525205073fb87d02aedfed25ab8b75b", "at": "2026-10-03T20:28:34.723610+00:00"}
+{"op": "create", "table": "sys_ui_macro", "sys_id": "4725605073fb87d02aedfed25ab8b743", "at": "2026-10-03T20:28:39.593978+00:00"}
+{"op": "create", "table": "sys_ui_formatter", "sys_id": "6f25605073fb87d02aedfed25ab8b777", "at": "2026-10-03T20:28:41.805799+00:00"}
+{"op": "create", "table": "sys_ui_view", "sys_id": "8c35205073fb87d02aedfed25ab8b7ca", "at": "2026-10-03T20:28:43.695700+00:00"}
+{"op": "create", "table": "sys_ui_section", "sys_id": "ec35a05073fb87d02aedfed25ab8b729", "at": "2026-10-03T20:28:45.901616+00:00"}
+{"op": "create", "table": "sys_ui_form", "sys_id": "6b45e45073fb87d02aedfed25ab8b70d", "at": "2026-10-03T20:29:14.590655+00:00"}
+{"op": "create", "table": "sys_ui_form_section", "sys_id": "8c55e45073fb87d02aedfed25ab8b74d", "at": "2026-10-03T20:29:16.039478+00:00"}
+{"op": "create", "table": "sys_ui_related_list", "sys_id": "d855e45073fb87d02aedfed25ab8b789", "at": "2026-10-03T20:29:17.581677+00:00"}
+{"op": "create", "table": "sysrule_view", "sys_id": "9955285073fb87d02aedfed25ab8b733", "at": "2026-10-03T20:29:21.071319+00:00"}
+{"op": "create", "table": "sp_widget", "sys_id": "7555285073fb87d02aedfed25ab8b75b", "at": "2026-10-03T20:29:23.492792+00:00"}
+{"op": "create", "table": "sp_page", "sys_id": "1e55285073fb87d02aedfed25ab8b79d", "at": "2026-10-03T20:29:25.864138+00:00"}
+{"op": "create", "table": "sp_container", "sys_id": "7255285073fb87d02aedfed25ab8b7fa", "at": "2026-10-03T20:29:28.420133+00:00"}
+{"op": "create", "table": "sp_row", "sys_id": "9f55685073fb87d02aedfed25ab8b778", "at": "2026-10-03T20:29:29.771769+00:00"}
+{"op": "create", "table": "sp_column", "sys_id": "f755685073fb87d02aedfed25ab8b7b7", "at": "2026-10-03T20:29:32.052457+00:00"}
+{"op": "create", "table": "sp_instance", "sys_id": "1c65a85073fb87d02aedfed25ab8b703", "at": "2026-10-03T20:29:33.966806+00:00"}
+{"op": "create", "table": "sp_rectangle_menu_item", "sys_id": "c165a85073fb87d02aedfed25ab8b7bc", "at": "2026-10-03T20:29:37.004700+00:00"}
+{"op": "update", "table": "sysrule_view", "sys_id": "9955285073fb87d02aedfed25ab8b733", "before": {"active": "false"}, "at": "2026-10-03T20:29:42.889821+00:00"}
+{"op": "update", "table": "sp_widget", "sys_id": "7555285073fb87d02aedfed25ab8b75b", "at": "2026-10-03T20:29:54.050731+00:00"}
+{"op": "update", "table": "sp_page", "sys_id": "1e55285073fb87d02aedfed25ab8b79d", "at": "2026-10-03T20:29:55.852601+00:00"}
+{"op": "update", "table": "sp_container", "sys_id": "7255285073fb87d02aedfed25ab8b7fa", "at": "2026-10-03T20:29:57.559216+00:00"}
+{"op": "update", "table": "sp_row", "sys_id": "9f55685073fb87d02aedfed25ab8b778", "at": "2026-10-03T20:29:59.407082+00:00"}
+{"op": "update", "table": "sp_column", "sys_id": "f755685073fb87d02aedfed25ab8b7b7", "at": "2026-10-03T20:30:02.024683+00:00"}
+{"op": "update", "table": "sp_instance", "sys_id": "1c65a85073fb87d02aedfed25ab8b703", "at": "2026-10-03T20:30:04.698845+00:00"}
+{"op": "update", "table": "sp_rectangle_menu_item", "sys_id": "c165a85073fb87d02aedfed25ab8b7bc", "at": "2026-10-03T20:30:07.546254+00:00"}
+{"op": "create", "table": "sys_scope_privilege", "sys_id": "526fd55873b3c7d02aedfed25ab8b76d", "why": "app writes incident fields from its business rule"}
+{"op": "update", "table": "sys_db_object", "sys_id": "87e1e180a56503108bb220b7a4d212ec", "before": {"update_access": "false"}, "after": {"update_access": "true"}, "why": "BARQ conversation rule (app scope) must update incidents"}
+{"op": "update", "table": "sys_db_object", "sys_id": "87e1e180a56503108bb220b7a4d212ec", "before": {"create_access": "false"}, "after": {"create_access": "true"}, "why": "BARQ users' page (app scope) creates the caller's incident"}
+{"op":"sdk_install","app":"51a63bbf738bc7502aedfed25ab8b789","rollback":"0e1fad587337c7d02aedfed25ab8b753","why":"PDI had the 2026-09-16 app build without #184 rejected-stays-failed guard"}
+{"op": "update", "table": "sp_widget", "sys_id": "7555285073fb87d02aedfed25ab8b75b", "at": "2026-10-04T02:56:08.885494+00:00"}
+{"op": "update", "table": "sp_page", "sys_id": "1e55285073fb87d02aedfed25ab8b79d", "at": "2026-10-04T02:56:10.651481+00:00"}
+{"op": "update", "table": "sp_container", "sys_id": "7255285073fb87d02aedfed25ab8b7fa", "at": "2026-10-04T02:56:12.722922+00:00"}
+{"op": "update", "table": "sp_row", "sys_id": "9f55685073fb87d02aedfed25ab8b778", "at": "2026-10-04T02:56:14.724570+00:00"}
+{"op": "update", "table": "sp_column", "sys_id": "f755685073fb87d02aedfed25ab8b7b7", "at": "2026-10-04T02:56:16.305252+00:00"}
+{"op": "update", "table": "sp_instance", "sys_id": "1c65a85073fb87d02aedfed25ab8b703", "at": "2026-10-04T02:56:17.799760+00:00"}
+{"op": "update", "table": "sp_rectangle_menu_item", "sys_id": "c165a85073fb87d02aedfed25ab8b7bc", "at": "2026-10-04T02:56:20.064020+00:00"}
+{"op": "update", "table": "sn_ex_sp_portal_extensible_navigation_item", "sys_id": "95b5e49073fb87d02aedfed25ab8b760", "at": "2026-10-04T02:56:23.806801+00:00"}
+{"op":"before_values","table":"sys_properties","name":"x_2215032_ai_inc_0.s1_3_supported_categories","value":"software,network,hardware,inquiry"}
+{"op": "create", "table": "sys_ws_definition", "sys_id": "a6b33c2473bf0bd02aedfed25ab8b705", "why": "agentic engineer: account facts and safe actions for BARQ AI Agent"}
+{"op": "create", "table": "sys_ws_operation", "sys_id": "01d334a473bf0bd02aedfed25ab8b7f1", "why": "agentic engineer: BARQ account facts"}
+{"op": "create", "table": "sys_ws_operation", "sys_id": "bed334a473bf0bd02aedfed25ab8b779", "why": "agentic engineer: BARQ account action"}
+{"op": "create", "table": "sys_dictionary", "sys_id": "8be334a073bf0bd02aedfed25ab8b788", "why": "agentic engineer: incident field AI Report"}
+{"op": "create", "table": "sys_dictionary", "sys_id": "68f378a473bf0bd02aedfed25ab8b7b5", "why": "agentic engineer: incident field AI Activity"}
+{"op": "update", "table": "sys_properties", "sys_id": "7fa1a0f983df0b10b5309e80ceaad377", "why": "agentic engineer: the agent works every incident category", "fields": ["value"]}
+{"op": "create", "table": "sys_script_include", "sys_id": "3554702073bf0bd02aedfed25ab8b71d", "why": "agentic engineer: global helper BarqAccount"}
+{"op": "update", "table": "sys_ws_definition", "sys_id": "a6b33c2473bf0bd02aedfed25ab8b705", "why": "agentic engineer: account facts and safe actions for BARQ AI Agent", "fields": ["active", "consumes", "name", "produces", "service_id", "short_description", "sys_scope"]}
+{"op": "update", "table": "sys_ws_operation", "sys_id": "01d334a473bf0bd02aedfed25ab8b7f1", "why": "agentic engineer: BARQ account facts", "fields": ["active", "consumes", "http_method", "name", "operation_script", "produces", "relative_path", "requires_acl_authorization", "requires_authentication", "sys_scope", "web_service_definition"]}
+{"op": "update", "table": "sys_ws_operation", "sys_id": "bed334a473bf0bd02aedfed25ab8b779", "why": "agentic engineer: BARQ account action", "fields": ["active", "consumes", "http_method", "name", "operation_script", "produces", "relative_path", "requires_acl_authorization", "requires_authentication", "sys_scope", "web_service_definition"]}
+{"op": "create", "table": "sys_script_include", "sys_id": "8894302873bf0bd02aedfed25ab8b765", "why": "agentic engineer: global helper BarqAccount"}
+{"op":"delete","table":"sys_script_include","sys_id":"3554702073bf0bd02aedfed25ab8b71d","why":"stray scoped copy created by mistake 2026-10-04"}
+{"op": "create", "table": "sys_user", "sys_id": "5dc4f42873bf0bd02aedfed25ab8b7af", "why": "agentic-engineer test person barq.lina"}
+{"op": "create", "table": "sys_user", "sys_id": "19d4b82873bf0bd02aedfed25ab8b71a", "why": "agentic-engineer test person barq.omar"}
+{"op": "create", "table": "sys_user", "sys_id": "43d4b82873bf0bd02aedfed25ab8b7c0", "why": "agentic-engineer test person barq.sara"}
+{"op": "create", "table": "sys_user", "sys_id": "16e43c2873bf0bd02aedfed25ab8b74d", "why": "agentic-engineer test person barq.karim"}
+{"op": "create", "table": "sys_user", "sys_id": "00f47c2873bf0bd02aedfed25ab8b75e", "why": "agentic-engineer test person barq.mona"}
+{"op": "update", "table": "sys_script_include", "sys_id": "8894302873bf0bd02aedfed25ab8b765", "why": "agentic engineer: global helper BarqAccount"}
+{"op": "update", "table": "sys_script", "sys_id": "7525205073fb87d02aedfed25ab8b75b", "why": "agentic engineer: conversation rule (caller always to agent, engineer instructions)"}
+{"op": "create", "table": "sys_script_include", "sys_id": "12b8fc2073ff0bd02aedfed25ab8b704", "why": "agentic engineer: card back-end"}
+{"op": "create", "table": "sys_ui_script", "sys_id": "43b870ec73bf0bd02aedfed25ab8b798", "why": "agentic engineer: card UI script"}
+{"op": "update", "table": "sys_ui_action", "sys_id": "eff468dc73bb87d02aedfed25ab8b709", "before": {"active": "true"}, "why": "agentic engineer: retire form button Approve AI fix"}
+{"op": "update", "table": "sys_ui_action", "sys_id": "5405281073fb87d02aedfed25ab8b7eb", "before": {"active": "true"}, "why": "agentic engineer: retire form button Reject AI fix"}
+{"op": "update", "table": "sys_ui_action", "sys_id": "3405681073fb87d02aedfed25ab8b74f", "before": {"active": "true"}, "why": "agentic engineer: retire form button Take over from AI"}
+{"op": "update", "table": "sys_ui_action", "sys_id": "5105281073fb87d02aedfed25ab8b775", "before": {"active": "true"}, "why": "agentic engineer: retire form button Hand back to BARQ AI"}
+{"op": "update", "table": "sp_widget", "sys_id": "7555285073fb87d02aedfed25ab8b75b", "at": "2026-10-04T16:32:50.279967+00:00"}
+{"op": "update", "table": "sp_page", "sys_id": "1e55285073fb87d02aedfed25ab8b79d", "at": "2026-10-04T16:32:52.455212+00:00"}
+{"op": "update", "table": "sp_container", "sys_id": "7255285073fb87d02aedfed25ab8b7fa", "at": "2026-10-04T16:32:54.772470+00:00"}
+{"op": "update", "table": "sp_row", "sys_id": "9f55685073fb87d02aedfed25ab8b778", "at": "2026-10-04T16:32:56.519714+00:00"}
+{"op": "update", "table": "sp_column", "sys_id": "f755685073fb87d02aedfed25ab8b7b7", "at": "2026-10-04T16:32:58.663956+00:00"}
+{"op": "update", "table": "sp_instance", "sys_id": "1c65a85073fb87d02aedfed25ab8b703", "at": "2026-10-04T16:33:01.145491+00:00"}
+{"op": "update", "table": "sp_rectangle_menu_item", "sys_id": "c165a85073fb87d02aedfed25ab8b7bc", "at": "2026-10-04T16:33:04.918024+00:00"}
+{"op": "update", "table": "sn_ex_sp_portal_extensible_navigation_item", "sys_id": "95b5e49073fb87d02aedfed25ab8b760", "at": "2026-10-04T16:33:08.508942+00:00"}
+{"op": "update", "table": "sysrule_view", "sys_id": "9955285073fb87d02aedfed25ab8b733", "before": {"active": "false"}, "at": "2026-10-04T16:33:14.506093+00:00"}
+{"op": "update", "table": "sys_script", "sys_id": "7525205073fb87d02aedfed25ab8b75b", "why": "agentic engineer: conversation rule (caller always to agent, engineer instructions)"}
+{"op": "update", "table": "sys_script_include", "sys_id": "12b8fc2073ff0bd02aedfed25ab8b704", "why": "agentic engineer: card back-end", "fields": ["access", "active", "api_name", "client_callable", "description", "name", "script", "sys_scope"]}
+{"op": "update", "table": "sys_ui_script", "sys_id": "43b870ec73bf0bd02aedfed25ab8b798", "why": "agentic engineer: card UI script", "fields": ["active", "description", "global", "name", "script", "script_name", "sys_scope", "ui_type"]}
+{"op": "update", "table": "sysrule_view", "sys_id": "9955285073fb87d02aedfed25ab8b733", "before": {"active": "false"}, "at": "2026-10-04T16:42:02.091196+00:00"}
+{"op": "update", "table": "sys_ui_macro", "sys_id": "4725605073fb87d02aedfed25ab8b743", "why": "agentic engineer: live card"}
+{"op": "update", "table": "sp_widget", "sys_id": "7555285073fb87d02aedfed25ab8b75b", "at": "2026-10-04T17:23:55.929921+00:00"}
+{"op": "update", "table": "sp_page", "sys_id": "1e55285073fb87d02aedfed25ab8b79d", "at": "2026-10-04T17:23:57.889284+00:00"}
+{"op": "update", "table": "sp_container", "sys_id": "7255285073fb87d02aedfed25ab8b7fa", "at": "2026-10-04T17:23:59.823815+00:00"}
+{"op": "update", "table": "sp_row", "sys_id": "9f55685073fb87d02aedfed25ab8b778", "at": "2026-10-04T17:24:02.060701+00:00"}
+{"op": "update", "table": "sp_column", "sys_id": "f755685073fb87d02aedfed25ab8b7b7", "at": "2026-10-04T17:24:03.935632+00:00"}
+{"op": "update", "table": "sp_instance", "sys_id": "1c65a85073fb87d02aedfed25ab8b703", "at": "2026-10-04T17:24:05.659478+00:00"}
+{"op": "update", "table": "sp_rectangle_menu_item", "sys_id": "c165a85073fb87d02aedfed25ab8b7bc", "at": "2026-10-04T17:24:08.668502+00:00"}
+{"op": "update", "table": "sn_ex_sp_portal_extensible_navigation_item", "sys_id": "95b5e49073fb87d02aedfed25ab8b760", "at": "2026-10-04T17:24:11.906737+00:00"}
+{"op": "update", "table": "sys_script", "sys_id": "7525205073fb87d02aedfed25ab8b75b", "why": "agentic engineer: conversation rule (caller always to agent, engineer instructions)"}
+{"op": "update", "table": "sys_script_include", "sys_id": "12b8fc2073ff0bd02aedfed25ab8b704", "why": "agentic engineer: card back-end", "fields": ["access", "active", "api_name", "client_callable", "description", "name", "script", "sys_scope"]}
+{"op": "update", "table": "sys_ui_script", "sys_id": "43b870ec73bf0bd02aedfed25ab8b798", "why": "agentic engineer: card UI script", "fields": ["active", "description", "global", "name", "script", "script_name", "sys_scope", "ui_type"]}
+{"op": "update", "table": "sys_ui_macro", "sys_id": "4725605073fb87d02aedfed25ab8b743", "why": "agentic engineer: live card"}
+{"op": "update", "table": "sys_script", "sys_id": "7525205073fb87d02aedfed25ab8b75b", "why": "agentic engineer: conversation rule (caller always to agent, engineer instructions)"}
+{"op": "update", "table": "sys_script_include", "sys_id": "12b8fc2073ff0bd02aedfed25ab8b704", "why": "agentic engineer: card back-end", "fields": ["access", "active", "api_name", "client_callable", "description", "name", "script", "sys_scope"]}
+{"op": "update", "table": "sys_ui_script", "sys_id": "43b870ec73bf0bd02aedfed25ab8b798", "why": "agentic engineer: card UI script", "fields": ["active", "description", "global", "name", "script", "script_name", "sys_scope", "ui_type"]}
+{"op": "update", "table": "sys_ui_macro", "sys_id": "4725605073fb87d02aedfed25ab8b743", "why": "agentic engineer: live card"}
+{"op": "create", "table": "sys_ui_list", "sys_id": "4947d1a873f34bd02aedfed25ab8b7cf", "why": "demo: BARQ AI ticket list layout"}
+{"op": "create", "table": "sys_ui_list_element", "sys_id": "e94715a873f34bd02aedfed25ab8b79d", "why": "demo list column number"}
+{"op": "create", "table": "sys_ui_list_element", "sys_id": "614715a873f34bd02aedfed25ab8b7a3", "why": "demo list column caller_id"}
+{"op": "create", "table": "sys_ui_list_element", "sys_id": "714715a873f34bd02aedfed25ab8b7e8", "why": "demo list column short_description"}
+{"op": "create", "table": "sys_ui_list_element", "sys_id": "0e4715a873f34bd02aedfed25ab8b7ec", "why": "demo list column state"}
+{"op": "create", "table": "sys_ui_list_element", "sys_id": "d64715a873f34bd02aedfed25ab8b7f1", "why": "demo list column assignment_group"}
+{"op": "create", "table": "sys_ui_list_element", "sys_id": "6647196873f34bd02aedfed25ab8b75a", "why": "demo list column x_2215032_ai_inc_0_ai_activity"}
+{"op": "create", "table": "sys_ui_list_element", "sys_id": "364755a873f34bd02aedfed25ab8b764", "why": "demo list column x_2215032_ai_inc_0_ai_suggestion"}
+{"op": "create", "table": "sys_ui_list_element", "sys_id": "cf4755a873f34bd02aedfed25ab8b768", "why": "demo list column sys_updated_on"}
