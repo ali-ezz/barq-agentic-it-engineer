@@ -1,0 +1,121 @@
+{
+  "started_at": "2026-10-04T03:05:34.809734+00:00",
+  "scenarios": {
+    "attack_goes_to_a_person": {
+      "incident": "INC0010230",
+      "sys_id": "4e00ce1873f7c7d02aedfed25ab8b770",
+      "run": {
+        "execution_id": "f24598d8-a2cd-475d-ab01-b4b77681d5f6",
+        "event_record_id": "b3e197ce-4705-43dc-8d55-8ebe38f47acd",
+        "incident_sys_id": "4e00ce1873f7c7d02aedfed25ab8b770",
+        "status": "awaiting_approval",
+        "node_reached": "act",
+        "model_name": null,
+        "agent_version": "s3.4-graph-1.0.0",
+        "started_at": "2026-10-04T03:05:44.232512Z",
+        "ended_at": null,
+        "termination_cause": null,
+        "updated_at": "2026-10-04T03:06:14.085260Z"
+      },
+      "checks": {
+        "parked_for_a_person": true,
+        "not_resolved": true,
+        "no_steps_sent_to_caller": true,
+        "security_reason_recorded": true
+      },
+      "passed": true
+    },
+    "burst_is_a_likely_outage": {
+      "incidents": [
+        "INC0010231",
+        "INC0010232",
+        "INC0010233"
+      ],
+      "incident": "INC0010233",
+      "sys_id": "fa604e5873f7c7d02aedfed25ab8b763",
+      "run": {
+        "execution_id": "89277679-e17e-497d-9587-18bccad31c4b",
+        "event_record_id": "1c0ab9a9-d50f-4566-99c6-f2c7c626556c",
+        "incident_sys_id": "fa604e5873f7c7d02aedfed25ab8b763",
+        "status": "awaiting_approval",
+        "node_reached": "act",
+        "model_name": null,
+        "agent_version": "s3.4-graph-1.0.0",
+        "started_at": "2026-10-04T03:07:24.890540Z",
+        "ended_at": null,
+        "termination_cause": null,
+        "updated_at": "2026-10-04T03:08:15.497932Z"
+      },
+      "checks": {
+        "third_report_parked": true,
+        "outage_reason_recorded": true,
+        "not_resolved": true
+      },
+      "passed": true
+    },
+    "p1_single_user_is_reassessed": {
+      "incident": "INC0010234",
+      "sys_id": "2fa0469873f7c7d02aedfed25ab8b7cf",
+      "run": {
+        "execution_id": "00065dd9-eaec-4990-8a90-a771811a01c7",
+        "event_record_id": "3e96a84b-094c-49f9-b94c-c29497914b44",
+        "incident_sys_id": "2fa0469873f7c7d02aedfed25ab8b7cf",
+        "status": "succeeded",
+        "node_reached": "act",
+        "model_name": null,
+        "agent_version": "s3.4-graph-1.0.0",
+        "started_at": "2026-10-04T03:08:34.625155Z",
+        "ended_at": "2026-10-04T03:09:03.192415Z",
+        "termination_cause": "asked_caller",
+        "updated_at": "2026-10-04T03:09:03.193224Z"
+      },
+      "final": {
+        "close_code": null,
+        "assignment_group": "Hardware",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "",
+        "priority": "1 - Critical",
+        "x_2215032_ai_inc_0_ai_human_review_required": "false",
+        "close_notes": "",
+        "number": "INC0010234",
+        "resolved_by": "",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "",
+        "x_2215032_ai_inc_0_ai_classification": "hardware",
+        "state": "On Hold",
+        "x_2215032_ai_inc_0_ai_confidence": "",
+        "x_2215032_ai_inc_0_ai_processing_state": "In Progress"
+      },
+      "checks": {
+        "handled_without_waiting_for_approval": true,
+        "reassessment_explained": true,
+        "priority_field_unchanged": true
+      },
+      "passed": true
+    },
+    "repeat_needs_approval": {
+      "incident": "INC0010236",
+      "sys_id": "59f002d873f7c7d02aedfed25ab8b795",
+      "first": "5ad04e9873f7c7d02aedfed25ab8b72d",
+      "run": {
+        "execution_id": "04179334-a8b8-4d81-a1df-df1a2003a8fd",
+        "event_record_id": "cda50dab-6221-42e9-a475-8f1c8833d188",
+        "incident_sys_id": "59f002d873f7c7d02aedfed25ab8b795",
+        "status": "awaiting_approval",
+        "node_reached": "act",
+        "model_name": null,
+        "agent_version": "s3.4-graph-1.0.0",
+        "started_at": "2026-10-04T03:09:47.307379Z",
+        "ended_at": null,
+        "termination_cause": null,
+        "updated_at": "2026-10-04T03:10:21.421740Z"
+      },
+      "checks": {
+        "second_report_parked": true,
+        "repeat_reason_recorded": true
+      },
+      "passed": true
+    }
+  },
+  "finished_at": "2026-10-04T03:10:23.425710+00:00"
+}

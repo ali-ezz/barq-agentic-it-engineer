@@ -1,0 +1,242 @@
+diff --git a/.env.example b/.env.example
+index 8c6ed57..acb947d 100644
+--- a/.env.example
++++ b/.env.example
+@@ -11,9 +11,9 @@
+ # -----------------------------------------------------------------------------
+ # Host & Network Binding (Security)
+ # -----------------------------------------------------------------------------
+-# Binds service ports to localhost (127.0.0.1) by default to prevent exposing
+-# database ports on local Wi-Fi / LAN.
+-# Override to 0.0.0.0 only if you intentionally need external device access.
++# Interface the API port (8000) is published on. 127.0.0.1 by default so nothing is exposed
++# on Wi-Fi / LAN; set 0.0.0.0 only for a host that must serve the API to other machines.
++# PostgreSQL, Redis and Qdrant are always published on 127.0.0.1, whatever this says.
+ BIND_IP=127.0.0.1
+ 
+ # -----------------------------------------------------------------------------
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+index 5f01d0d..46f47e1 100644
+--- a/.github/workflows/deploy.yml
++++ b/.github/workflows/deploy.yml
+@@ -130,6 +130,15 @@ jobs:
+             docker compose exec -T celery-worker \
+               celery -A app.workers.celery_app inspect ping --timeout 10
+ 
++            echo "==> Reclaiming disk from superseded images and build cache..."
++            # Images are built on this host, so each deploy leaves the previous image
++            # and its layers behind (about 17 GB had accumulated). Only dangling images and
++            # build cache older than 72 h are removed: running containers, named volumes and
++            # the images in use are untouched. A failure here must never fail a good deploy.
++            docker image prune -f > /dev/null || true
++            docker builder prune -f --filter "until=72h" > /dev/null || true
++            df -h / | tail -1
++
+             docker compose ps api celery-worker
+             trap - ERR
+             echo "Deployment successful: API and worker are operational at $deploy_sha"
+diff --git a/Dockerfile b/Dockerfile
+index 3287fec..76fb6c5 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -3,7 +3,7 @@
+ # Unified Container Image for FastAPI Ingestion API & Celery Workers
+ # =============================================================================
+ 
+-FROM python:3.12-slim AS base
++FROM python:3.12-slim-bookworm AS base
+ 
+ 
+ # Prevent Python from writing .pyc files and buffer stdout/stderr
+@@ -22,7 +22,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
+     && rm -rf /var/lib/apt/lists/*
+ 
+ # Install uv for fast, reliable dependency resolution
+-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
++# Pinned: `latest` made every build non-reproducible. Bump with `uv self version` in mind.
++COPY --from=ghcr.io/astral-sh/uv:0.12.19 /uv /uvx /bin/
+ 
+ # Copy dependency specifications first for optimal layer caching
+ COPY pyproject.toml uv.lock README.md /app/
+@@ -51,5 +52,6 @@ EXPOSE 8000
+ HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
+     CMD curl -f http://127.0.0.1:8000/health || exit 1
+ 
+-# Production ASGI Entrypoint
+-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips=*"]
++# Production ASGI Entrypoint. X-Forwarded-* is trusted from loopback only (`*` let any client
++# spoof its address in the access log); put a real proxy's address here if one is added.
++CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips=127.0.0.1"]
+diff --git a/docker-compose.yml b/docker-compose.yml
+index dc0ac4a..a2c3938 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -25,6 +25,14 @@ x-app-environment: &app-environment
+   WEBHOOK_OAUTH_CLIENT_SECRET: ${WEBHOOK_OAUTH_CLIENT_SECRET:?WEBHOOK_OAUTH_CLIENT_SECRET must be set in .env}
+   WEBHOOK_OAUTH_SIGNING_KEY: ${WEBHOOK_OAUTH_SIGNING_KEY:?WEBHOOK_OAUTH_SIGNING_KEY must be set in .env}
+ 
++# Bounded container logs. Docker's json-file driver has no size limit by default, so a chatty
++# service fills the host disk (the shared EC2 has 19 GB shared with every image it builds).
++x-logging: &default-logging
++  driver: json-file
++  options:
++    max-size: "10m"
++    max-file: "3"
++
+ services:
+   # ---------------------------------------------------------------------------
+   # 1. Qdrant — Vector Database (Sprint 1+)
+@@ -35,10 +43,13 @@ services:
+     # fails if they drift apart.
+     image: qdrant/qdrant:v1.14.0
+     container_name: barq-qdrant
++    logging: *default-logging
+     restart: unless-stopped
++    # Loopback only, whatever BIND_IP says: Qdrant has no API key here, and the services
++    # reach it over the compose network, not through a published port.
+     ports:
+-      - "${BIND_IP:-127.0.0.1}:${QDRANT_HTTP_PORT:-6333}:6333"
+-      - "${BIND_IP:-127.0.0.1}:${QDRANT_GRPC_PORT:-6334}:6334"
++      - "127.0.0.1:${QDRANT_HTTP_PORT:-6333}:6333"
++      - "127.0.0.1:${QDRANT_GRPC_PORT:-6334}:6334"
+     volumes:
+       - qdrant_data:/qdrant/storage
+     environment:
+@@ -60,9 +71,11 @@ services:
+   postgres:
+     image: postgres:16-alpine
+     container_name: barq-postgres
++    logging: *default-logging
+     restart: unless-stopped
++    # Loopback only, whatever BIND_IP says; the services use the compose network.
+     ports:
+-      - "${BIND_IP:-127.0.0.1}:${POSTGRES_PORT:-5432}:5432"
++      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+     environment:
+       POSTGRES_DB: ${POSTGRES_DB:-barq_incident_dev}
+       POSTGRES_USER: ${POSTGRES_USER:-postgres}
+@@ -84,9 +97,11 @@ services:
+   redis:
+     image: redis:7-alpine
+     container_name: barq-redis
++    logging: *default-logging
+     restart: unless-stopped
++    # Loopback only, whatever BIND_IP says; the services use the compose network.
+     ports:
+-      - "${BIND_IP:-127.0.0.1}:${REDIS_PORT:-6379}:6379"
++      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+     volumes:
+       - redis_data:/data
+     environment:
+@@ -116,6 +131,7 @@ services:
+       context: .
+       dockerfile: Dockerfile
+     container_name: barq-api
++    logging: *default-logging
+     restart: unless-stopped
+     ports:
+       - "${BIND_IP:-127.0.0.1}:${API_PORT:-8000}:8000"
+@@ -147,6 +163,7 @@ services:
+       context: .
+       dockerfile: Dockerfile
+     container_name: barq-celery-worker
++    logging: *default-logging
+     restart: unless-stopped
+     # SIGTERM → warm shutdown finishes the in-flight task; grace period must
+     # exceed the worst-case remaining task time (see worker_soft_time_limit).
+@@ -204,11 +221,15 @@ services:
+   # 6. PostgreSQL Web UI (pgweb)
+   # ---------------------------------------------------------------------------
+   pgweb:
+-    image: sosedoff/pgweb:latest
++    image: sosedoff/pgweb:0.17.0
+     container_name: barq-pgweb
++    logging: *default-logging
+     restart: unless-stopped
++    # Unauthenticated database admin UI: never part of a plain `docker compose up`.
++    # Start it deliberately with `docker compose --profile tools up -d pgweb`.
++    profiles: ["tools"]
+     ports:
+-      - "${BIND_IP:-127.0.0.1}:${PGWEB_PORT:-8081}:8081"
++      - "127.0.0.1:${PGWEB_PORT:-8081}:8081"
+     environment:
+       PGWEB_DATABASE_URL: "postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@barq-postgres:5432/${POSTGRES_DB:-barq_incident_dev}?sslmode=disable"
+     depends_on:
+@@ -223,9 +244,12 @@ services:
+   redis-commander:
+     image: rediscommander/redis-commander:latest
+     container_name: barq-redis-commander
++    logging: *default-logging
+     restart: unless-stopped
++    # Unauthenticated Redis admin UI (publishes no semver tags): opt-in only, loopback only.
++    profiles: ["tools"]
+     ports:
+-      - "${BIND_IP:-127.0.0.1}:${REDIS_COMMANDER_PORT:-8082}:8081"
++      - "127.0.0.1:${REDIS_COMMANDER_PORT:-8082}:8081"
+     environment:
+       REDIS_HOSTS: "local:barq-redis:6379:0:${REDIS_PASSWORD:-}"
+     depends_on:
+diff --git a/tests/repo/test_deployment_hardening.py b/tests/repo/test_deployment_hardening.py
+new file mode 100644
+index 0000000..b7dcce4
+--- /dev/null
++++ b/tests/repo/test_deployment_hardening.py
+@@ -0,0 +1,58 @@
++"""Invariants of the deployment files that a quiet edit could undo.
++
++Each one is a defect found on the shared host during the 2026-10-02 audit: datastores
++published on every interface (protected only by a cloud firewall), unauthenticated admin
++UIs started by a plain ``docker compose up``, unbounded container logs on a 19 GB disk,
++unpinned images, and a deploy that builds on the host and never reclaims the space.
++"""
++
++from __future__ import annotations
++
++from pathlib import Path
++
++import yaml
++
++REPO = Path(__file__).resolve().parents[2]
++COMPOSE = yaml.safe_load((REPO / "docker-compose.yml").read_text())
++SERVICES = COMPOSE["services"]
++DATASTORES = ("postgres", "redis", "qdrant")
++ADMIN_TOOLS = ("pgweb", "redis-commander")
++
++
++def test_datastores_are_published_on_loopback_only() -> None:
++    for name in DATASTORES:
++        for port in SERVICES[name]["ports"]:
++            assert str(port).startswith("127.0.0.1:"), (
++                f"{name} publishes {port}: BIND_IP must never widen a datastore"
++            )
++
++
++def test_admin_tools_are_opt_in_and_loopback_only() -> None:
++    for name in ADMIN_TOOLS:
++        assert SERVICES[name].get("profiles") == ["tools"], f"{name} must sit behind a profile"
++        for port in SERVICES[name]["ports"]:
++            assert str(port).startswith("127.0.0.1:"), f"{name} publishes {port}"
++
++
++def test_every_service_has_bounded_logs() -> None:
++    for name, service in SERVICES.items():
++        options = service.get("logging", {}).get("options", {})
++        assert options.get("max-size") and options.get("max-file"), f"{name} logs are unbounded"
++
++
++def test_database_admin_image_is_pinned() -> None:
++    assert not SERVICES["pgweb"]["image"].endswith(":latest")
++
++
++def test_dockerfile_pins_its_base_images_and_trusts_only_loopback_proxies() -> None:
++    dockerfile = (REPO / "Dockerfile").read_text()
++    assert "astral-sh/uv:latest" not in dockerfile
++    assert "FROM python:3.12-slim AS" not in dockerfile  # unqualified rolling tag
++    assert "--forwarded-allow-ips=*" not in dockerfile
++
++
++def test_deploy_reclaims_build_leftovers_without_ever_failing_a_good_deploy() -> None:
++    workflow = (REPO / ".github" / "workflows" / "deploy.yml").read_text()
++    assert "docker image prune -f > /dev/null || true" in workflow
++    assert 'docker builder prune -f --filter "until=72h" > /dev/null || true' in workflow
++    assert "--volumes" not in workflow, "a prune must never be able to touch the data volumes"

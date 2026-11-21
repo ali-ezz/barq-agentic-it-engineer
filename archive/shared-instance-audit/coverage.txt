@@ -1,0 +1,75 @@
+src/agent/policy.py                                    88      1    99%   104
+src/agent/prompts.py                                   93      1    99%   432
+src/agent/retrieval.py                                203     15    93%   135, 138, 293-294, 335-348, 415, 475-476, 500, 538
+src/agent/semantic_cache.py                           333     50    85%   72, 230-232, 254-255, 265-266, 271, 274, 278, 312-315, 331-332, 366-369, 390, 425, 432-439, 502-508, 524-525, 587, 618-623, 658-663, 683, 687, 707-715, 736-737, 755-756, 766, 772-773, 797, 799
+src/agent/servicenow.py                                98      7    93%   99, 118, 174, 190, 202-205
+src/agent/state.py                                    162      1    99%   121
+src/agent/tools/registry.py                           260     11    96%   77, 79, 81, 102, 104, 286, 299-300, 424-427, 436
+src/api/app.py                                          2      2     0%   3-5
+src/api/errors.py                                       5      5     0%   6-27
+src/api/routers/approvals.py                          177     25    86%   116, 145-147, 150, 156-158, 250, 261-266, 276, 286-288, 332-334, 369-373, 436, 451
+src/api/routers/dlq.py                                 78     14    82%   55, 69, 72, 75, 81-86, 90, 108-109, 150, 160
+src/api/routers/executions.py                          62      3    95%   79, 96, 136
+src/api/routers/suggestions.py                        126     16    87%   167, 176-178, 218, 286-288, 321-329, 383-385
+src/api/routers/webhook.py                             57      2    96%   160-161
+src/app/api/dependencies.py                            41      2    95%   55, 63
+src/app/api/webhook.py                                  3      3     0%   3-7
+src/app/auth/token_manager.py                          79      6    92%   46, 90, 110-111, 127-128
+src/app/auth/webhook_oauth.py                         151     10    93%   71, 75, 206-207, 209, 211, 216, 224, 241-242
+src/app/clients/qdrant.py                              36      1    97%   146
+src/app/core/config.py                                113      3    97%   26-27, 264
+src/app/core/correlation.py                            26      2    92%   37-38
+src/app/core/lifespan.py                              130     30    77%   28-50, 88, 95, 145, 151-152, 159-160, 171-178, 184-185, 193-194, 212-213
+src/app/db/session.py                                  33      6    82%   83-88
+src/app/exceptions/app_errors.py                       68      2    97%   101, 126
+src/app/exceptions/handlers.py                         33      5    85%   28-29, 51, 77-81
+src/app/main.py                                        38      2    95%   69-71
+src/app/models/incident.py                            120      2    98%   62, 197
+src/app/models/manual_section.py                      129      8    94%   82-84, 86-87, 108, 110, 164
+src/app/models/oauth.py                                16      1    94%   23
+src/app/models/stressor.py                             22     22     0%   1-30
+src/app/models/work_note.py                            12      1    92%   13
+src/app/publishing/html.py                             70      1    99%   110
+src/app/publishing/provisioning.py                     63      9    86%   129, 136, 139-140, 156, 168-171
+src/app/publishing/servicenow_kb.py                   197     27    86%   82, 98, 139, 142, 165-180, 185, 294, 303, 305-306, 317, 353, 434, 448, 493
+src/app/repositories/audit.py                         104     19    82%   47-49, 120-122, 134-292
+src/app/repositories/idempotency.py                    57     31    46%   46-69, 82-124
+src/app/retrieval/barq_manual.py                      172     35    80%   49-50, 58-73, 122, 127, 144, 177, 183, 286, 319-344, 353-355
+src/app/retrieval/chunking.py                          63      3    95%   106, 119, 132
+src/app/retrieval/embedding.py                         45      1    98%   68
+src/app/retrieval/extraction/layout_extraction.py      69     21    70%   40-74
+src/app/retrieval/extraction/ocr_extraction.py        111     16    86%   57-67, 188-202
+src/app/retrieval/extraction/parse_appendix.py         88      6    93%   38, 70-71, 88, 120, 129
+src/app/retrieval/extraction/section_detector.py       84     11    87%   41, 101, 108-116
+src/app/retrieval/extraction/table_extraction.py      155     12    92%   111-129
+src/app/retrieval/html_markdown.py                     47      6    87%   24, 32, 37-39, 54
+src/app/retrieval/hybrid_search.py                     80      2    98%   58, 132
+src/app/retrieval/ingest.py                            71      2    97%   118, 196
+src/app/retrieval/manual/manual_chunking.py            41      2    95%   83, 103
+src/app/retrieval/manual/manual_ingest.py              62      1    98%   142
+src/app/retrieval/manual/manual_parser.py             206     82    60%   92-93, 97-98, 102-111, 170-176, 198-210, 248-263, 276-301, 323-347, 423-466
+src/app/retrieval/manual/manual_sources.py             29     13    55%   38, 41-52, 68, 71-74, 89
+src/app/retrieval/manual/markdown_parser.py           357     16    96%   127, 210, 389-393, 439, 447, 461-462, 515-516, 521, 566, 568, 586
+src/app/retrieval/rerank.py                            49      4    92%   45-49
+src/app/services/clustering/signature.py               54      2    96%   41, 74
+src/app/utils/servicenow.py                            47      6    87%   23-27, 57
+src/app/workers/cluster_runtime.py                     74     12    84%   39, 58, 72-75, 88, 92, 120, 142-143, 166-167
+src/app/workers/db.py                                 411    140    66%   69, 273-282, 285-300, 303-304, 318-333, 336-337, 350-361, 364-368, 378-384, 398, 409, 428-449, 460-470, 487-503, 510-511, 516-528, 537-561, 564-586, 589-595, 598-609, 632-659, 669-677, 692-703, 706-708, 711-721, 724-725, 735-750, 753-754, 764-775, 788-824, 1019, 1054, 1140, 1195, 1225, 1241
+src/app/workers/incident_state.py                      88      9    90%   65, 95, 108, 123, 131, 145-146, 173, 175
+src/app/workers/reaper.py                              29     12    59%   78-135
+src/app/workers/replay.py                             126     36    71%   85, 93-94, 134, 158-159, 167-168, 207-215, 223-261, 265
+src/app/workers/retry_policy.py                        30      1    97%   103
+src/app/workers/sync_engine.py                         31      6    81%   89-94
+src/app/workers/tasks.py                              269     36    87%   110, 248, 276-277, 281-282, 315, 333-338, 391-398, 417-423, 436-439, 442, 453, 457, 463, 498, 508, 528, 581, 655, 687, 704-719
+src/observability/redaction.py                         52      1    98%   118
+src/observability/tracing.py                          182     21    88%   98-99, 126, 176, 279-280, 289-291, 296-300, 307-308, 315-316, 355-357
+src/retrieval/embedding.py                              2      2     0%   3-10
+src/retrieval/search.py                                 2      2     0%   3-7
+src/workers/__init__.py                                 3      3     0%   3-7
+src/workers/celery_app.py                               3      3     0%   3-11
+src/workers/replay.py                                   3      3     0%   3-11
+src/workers/retry_policy.py                             3      3     0%   3-15
+src/workers/tasks.py                                    3      3     0%   3-13
+---------------------------------------------------------------------------------
+TOTAL                                                9317   1085    88%
+85 files skipped due to complete coverage.

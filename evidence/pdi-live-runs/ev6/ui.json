@@ -1,0 +1,41 @@
+{
+  "started_at": "2026-10-04T02:58:46.658352+00:00",
+  "caller": "lottie.voll",
+  "incident": "INC0010228",
+  "status_after_answer": "Solved - please confirm",
+  "script_errors": [],
+  "checks": {
+    "opens_on_new_ticket_form": true,
+    "new_user_has_no_tickets": true,
+    "virtual_agent_bubble_hidden": true,
+    "header_has_barq_ai": true,
+    "working_banner_shown": true,
+    "answer_arrived_without_refresh": true,
+    "answer_within_90s": true,
+    "answer_is_readable": true,
+    "answer_has_steps": true,
+    "banner_gone_after_answer": true,
+    "closed_after_confirm": true,
+    "closed_ticket_folded": true,
+    "chat_answered": true,
+    "chat_is_readable": true,
+    "fits_a_phone": true,
+    "no_script_errors": true,
+    "engineer_sees_barq_card": true,
+    "closed_ticket_offers_no_buttons": true
+  },
+  "timings": {
+    "answer_on_screen_s": 10.0,
+    "chat_answer_s": 8.8
+  },
+  "passed": true,
+  "shots": [
+    "../ev6/shots/01_page_opens_on_new_ticket.png",
+    "../ev6/shots/02_working_banner.png",
+    "../ev6/shots/03_answer_arrived.png",
+    "../ev6/shots/04_confirmed_closed.png",
+    "../ev6/shots/05_chat_answer.png",
+    "../ev6/shots/06_phone.png",
+    "../ev6/shots/07_engineer_card.png"
+  ]
+}

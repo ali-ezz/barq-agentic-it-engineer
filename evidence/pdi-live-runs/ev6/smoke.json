@@ -1,0 +1,32 @@
+{
+  "started_at": "2026-10-04T14:31:35.765195+00:00",
+  "scenarios": {
+    "low_risk_resolved": {
+      "incident": "INC0010243",
+      "sys_id": "0b0dd02873fb0bd02aedfed25ab8b7fb",
+      "run": {
+        "execution_id": "f3623543-be6d-4732-831a-75b9d3d78975",
+        "event_record_id": "ae3818b0-8a16-45e3-a734-9f8f84b239c3",
+        "incident_sys_id": "0b0dd02873fb0bd02aedfed25ab8b7fb",
+        "status": "succeeded",
+        "node_reached": "act",
+        "model_name": null,
+        "agent_version": "s3.4-graph-1.0.0",
+        "started_at": "2026-10-04T14:31:45.007285Z",
+        "ended_at": "2026-10-04T14:32:37.489651Z",
+        "termination_cause": "suggested",
+        "updated_at": "2026-10-04T14:32:37.490445Z"
+      },
+      "checks": {
+        "run_succeeded": true,
+        "resolved": true,
+        "resolved_by_agent": true,
+        "routed": true,
+        "ai_complete": true,
+        "caller_got_the_fix": true
+      },
+      "passed": true
+    }
+  },
+  "finished_at": "2026-10-04T14:32:43.802147+00:00"
+}
