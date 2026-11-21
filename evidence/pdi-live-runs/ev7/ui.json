@@ -1,0 +1,57 @@
+{
+  "started_at": "2026-10-04T17:43:29.525767+00:00",
+  "caller": "barq.lina",
+  "incident": "INC0010309",
+  "live_lines": [
+    "Reading your message…",
+    "Looking into it…",
+    "Thinking…",
+    "Unlocking your account…",
+    "Thinking…",
+    "Checking your account…",
+    "Thinking…",
+    "Writing my answer…"
+  ],
+  "answer": "I have checked your account and found that it was indeed locked after several failed sign-in attempts. I have successfully unlocked it for you now.\n\nTo prevent your account from locking again, please sign out or update your password on your corporate email on your phone, as well as on any VPN clients or mapped drives. This will update your cached credentials and stop them from silently retrying your old password.\n\nCould you please try signing in now and let me know if you can get in?",
+  "status_after_answer": "Fixed - tell me if it works",
+  "script_errors": [],
+  "checks": {
+    "opens_on_welcome": true,
+    "virtual_agent_bubble_hidden": true,
+    "no_buttons_besides_new_and_send": true,
+    "live_activity_shown": true,
+    "answer_types_itself_in": true,
+    "answer_without_refresh": true,
+    "answer_within_90s": true,
+    "answer_is_readable": true,
+    "status_tells_next_step": true,
+    "card_has_summary": true,
+    "card_said_vs_found": true,
+    "card_action_with_undo": true,
+    "card_one_control_button": true,
+    "old_form_buttons_gone": true,
+    "card_timeline_opens": true,
+    "card_trace_link": true,
+    "take_over_locks_agent_out": true,
+    "card_shows_agent_working_live": true,
+    "caller_sees_follow_up": true,
+    "closes_after_confirmation": true,
+    "no_script_errors": true
+  },
+  "timings": {
+    "answer_on_screen_s": 58.6,
+    "close_s": 15.9
+  },
+  "passed": true,
+  "shots": [
+    "../ev7/shots/01_chat_welcome.png",
+    "../ev7/shots/02_live_activity.png",
+    "../ev7/shots/03_answer.png",
+    "../ev7/shots/04_engineer_card.png",
+    "../ev7/shots/05_engineer_timeline.png",
+    "../ev7/shots/06_engineer_holds.png",
+    "../ev7/shots/07_card_live.png",
+    "../ev7/shots/08_card_after_hand_back.png",
+    "../ev7/shots/09_closed.png"
+  ]
+}

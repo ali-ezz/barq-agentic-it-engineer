@@ -1,0 +1,250 @@
+{
+  "started_at": "2026-10-04T02:16:45.409970+00:00",
+  "scenarios": {
+    "ask_then_continue": {
+      "incident": "INC0010164",
+      "sys_id": "23d47dd87377c7d02aedfed25ab8b7c8",
+      "runs": [
+        {
+          "execution_id": "fee8bce3-57e7-4492-938f-f734061d6689",
+          "event_record_id": "99d4fa62-e16e-491e-a7c0-86a37bccff6e",
+          "incident_sys_id": "23d47dd87377c7d02aedfed25ab8b7c8",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T02:17:28.918646Z",
+          "ended_at": "2026-10-04T02:18:00.072826Z",
+          "termination_cause": "suggested",
+          "updated_at": "2026-10-04T02:18:00.073707Z"
+        },
+        {
+          "execution_id": "fe138dd5-06cf-4dcd-b645-f64ceebacf85",
+          "event_record_id": "b061a005-eb16-45c6-be1e-54c6ef21dae9",
+          "incident_sys_id": "23d47dd87377c7d02aedfed25ab8b7c8",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T02:16:54.788062Z",
+          "ended_at": "2026-10-04T02:17:16.826064Z",
+          "termination_cause": "asked_caller",
+          "updated_at": "2026-10-04T02:17:16.827345Z"
+        }
+      ],
+      "final": {
+        "close_code": "Solution provided",
+        "assignment_group": "Network",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "1. Close the mail client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n2. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n3. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "false",
+        "close_notes": "Resolved by BARQ AI Agent with confidence 0.95.\n\n1. Close the mail client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n2. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n3. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "number": "INC0010164",
+        "resolved_by": "BARQ AI Agent",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "1. Close the mail client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n2. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n3. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "x_2215032_ai_inc_0_ai_classification": "software",
+        "state": "Resolved",
+        "x_2215032_ai_inc_0_ai_confidence": "0.95",
+        "x_2215032_ai_inc_0_ai_processing_state": "Complete"
+      },
+      "checks": {
+        "first_run_finished": true,
+        "asked_one_question": true,
+        "waited_on_hold": true,
+        "reply_queued_the_agent_again": true,
+        "agent_continued_to_a_result": true,
+        "no_question_repeated": true
+      },
+      "passed": true
+    },
+    "engineer_takes_over_then_hands_back": {
+      "incident": "INC0010165",
+      "sys_id": "d625711c7377c7d02aedfed25ab8b7ac",
+      "runs": [
+        {
+          "execution_id": "c6cc3be7-2b96-4b5b-8f94-8ea7671cc01d",
+          "event_record_id": "b3d9a868-0a25-4edb-a9f7-02de8e25dd39",
+          "incident_sys_id": "d625711c7377c7d02aedfed25ab8b7ac",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T02:19:24.090730Z",
+          "ended_at": "2026-10-04T02:20:00.706870Z",
+          "termination_cause": "suggested",
+          "updated_at": "2026-10-04T02:20:00.707609Z"
+        },
+        {
+          "execution_id": "13fa9470-4060-4b35-9580-a7691224f0e5",
+          "event_record_id": "4fc1e2a2-364d-42cb-959e-a25b29ea0583",
+          "incident_sys_id": "d625711c7377c7d02aedfed25ab8b7ac",
+          "status": "succeeded",
+          "node_reached": null,
+          "model_name": null,
+          "agent_version": null,
+          "started_at": "2026-10-04T02:18:48.482683Z",
+          "ended_at": "2026-10-04T02:18:48.499842Z",
+          "termination_cause": "observed:incident.engineer_replied",
+          "updated_at": "2026-10-04T02:18:48.500758Z"
+        },
+        {
+          "execution_id": "5bd0641e-99f8-4d1a-9467-3f4b3411fd59",
+          "event_record_id": "5a4d4d6c-f136-4131-aaec-a167796978d4",
+          "incident_sys_id": "d625711c7377c7d02aedfed25ab8b7ac",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T02:18:14.498290Z",
+          "ended_at": "2026-10-04T02:18:41.571366Z",
+          "termination_cause": "asked_caller",
+          "updated_at": "2026-10-04T02:18:41.572107Z"
+        }
+      ],
+      "final": {
+        "close_code": "Solution provided",
+        "assignment_group": "Network",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "1. Confirm with the user that they changed their password within the last 24 hours. [KB0001 v2.0 \u00a7Resolution]\n2. Ask the user to sign out of the VPN client completely, including the system tray icon. [KB0001 v2.0 \u00a7Resolution]\n3. Clear the cached credential for the VPN profile from the credential store. [KB0001 v2.0 \u00a7Resolution]\n4. Reconnect using the new password. [KB0001 v2.0 \u00a7Resolution]\n5. If authentication still fails, check whether the account is locked in the identity console before escalating. [KB0001 v2.0 \u00a7Resolution]\n\nSources: KB0001 v2.0 \u2014 VPN AUTHENTICATION FAILS AFTER A PASSWORD CHANGE",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "false",
+        "close_notes": "Resolved by BARQ AI Agent with confidence 0.95.\n\n1. Confirm with the user that they changed their password within the last 24 hours. [KB0001 v2.0 \u00a7Resolution]\n2. Ask the user to sign out of the VPN client completely, including the system tray icon. [KB0001 v2.0 \u00a7Resolution]\n3. Clear the cached credential for the VPN profile from the credential store. [KB0001 v2.0 \u00a7Resolution]\n4. Reconnect using the new password. [KB0001 v2.0 \u00a7Resolution]\n5. If authentication still fails, check whether the account is locked in the identity console before escalating. [KB0001 v2.0 \u00a7Resolution]\n\nSources: KB0001 v2.0 \u2014 VPN AUTHENTICATION FAILS AFTER A PASSWORD CHANGE",
+        "number": "INC0010165",
+        "resolved_by": "BARQ AI Agent",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "1. Confirm with the user that they changed their password within the last 24 hours. [KB0001 v2.0 \u00a7Resolution]\n2. Ask the user to sign out of the VPN client completely, including the system tray icon. [KB0001 v2.0 \u00a7Resolution]\n3. Clear the cached credential for the VPN profile from the credential store. [KB0001 v2.0 \u00a7Resolution]\n4. Reconnect using the new password. [KB0001 v2.0 \u00a7Resolution]\n5. If authentication still fails, check whether the account is locked in the identity console before escalating. [KB0001 v2.0 \u00a7Resolution]\n\nSources: KB0001 v2.0 \u2014 VPN AUTHENTICATION FAILS AFTER A PASSWORD CHANGE",
+        "x_2215032_ai_inc_0_ai_classification": "access",
+        "state": "Resolved",
+        "x_2215032_ai_inc_0_ai_confidence": "0.95",
+        "x_2215032_ai_inc_0_ai_processing_state": "Complete"
+      },
+      "checks": {
+        "engineer_reply_locked_the_agent_out": true,
+        "stood_down_note": true,
+        "engineer_reply_recorded": true,
+        "hand_back_button_offered_and_pressed": true,
+        "hand_back_note_with_instruction": true,
+        "agent_resumed": true,
+        "lock_cleared": true
+      },
+      "passed": true
+    },
+    "caller_reopens_ai_resolution": {
+      "incident": "INC0010166",
+      "sys_id": "90a5f95c7377c7d02aedfed25ab8b7bd",
+      "runs": [
+        {
+          "execution_id": "2c0ca5c8-f692-470d-8055-299dd28568fa",
+          "event_record_id": "c6aad9e4-53f8-4884-9792-45664aa9f966",
+          "incident_sys_id": "90a5f95c7377c7d02aedfed25ab8b7bd",
+          "status": "succeeded",
+          "node_reached": null,
+          "model_name": null,
+          "agent_version": null,
+          "started_at": "2026-10-04T02:21:25.662285Z",
+          "ended_at": "2026-10-04T02:21:27.645865Z",
+          "termination_cause": "observed:incident.reopened",
+          "updated_at": "2026-10-04T02:21:27.646643Z"
+        },
+        {
+          "execution_id": "7d4f4261-222c-492d-8a3f-8e556db13350",
+          "event_record_id": "bec7cb55-359b-494b-acd5-d2a3bdb9d83b",
+          "incident_sys_id": "90a5f95c7377c7d02aedfed25ab8b7bd",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T02:20:14.028643Z",
+          "ended_at": "2026-10-04T02:21:10.353843Z",
+          "termination_cause": "suggested",
+          "updated_at": "2026-10-04T02:21:10.354595Z"
+        }
+      ],
+      "final": {
+        "close_code": "Solution provided",
+        "assignment_group": "Software",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "1. Ask whether colleagues are affected to verify if more than one user is affected, ensuring it is not a service event. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for this user to confirm if the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. For a confirmed client-side fault, close the Outlook client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "true",
+        "close_notes": "Resolved by BARQ AI Agent with confidence 0.95.\n\n1. Ask whether colleagues are affected to verify if more than one user is affected, ensuring it is not a service event. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for this user to confirm if the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. For a confirmed client-side fault, close the Outlook client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "number": "INC0010166",
+        "resolved_by": "BARQ AI Agent",
+        "x_2215032_ai_inc_0_ai_human_lock": "true",
+        "x_2215032_ai_inc_0_ai_resolution": "1. Ask whether colleagues are affected to verify if more than one user is affected, ensuring it is not a service event. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for this user to confirm if the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. For a confirmed client-side fault, close the Outlook client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "x_2215032_ai_inc_0_ai_classification": "software",
+        "state": "In Progress",
+        "x_2215032_ai_inc_0_ai_confidence": "0.95",
+        "x_2215032_ai_inc_0_ai_processing_state": "Complete"
+      },
+      "checks": {
+        "was_resolved_by_agent": true,
+        "reopened_to_in_progress": true,
+        "engineer_has_it": true,
+        "hand_over_note": true,
+        "reopen_recorded": true
+      },
+      "passed": true
+    },
+    "approver_approves_on_page": {
+      "incident": "INC0010167",
+      "sys_id": "0ef5f59c7377c7d02aedfed25ab8b73e",
+      "message": "Approved. BARQ AI Agent resumed and is applying the decision.",
+      "runs": [
+        {
+          "execution_id": "7d22fc89-a590-47d7-b5eb-223e650bc5ab",
+          "event_record_id": "82f3dded-fe6b-4e3f-a279-efc61a1bcc15",
+          "incident_sys_id": "0ef5f59c7377c7d02aedfed25ab8b73e",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T02:21:44.115999Z",
+          "ended_at": "2026-10-04T02:23:05.240725Z",
+          "termination_cause": "interrupt_resume:escalated_high_risk",
+          "updated_at": "2026-10-04T02:23:05.241232Z"
+        }
+      ],
+      "checks": {
+        "parked": true,
+        "engineer_has_no_approve_button": true,
+        "approver_pressed_approve": true,
+        "resolved_after_approval": true,
+        "edited_fix_applied": true,
+        "backend_run_finished": true
+      },
+      "passed": true
+    },
+    "engineer_takes_over_parked": {
+      "incident": "INC0010168",
+      "sys_id": "d876f9dc7377c7d02aedfed25ab8b715",
+      "message": "You have taken over this incident from BARQ AI Agent.",
+      "runs": [
+        {
+          "execution_id": "80386f02-9d45-4c71-a29d-eccac4175211",
+          "event_record_id": "c049ad9c-b4a2-4c8c-96b0-5a66289275b2",
+          "incident_sys_id": "d876f9dc7377c7d02aedfed25ab8b715",
+          "status": "failed",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T02:23:44.838660Z",
+          "ended_at": "2026-10-04T02:24:34.428224Z",
+          "termination_cause": "human_rejected:interrupt_resume:escalated_high_risk",
+          "updated_at": "2026-10-04T02:24:34.429185Z"
+        }
+      ],
+      "checks": {
+        "parked": true,
+        "take_over_pressed": true,
+        "paused_run_closed": true,
+        "locked": true,
+        "nothing_resolved": true
+      },
+      "passed": true
+    }
+  },
+  "finished_at": "2026-10-04T02:24:51.074080+00:00"
+}

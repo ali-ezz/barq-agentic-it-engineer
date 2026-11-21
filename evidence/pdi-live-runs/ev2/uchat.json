@@ -1,0 +1,81 @@
+{
+  "started_at": "2026-10-04T01:09:01.412973+00:00",
+  "caller": "carolina.kinlaw",
+  "incident": null,
+  "sys_id": null,
+  "reply": {
+    "role": "assistant",
+    "citations": [
+      {
+        "article_id": "KB0009-v2.0",
+        "chunk_index": 0,
+        "article_number": "KB0009",
+        "section": "Symptom",
+        "title": "WI-FI DROPS REPEATEDLY ON THE 5 GHZ CORPORATE NETWORK",
+        "excerpt": "## Symptom  \nThe connection drops every few minutes and reconnects on its own. It is worse in some parts of the building and while moving between areas.",
+        "article_url": null,
+        "manual_section": null,
+        "version": "2.0"
+      },
+      {
+        "article_id": "KB0009-v2.0",
+        "chunk_index": 1,
+        "article_number": "KB0009",
+        "section": "Cause",
+        "title": "WI-FI DROPS REPEATEDLY ON THE 5 GHZ CORPORATE NETWORK",
+        "excerpt": "## Cause  \nAggressive roaming behaviour between access points, or a power-saving setting on the wireless adapter that suspends the radio during idle periods.",
+        "article_url": null,
+        "manual_section": null,
+        "version": "2.0"
+      },
+      {
+        "article_id": "KB0009-v2.0",
+        "chunk_index": 2,
+        "article_number": "KB0009",
+        "section": "Resolution",
+        "title": "WI-FI DROPS REPEATEDLY ON THE 5 GHZ CORPORATE NETWORK",
+        "excerpt": "## Resolution  \n1. Establish whether drops occur in one location or while moving. Drops only while moving indicate roaming; drops while stationary indicate the adapter.\n2. For a stationary user, disable power saving on the wireless adapter.\n3. Update the wireless adapter driver to the current supported version.\n4. Ask the user to forget and rejoin the corporate network so the profile is rebuilt.\n5. Confirm a stable connection for at least fifteen minutes before closing.",
+        "article_url": null,
+        "manual_section": null,
+        "version": "2.0"
+      },
+      {
+        "article_id": "KB0009-v2.0",
+        "chunk_index": 3,
+        "article_number": "KB0009",
+        "section": "Escalation",
+        "title": "WI-FI DROPS REPEATEDLY ON THE 5 GHZ CORPORATE NETWORK",
+        "excerpt": "## Escalation  \nDrops affecting several users in the same area are an infrastructure fault. Escalate to Network with the location and the approximate times.",
+        "article_url": null,
+        "manual_section": null,
+        "version": "2.0"
+      }
+    ],
+    "created_at": "2026-10-04T01:09:19.746598Z",
+    "id": "adf00769-2f25-4264-8cd5-694ebe78e3c5",
+    "seq": 2,
+    "content": "Based on the internal knowledge base, if your Wi-Fi keeps dropping repeatedly on the 5 GHz corporate network, please follow these steps to resolve the issue:\n\n### 1. Identify the Pattern\n* **Drops while moving:** This indicates an issue with roaming between access points.\n* **Drops while stationary:** This indicates an issue with the wireless adapter itself.\n\n### 2. Resolution Steps\n* **For stationary drops:** Disable power saving on your wireless adapter, as a power-saving setting may be suspending the radio during idle periods.\n* **Update Drivers:** Ensure your wireless adapter driver is updated to the current supported version.\n* **Rebuild Profile:** Forget the corporate network on your device and rejoin it to rebuild the wireless profile.\n* **Verification:** Ensure the connection remains stable for at least 15 minutes.\n\n### 3. Escalation\nIf multiple users in the same area are experiencing these drops, it is considered an infrastructure fault. In this case, the issue should be escalated to the **Network** team, providing them with the specific location and the approximate times the drops occurred."
+  },
+  "proposal": {
+    "short_description": "Intermittent Wi-Fi connection drops on corporate 5 GHz network",
+    "description": "My Wi-Fi keeps dropping every few minutes on the 5 GHz corporate network.",
+    "category": "network"
+  },
+  "ticket": {},
+  "follow_up": {},
+  "run": null,
+  "checks": {
+    "page_loads_with_chat": true,
+    "new_caller_sees_no_tickets": true,
+    "chat_answers": true,
+    "problem_gets_ticket_proposal": true,
+    "ticket_created_as_the_caller": false,
+    "agent_worked_the_ticket": false,
+    "agent_message_visible_in_chat": false,
+    "no_work_notes_in_chat": true,
+    "follow_up_applied": false,
+    "other_users_ticket_refused": true
+  },
+  "passed": false,
+  "finished_at": "2026-10-04T01:09:28.709435+00:00"
+}

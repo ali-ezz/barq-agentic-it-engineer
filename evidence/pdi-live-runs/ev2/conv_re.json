@@ -1,0 +1,180 @@
+{
+  "started_at": "2026-10-04T00:34:36.777309+00:00",
+  "scenarios": {
+    "ask_then_continue": {
+      "incident": "INC0010088",
+      "sys_id": "637dd15473b3c7d02aedfed25ab8b78e",
+      "runs": [
+        {
+          "execution_id": "e1549d8c-7960-417a-9139-9ea62c960b93",
+          "event_record_id": "cb161ff6-1922-4bb6-91b3-5e7c488566ff",
+          "incident_sys_id": "637dd15473b3c7d02aedfed25ab8b78e",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:35:20.271207Z",
+          "ended_at": "2026-10-04T00:35:22.634793Z",
+          "termination_cause": "skipped_ineligible",
+          "updated_at": "2026-10-04T00:35:22.636245Z"
+        },
+        {
+          "execution_id": "0c2ea801-5c74-4114-8d0b-e51d8a88e5e5",
+          "event_record_id": "96da86f0-9e82-46e8-a96a-6cc7de1ad97c",
+          "incident_sys_id": "637dd15473b3c7d02aedfed25ab8b78e",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:34:44.377831Z",
+          "ended_at": "2026-10-04T00:35:12.330665Z",
+          "termination_cause": "asked_caller",
+          "updated_at": "2026-10-04T00:35:12.331331Z"
+        }
+      ],
+      "final": {
+        "close_code": null,
+        "assignment_group": "Network",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "false",
+        "close_notes": "",
+        "number": "INC0010088",
+        "resolved_by": "",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "",
+        "x_2215032_ai_inc_0_ai_classification": "other",
+        "state": "In Progress",
+        "x_2215032_ai_inc_0_ai_confidence": "",
+        "x_2215032_ai_inc_0_ai_processing_state": "In Progress"
+      },
+      "checks": {
+        "first_run_finished": true,
+        "asked_one_question": true,
+        "waited_on_hold": true,
+        "reply_queued_the_agent_again": true,
+        "agent_continued_to_a_result": false,
+        "no_question_repeated": true
+      },
+      "passed": false
+    },
+    "engineer_takes_over_then_hands_back": {
+      "incident": "INC0010089",
+      "sys_id": "cead595473b3c7d02aedfed25ab8b7a4",
+      "runs": [
+        {
+          "execution_id": "c75297d5-cbfa-4dd3-adc8-99b79eaac594",
+          "event_record_id": "072bb2c3-ab08-45a4-bb3c-d37df085abf0",
+          "incident_sys_id": "cead595473b3c7d02aedfed25ab8b7a4",
+          "status": "succeeded",
+          "node_reached": null,
+          "model_name": null,
+          "agent_version": null,
+          "started_at": "2026-10-04T00:36:11.673469Z",
+          "ended_at": "2026-10-04T00:36:11.687081Z",
+          "termination_cause": "observed:incident.engineer_replied",
+          "updated_at": "2026-10-04T00:36:11.687633Z"
+        },
+        {
+          "execution_id": "f7395b07-9f34-4551-9d93-f96c19e7d999",
+          "event_record_id": "9464763c-f9b9-486f-b090-517a4564021c",
+          "incident_sys_id": "cead595473b3c7d02aedfed25ab8b7a4",
+          "status": "awaiting_approval",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:35:35.029895Z",
+          "ended_at": null,
+          "termination_cause": null,
+          "updated_at": "2026-10-04T00:35:56.046621Z"
+        }
+      ],
+      "final": {
+        "close_code": null,
+        "assignment_group": "Network",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "true",
+        "close_notes": "",
+        "number": "INC0010089",
+        "resolved_by": "",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "",
+        "x_2215032_ai_inc_0_ai_classification": "network",
+        "state": "In Progress",
+        "x_2215032_ai_inc_0_ai_confidence": "",
+        "x_2215032_ai_inc_0_ai_processing_state": "Awaiting Approval"
+      },
+      "checks": {
+        "engineer_reply_locked_the_agent_out": false,
+        "stood_down_note": false,
+        "engineer_reply_recorded": true,
+        "hand_back_button_offered_and_pressed": false,
+        "hand_back_note_with_instruction": false,
+        "agent_resumed": false,
+        "lock_cleared": true
+      },
+      "passed": false
+    },
+    "caller_reopens_ai_resolution": {
+      "incident": "INC0010091",
+      "sys_id": "294fdd1873b3c7d02aedfed25ab8b717",
+      "runs": [
+        {
+          "execution_id": "ec9d14e9-b858-43e5-9514-1a41cf5a8c80",
+          "event_record_id": "dc4c7ac9-9e09-4876-8fca-a6ac0312f272",
+          "incident_sys_id": "294fdd1873b3c7d02aedfed25ab8b717",
+          "status": "succeeded",
+          "node_reached": null,
+          "model_name": null,
+          "agent_version": null,
+          "started_at": "2026-10-04T00:43:40.519790Z",
+          "ended_at": "2026-10-04T00:43:44.236538Z",
+          "termination_cause": "observed:incident.reopened",
+          "updated_at": "2026-10-04T00:43:44.239851Z"
+        },
+        {
+          "execution_id": "ffacf46c-933e-45fd-87c0-6d50cd947fc8",
+          "event_record_id": "f51174f6-69ec-4f70-b9f4-40bc312534fd",
+          "incident_sys_id": "294fdd1873b3c7d02aedfed25ab8b717",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:42:34.270127Z",
+          "ended_at": "2026-10-04T00:43:31.750428Z",
+          "termination_cause": "suggested",
+          "updated_at": "2026-10-04T00:43:31.751500Z"
+        }
+      ],
+      "final": {
+        "close_code": "Solution provided",
+        "assignment_group": "Software",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "1. Ask whether colleagues are affected, and if more than one user in the same area is affected, treat it as a service event and stop. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for this user to verify if the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. For a client-side fault, close the client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "false",
+        "close_notes": "Resolved by BARQ AI Agent with confidence 0.95.\n\n1. Ask whether colleagues are affected, and if more than one user in the same area is affected, treat it as a service event and stop. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for this user to verify if the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. For a client-side fault, close the client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "number": "INC0010091",
+        "resolved_by": "BARQ AI Agent",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "1. Ask whether colleagues are affected, and if more than one user in the same area is affected, treat it as a service event and stop. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for this user to verify if the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. For a client-side fault, close the client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "x_2215032_ai_inc_0_ai_classification": "software",
+        "state": "Resolved",
+        "x_2215032_ai_inc_0_ai_confidence": "0.95",
+        "x_2215032_ai_inc_0_ai_processing_state": "Complete"
+      },
+      "checks": {
+        "was_resolved_by_agent": true,
+        "reopened_to_in_progress": false,
+        "engineer_has_it": false,
+        "hand_over_note": false,
+        "reopen_recorded": true
+      },
+      "passed": false
+    }
+  },
+  "finished_at": "2026-10-04T00:44:41.208270+00:00"
+}

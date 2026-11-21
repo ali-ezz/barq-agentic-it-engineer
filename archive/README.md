@@ -10,3 +10,14 @@ Earlier work kept for reference. Not part of the running system.
 - `servicenow-research/`: ACL update-set XML, upload scripts and notes from researching the instance.
 
 These scripts read credentials from a local env file (`BARQ_ENV_FILE`) and refer to hosts by placeholder.
+
+## Other repositories (what is, and is not, here)
+
+- `team-repo-stash0.patch`: the one unfinished change that sat in my clone of the team repository (a one-line
+  whitespace edit to `scripts/verify_permissions.py`). Apply it, if you ever want it, on the team repository with `git apply archive/team-repo-stash0.patch`.
+- My local-only branches from the team repository (18 branches, mostly dependency bumps, scratch merges and branches whose
+  content was later merged upstream by squash) were saved as a git bundle on my machine
+  (`team-repo-local-only-branches.bundle`, 2.8 MB, thin: it needs the team repository's `main` to restore). It is **not published**:
+  the commit history contains the team's personal e-mail addresses and old deployment details. To restore it locally:
+  `git clone <team repo> && cd <team repo> && git fetch /path/to/team-repo-local-only-branches.bundle 'refs/heads/*:refs/heads/bundle/*'`.
+- The worktrees of my working copy (`barq-agentic`, `barq-sdk-audit`) were clean; their branches are already in the team repository or contained here.

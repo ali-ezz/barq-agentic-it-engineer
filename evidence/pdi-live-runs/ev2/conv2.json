@@ -1,0 +1,250 @@
+{
+  "started_at": "2026-10-04T00:44:28.030429+00:00",
+  "scenarios": {
+    "ask_then_continue": {
+      "incident": "INC0010093",
+      "sys_id": "3bbf159873b3c7d02aedfed25ab8b738",
+      "runs": [
+        {
+          "execution_id": "a15adce6-2a89-4360-9c9e-0bb868fea018",
+          "event_record_id": "d104dc65-d14c-4ce7-bad7-164318c8e563",
+          "incident_sys_id": "3bbf159873b3c7d02aedfed25ab8b738",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:45:56.647088Z",
+          "ended_at": "2026-10-04T00:47:16.924261Z",
+          "termination_cause": "suggested",
+          "updated_at": "2026-10-04T00:47:16.925986Z"
+        },
+        {
+          "execution_id": "c3e4cfa7-b5f8-4896-b878-d1f7dc48bf44",
+          "event_record_id": "d16325de-3b1e-4582-8fb9-05d3a3ca7911",
+          "incident_sys_id": "3bbf159873b3c7d02aedfed25ab8b738",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:44:44.434735Z",
+          "ended_at": "2026-10-04T00:45:39.584854Z",
+          "termination_cause": "asked_caller",
+          "updated_at": "2026-10-04T00:45:39.587274Z"
+        }
+      ],
+      "final": {
+        "close_code": "Solution provided",
+        "assignment_group": "Network",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "1. Ask whether colleagues are affected to ensure it is not a service event. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for this user to confirm if the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. Close the mail client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "false",
+        "close_notes": "Resolved by BARQ AI Agent with confidence 0.95.\n\n1. Ask whether colleagues are affected to ensure it is not a service event. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for this user to confirm if the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. Close the mail client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "number": "INC0010093",
+        "resolved_by": "BARQ AI Agent",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "1. Ask whether colleagues are affected to ensure it is not a service event. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for this user to confirm if the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. Close the mail client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "x_2215032_ai_inc_0_ai_classification": "software",
+        "state": "Resolved",
+        "x_2215032_ai_inc_0_ai_confidence": "0.95",
+        "x_2215032_ai_inc_0_ai_processing_state": "Complete"
+      },
+      "checks": {
+        "first_run_finished": true,
+        "asked_one_question": true,
+        "waited_on_hold": true,
+        "reply_queued_the_agent_again": true,
+        "agent_continued_to_a_result": true,
+        "no_question_repeated": true
+      },
+      "passed": true
+    },
+    "engineer_takes_over_then_hands_back": {
+      "incident": "INC0010095",
+      "sys_id": "50606d9873b3c7d02aedfed25ab8b7a9",
+      "runs": [
+        {
+          "execution_id": "7b41cf39-d415-48ed-8741-c1a93cfff471",
+          "event_record_id": "2474ccaa-91bc-43b7-95f0-850e65f208a6",
+          "incident_sys_id": "50606d9873b3c7d02aedfed25ab8b7a9",
+          "status": "awaiting_approval",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:48:24.017037Z",
+          "ended_at": null,
+          "termination_cause": null,
+          "updated_at": "2026-10-04T00:48:42.335188Z"
+        },
+        {
+          "execution_id": "0382ee13-e1ba-46c7-a912-2f0eb13ac593",
+          "event_record_id": "c601bad9-e813-4888-a23b-9189815325cf",
+          "incident_sys_id": "50606d9873b3c7d02aedfed25ab8b7a9",
+          "status": "succeeded",
+          "node_reached": null,
+          "model_name": null,
+          "agent_version": null,
+          "started_at": "2026-10-04T00:47:56.709567Z",
+          "ended_at": "2026-10-04T00:47:56.729547Z",
+          "termination_cause": "observed:incident.engineer_replied",
+          "updated_at": "2026-10-04T00:47:56.730371Z"
+        },
+        {
+          "execution_id": "40e6b982-2aa0-43a2-8d33-65f6798f3083",
+          "event_record_id": "5b7073ff-a4f9-4869-8984-8f363298b600",
+          "incident_sys_id": "50606d9873b3c7d02aedfed25ab8b7a9",
+          "status": "abandoned",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:47:27.102543Z",
+          "ended_at": "2026-10-04T00:48:24.035752Z",
+          "termination_cause": "superseded_by_newer_run",
+          "updated_at": "2026-10-04T00:48:24.038750Z"
+        }
+      ],
+      "final": {
+        "close_code": null,
+        "assignment_group": "Network",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "true",
+        "close_notes": "",
+        "number": "INC0010095",
+        "resolved_by": "",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "",
+        "x_2215032_ai_inc_0_ai_classification": "access",
+        "state": "In Progress",
+        "x_2215032_ai_inc_0_ai_confidence": "",
+        "x_2215032_ai_inc_0_ai_processing_state": "Awaiting Approval"
+      },
+      "checks": {
+        "engineer_reply_locked_the_agent_out": true,
+        "stood_down_note": true,
+        "engineer_reply_recorded": true,
+        "hand_back_button_offered_and_pressed": true,
+        "hand_back_note_with_instruction": true,
+        "agent_resumed": true,
+        "lock_cleared": true
+      },
+      "passed": true
+    },
+    "caller_reopens_ai_resolution": {
+      "incident": "INC0010096",
+      "sys_id": "aeb0291c73b3c7d02aedfed25ab8b7e3",
+      "runs": [
+        {
+          "execution_id": "000339ca-e76c-4fc9-90e8-b19ac5f98e56",
+          "event_record_id": "626c6c2d-0354-4b66-a249-eb0c25dd201f",
+          "incident_sys_id": "aeb0291c73b3c7d02aedfed25ab8b7e3",
+          "status": "succeeded",
+          "node_reached": null,
+          "model_name": null,
+          "agent_version": null,
+          "started_at": "2026-10-04T00:49:14.977973Z",
+          "ended_at": "2026-10-04T00:49:16.672788Z",
+          "termination_cause": "observed:incident.reopened",
+          "updated_at": "2026-10-04T00:49:16.674637Z"
+        },
+        {
+          "execution_id": "0d26e374-9beb-4e47-99a6-ed0e466dbb29",
+          "event_record_id": "12e50f5f-cf4a-4534-b52b-656d7cdf59e9",
+          "incident_sys_id": "aeb0291c73b3c7d02aedfed25ab8b7e3",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:48:53.951903Z",
+          "ended_at": "2026-10-04T00:49:07.794133Z",
+          "termination_cause": "suggested",
+          "updated_at": "2026-10-04T00:49:07.794831Z"
+        }
+      ],
+      "final": {
+        "close_code": "Solution provided",
+        "assignment_group": "Software",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "1. Ask whether colleagues are affected, and if more than one user in the same area is affected, treat it as a service event and stop. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for this user to verify if the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. For a client-side fault, close the client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "true",
+        "close_notes": "Resolved by BARQ AI Agent with confidence 0.95.\n\n1. Ask whether colleagues are affected, and if more than one user in the same area is affected, treat it as a service event and stop. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for this user to verify if the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. For a client-side fault, close the client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "number": "INC0010096",
+        "resolved_by": "BARQ AI Agent",
+        "x_2215032_ai_inc_0_ai_human_lock": "true",
+        "x_2215032_ai_inc_0_ai_resolution": "1. Ask whether colleagues are affected, and if more than one user in the same area is affected, treat it as a service event and stop. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for this user to verify if the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. For a client-side fault, close the client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "x_2215032_ai_inc_0_ai_classification": "software",
+        "state": "In Progress",
+        "x_2215032_ai_inc_0_ai_confidence": "0.95",
+        "x_2215032_ai_inc_0_ai_processing_state": "Complete"
+      },
+      "checks": {
+        "was_resolved_by_agent": true,
+        "reopened_to_in_progress": true,
+        "engineer_has_it": true,
+        "hand_over_note": true,
+        "reopen_recorded": true
+      },
+      "passed": true
+    },
+    "approver_approves_on_page": {
+      "incident": "INC0010097",
+      "sys_id": "36d06d1c73b3c7d02aedfed25ab8b7a0",
+      "message": "Execute operation on API 'ScriptableRESTMessageClient.setRequestHeader' from scope 'AI Incident Orchestrator' was denied. The application 'AI Incident Orchestrator' must declare a cross scope access privilege. Please contact the application author to update their privilege requests.",
+      "runs": [
+        {
+          "execution_id": "8698eabd-a2a3-4658-8cf2-bdb0d93a0500",
+          "event_record_id": "83eace74-ff1d-4680-b7a3-e73b027b6734",
+          "incident_sys_id": "36d06d1c73b3c7d02aedfed25ab8b7a0",
+          "status": "awaiting_approval",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:49:34.032066Z",
+          "ended_at": null,
+          "termination_cause": null,
+          "updated_at": "2026-10-04T00:49:57.825258Z"
+        }
+      ],
+      "checks": {
+        "parked": true,
+        "engineer_has_no_approve_button": true,
+        "approver_pressed_approve": true,
+        "resolved_after_approval": false,
+        "edited_fix_applied": false,
+        "backend_run_finished": false
+      },
+      "passed": false
+    },
+    "engineer_takes_over_parked": {
+      "incident": "INC0010098",
+      "sys_id": "fdd12d9c73b3c7d02aedfed25ab8b720",
+      "message": "Execute operation on API 'ScriptableRESTMessageClient.setRequestHeader' from scope 'AI Incident Orchestrator' was denied. The application 'AI Incident Orchestrator' must declare a cross scope access privilege. Please contact the application author to update their privilege requests.",
+      "runs": [
+        {
+          "execution_id": "938c9376-464a-47cd-af7a-70b4571439d7",
+          "event_record_id": "a69f60a2-9be9-4ed6-af82-37c3bccfb11e",
+          "incident_sys_id": "fdd12d9c73b3c7d02aedfed25ab8b720",
+          "status": "awaiting_approval",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:53:44.518926Z",
+          "ended_at": null,
+          "termination_cause": null,
+          "updated_at": "2026-10-04T00:54:02.761496Z"
+        }
+      ],
+      "checks": {
+        "parked": true,
+        "take_over_pressed": true,
+        "paused_run_closed": false,
+        "locked": false,
+        "nothing_resolved": true
+      },
+      "passed": false
+    }
+  },
+  "finished_at": "2026-10-04T00:56:23.704738+00:00"
+}

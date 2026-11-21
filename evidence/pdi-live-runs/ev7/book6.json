@@ -1,0 +1,168 @@
+{
+ "ran_at": "2026-10-04T17:17:38.644675+00:00",
+ "passed": 3,
+ "total": 3,
+ "results": [
+  {
+   "scenario": "true_lock",
+   "caller": "barq.lina",
+   "incident": "INC0010306",
+   "passed": true,
+   "error": null,
+   "checks": {
+    "checked_the_account": true,
+    "unlocked_it": true,
+    "told_to_try_again": true,
+    "closed_after_confirmation": true,
+    "replies_pass_review": true
+   },
+   "grades": [
+    {
+     "kind": 5,
+     "notes": "The agent's reply is friendly, professional, clear, and perfectly accurate according to the facts provided. It offers a helpful explanation for why the lock happened and provides the next steps.",
+     "correct": 5,
+     "safe": true,
+     "language_ok": true,
+     "natural": 5
+    },
+    {
+     "language_ok": true,
+     "correct": 5,
+     "natural": 5,
+     "notes": "The agent's reply is friendly, professional, polite, and accurately addresses the caller's confirmation that they can now log in. It closes the loop naturally.",
+     "kind": 5,
+     "safe": true
+    }
+   ],
+   "turns": [
+    {
+     "said": "I can't sign in this morning. It says my account is locked. I changed my password yesterday.",
+     "reply": "Hi Lina,\n\nI checked your account and confirmed it was locked after some failed login attempts from your usual network connection. I have unlocked your account for you!\n\nSince you changed your password yesterday, a device like your phone's email app or a VPN client might still be trying to use your old password in the background, which can cause the account to lock up again. To prevent this, please log out and back in on those devices with your new password.\n\nCould you please try signing in now and let me know if it works?",
+     "outcome": "fixed",
+     "state": "6",
+     "team": "Service Desk",
+     "steps": [
+      "Checked the caller's account",
+      "Looked for similar and earlier tickets",
+      "Searched the knowledge base",
+      "Searched the knowledge base",
+      "Searched the knowledge base",
+      "Updated the ticket",
+      "Unlocked the caller's account",
+      "Checked the caller's account",
+      "Wrote a note for engineers"
+     ],
+     "seconds": 46.9
+    },
+    {
+     "said": "Yes, I can sign in now. Thank you!",
+     "reply": "You're very welcome, Lina! I'm glad to hear that you can sign in now. I will go ahead and close this ticket for you. Please let us know if you need any further assistance. Have a wonderful day!",
+     "outcome": "closed",
+     "state": "7",
+     "team": "Service Desk",
+     "steps": [
+      "Checked the caller's account"
+     ],
+     "seconds": 16.9
+    }
+   ]
+  },
+  {
+   "scenario": "cancel",
+   "caller": "barq.dina",
+   "incident": "INC0010304",
+   "passed": true,
+   "error": null,
+   "checks": {
+    "ended": true,
+    "replies_pass_review": true
+   },
+   "grades": [
+    {
+     "kind": 5,
+     "correct": 5,
+     "natural": 5,
+     "notes": "The agent's response is polite, helpful, and aligns perfectly with the known facts. They correctly identified that the account is active, provided standard troubleshooting steps since there's no specific KB article, and offered a clear path forward (escalation) if the issue persists.",
+     "language_ok": true,
+     "safe": true
+    },
+    {
+     "natural": 5,
+     "kind": 5,
+     "language_ok": true,
+     "safe": true,
+     "notes": "The agent's reply is friendly, polite, and directly addresses the employee's message. It correctly states that the ticket will be closed, matching the facts and outcome.",
+     "correct": 5
+    }
+   ],
+   "turns": [
+    {
+     "said": "Teams won't start on my laptop.",
+     "reply": "I checked your account and everything looks healthy and active on our end.\n\nCould you please try restarting your computer and checking your internet connection? If Teams still won't start, let me know and I will have a software engineer investigate this further for you.",
+     "outcome": "fixed",
+     "state": "6",
+     "team": "Software",
+     "steps": [
+      "Checked the caller's account",
+      "Searched the knowledge base",
+      "Looked for similar and earlier tickets",
+      "Searched the knowledge base",
+      "Updated the ticket"
+     ],
+     "seconds": 27.0
+    },
+    {
+     "said": "Never mind, it started now after a restart. You can cancel this.",
+     "reply": "I am glad to hear that restarting your laptop did the trick and Teams is working again. I will go ahead and close this ticket for you now. Have a great day ahead!",
+     "outcome": "closed",
+     "state": "7",
+     "team": "Software",
+     "steps": [
+      "Looked for similar and earlier tickets"
+     ],
+     "seconds": 22.8
+    }
+   ]
+  },
+  {
+   "scenario": "vpn_kb",
+   "caller": "barq.rami",
+   "incident": "INC0010305",
+   "passed": true,
+   "error": null,
+   "checks": {
+    "searched_knowledge": true,
+    "gave_steps": true,
+    "fixed": true,
+    "no_needless_account_change": true,
+    "replies_pass_review": true
+   },
+   "grades": [
+    {
+     "notes": "The reply is friendly, natural, accurate to the facts, and safe. It guides the user directly on how to resolve the issue based on the KB article.",
+     "correct": 5,
+     "language_ok": true,
+     "kind": 5,
+     "natural": 5,
+     "safe": true
+    }
+   ],
+   "turns": [
+    {
+     "said": "The VPN keeps saying invalid credentials since I changed my password yesterday. Webmail works fine.",
+     "reply": "I've checked your account, and everything is active and in good standing on our end. This issue usually happens because the VPN client is still trying to use your old password. \n\nTo fix this, please try the following steps on your computer:\n1. Sign out of your VPN client completely.\n2. Clear any saved credentials in the VPN client.\n3. Sign back in using your new password.\n\nCould you please try this and let me know if it works for you?",
+     "outcome": "fixed",
+     "state": "6",
+     "team": "Service Desk",
+     "steps": [
+      "Checked the caller's account",
+      "Searched the knowledge base",
+      "Looked for similar and earlier tickets",
+      "Updated the ticket"
+     ],
+     "seconds": 26.9
+    }
+   ]
+  }
+ ]
+}

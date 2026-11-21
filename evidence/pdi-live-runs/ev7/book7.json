@@ -1,0 +1,124 @@
+{
+ "ran_at": "2026-10-04T17:50:00.230237+00:00",
+ "passed": 2,
+ "total": 2,
+ "results": [
+  {
+   "scenario": "true_lock",
+   "caller": "barq.lina",
+   "incident": "INC0010311",
+   "passed": true,
+   "error": null,
+   "checks": {
+    "checked_the_account": true,
+    "unlocked_it": true,
+    "told_to_try_again": true,
+    "closed_after_confirmation": true,
+    "replies_pass_review": true
+   },
+   "grades": [
+    {
+     "correct": 5,
+     "notes": "The agent's reply is excellent. It is highly natural, friendly, and professional. It correctly states the account has been unlocked, explains why it likely got locked (old password on another device from their usual IP address), and provides clear, helpful instructions on what to do next. It is polite and safe.",
+     "kind": 5,
+     "language_ok": true,
+     "natural": 5,
+     "safe": true
+    },
+    {
+     "notes": "The agent's reply is polite, professional, and directly addresses the user's confirmation that they can sign in. It correctly states that the ticket will be closed and offers further help if needed.",
+     "safe": true,
+     "natural": 5,
+     "kind": 5,
+     "language_ok": true,
+     "correct": 5
+    }
+   ],
+   "turns": [
+    {
+     "said": "I can't sign in this morning. It says my account is locked. I changed my password yesterday.",
+     "reply": "I checked your account and confirmed that it was locked after five failed sign-in attempts from your usual IP address. This often happens when another device, like a phone or a VPN client, is still trying to log in with your old password.\n\nI have unlocked your account for you. Please make sure to sign out or update your password on all your other devices, and then try signing in. Could you let me know if it works now?",
+     "outcome": "fixed",
+     "state": "6",
+     "team": "Service Desk",
+     "steps": [
+      "Checked the caller's account",
+      "Looked for similar and earlier tickets",
+      "Searched the knowledge base",
+      "Updated the ticket",
+      "Unlocked the caller's account"
+     ],
+     "seconds": 27.2
+    },
+    {
+     "said": "Yes, I can sign in now. Thank you!",
+     "reply": "I am glad to hear you can sign in now! I will go ahead and close this ticket. Please let us know if you need any further assistance.",
+     "outcome": "closed",
+     "state": "7",
+     "team": "Service Desk",
+     "steps": [
+      "Checked the caller's account"
+     ],
+     "seconds": 20.4
+    }
+   ]
+  },
+  {
+   "scenario": "talk_to_person",
+   "caller": "barq.salma",
+   "incident": "INC0010310",
+   "passed": true,
+   "error": null,
+   "checks": {
+    "handed_to_person": true,
+    "acknowledged": true,
+    "replies_pass_review": true
+   },
+   "grades": [
+    {
+     "kind": 5,
+     "natural": 5,
+     "correct": 5,
+     "notes": "The agent's reply is polite, natural, and directly addresses the issue using the KB instructions. It gives clear, helpful steps to resolve the issue.",
+     "language_ok": true,
+     "safe": true
+    },
+    {
+     "correct": 5,
+     "notes": "The reply is polite, professional, and clear about the next steps. It matches the facts perfectly.",
+     "safe": true,
+     "language_ok": true,
+     "kind": 5,
+     "natural": 5
+    }
+   ],
+   "turns": [
+    {
+     "said": "My printer queue is stuck and nothing prints.",
+     "reply": "I would be glad to help with your printer. Based on our knowledge base, a stuck queue is usually caused by a stalled print service. \n\nCould you please try these quick steps?\n1. Check that the printer is online and has enough paper and toner.\n2. Restart your computer, which resets the print service and usually clears out stuck documents.\n\nPlease let me know if this works or if you still need help!",
+     "outcome": "fixed",
+     "state": "6",
+     "team": "Hardware",
+     "steps": [
+      "Searched the knowledge base",
+      "Looked for similar and earlier tickets",
+      "Updated the ticket",
+      "Checked the caller's account"
+     ],
+     "seconds": 31.2
+    },
+    {
+     "said": "I'd rather talk to a person, please.",
+     "reply": "I understand completely. I am transferring your ticket to our hardware support team so that one of our engineers can reach out and assist you directly.",
+     "outcome": "with_engineer",
+     "state": "2",
+     "team": "Hardware",
+     "steps": [
+      "Looked for similar and earlier tickets"
+     ],
+     "seconds": 26.0
+    }
+   ]
+  }
+ ]
+}

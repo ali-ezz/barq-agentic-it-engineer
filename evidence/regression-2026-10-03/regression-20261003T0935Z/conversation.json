@@ -1,0 +1,192 @@
+{
+  "started_at": "2026-10-03T09:40:41.565588+00:00",
+  "scenarios": {
+    "ask_then_continue": {
+      "incident": "INC0010326",
+      "sys_id": "63d0de4847fb0710c148497f316d43ee",
+      "runs": [
+        {
+          "execution_id": "0cab4405-6eee-4468-be6b-eb5fa032bd06",
+          "event_record_id": "f75cb553-a902-45dd-8847-39a3ca26ca0f",
+          "incident_sys_id": "63d0de4847fb0710c148497f316d43ee",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-03T09:41:04.414039Z",
+          "ended_at": "2026-10-03T09:41:11.343427Z",
+          "termination_cause": "skipped_ineligible",
+          "updated_at": "2026-10-03T09:41:11.344738Z"
+        },
+        {
+          "execution_id": "c01d010a-c10f-4242-a41b-58d1796e399f",
+          "event_record_id": "377cbae3-837a-4e05-b2e1-06ad24142b10",
+          "incident_sys_id": "63d0de4847fb0710c148497f316d43ee",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-03T09:40:49.486871Z",
+          "ended_at": "2026-10-03T09:40:55.541132Z",
+          "termination_cause": "suggested",
+          "updated_at": "2026-10-03T09:40:55.542172Z"
+        }
+      ],
+      "final": {
+        "close_code": null,
+        "assignment_group": "Network",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "1. Confirm with the user that they changed their password within the last 24 hours. [KB0001 v2.0 \u00a7Resolution]\n2. Verify the user's identity following the identity verification procedure. [KB0005 v4.0 \u00a7Resolution]\n3. Unlock the account in the identity console. [KB0005 v4.0 \u00a7Resolution]\n4. Ask the user to sign out of the corporate mail profile on their mobile device. [KB0005 v4.0 \u00a7Resolution]\n5. Ask the user to sign out of the VPN client completely, including the system tray icon. [KB0001 v2.0 \u00a7Resolution]\n6. Clear cached credentials on the laptop, including VPN and mapped drives. [KB0005 v4.0 \u00a7Resolution]\n7. Ask the user to sign in again and confirm access to two different services. [KB0005 v4.0 \u00a7Resolution]\n\nSources: KB0001 v2.0 \u2014 VPN AUTHENTICATION FAILS AFTER A PASSWORD CHANGE; KB0005 v4.0 \u2014 ACCOUNT IS LOCKED AFTER REPEATED FAILED SIGN-INS",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "true",
+        "close_notes": "",
+        "number": "INC0010326",
+        "resolved_by": "",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "1. Confirm with the user that they changed their password within the last 24 hours. [KB0001 v2.0 \u00a7Resolution]\n2. Verify the user's identity following the identity verification procedure. [KB0005 v4.0 \u00a7Resolution]\n3. Unlock the account in the identity console. [KB0005 v4.0 \u00a7Resolution]\n4. Ask the user to sign out of the corporate mail profile on their mobile device. [KB0005 v4.0 \u00a7Resolution]\n5. Ask the user to sign out of the VPN client completely, including the system tray icon. [KB0001 v2.0 \u00a7Resolution]\n6. Clear cached credentials on the laptop, including VPN and mapped drives. [KB0005 v4.0 \u00a7Resolution]\n7. Ask the user to sign in again and confirm access to two different services. [KB0005 v4.0 \u00a7Resolution]\n\nSources: KB0001 v2.0 \u2014 VPN AUTHENTICATION FAILS AFTER A PASSWORD CHANGE; KB0005 v4.0 \u2014 ACCOUNT IS LOCKED AFTER REPEATED FAILED SIGN-INS",
+        "x_2215032_ai_inc_0_ai_classification": "access",
+        "state": "In Progress",
+        "x_2215032_ai_inc_0_ai_confidence": "0.95",
+        "x_2215032_ai_inc_0_ai_processing_state": "Complete"
+      },
+      "checks": {
+        "first_run_finished": true,
+        "asked_one_question": false,
+        "waited_on_hold": false,
+        "reply_queued_the_agent_again": true,
+        "agent_continued_to_a_result": false,
+        "no_question_repeated": true
+      },
+      "passed": false
+    },
+    "engineer_takes_over_then_hands_back": {
+      "incident": "INC0010327",
+      "sys_id": "a3f0568847fb0710c148497f316d43c7",
+      "runs": [
+        {
+          "execution_id": "d8bfc2ae-9634-4826-a739-1ee598adf093",
+          "event_record_id": "2101babd-8e93-4207-8e29-6ea783edb803",
+          "incident_sys_id": "a3f0568847fb0710c148497f316d43c7",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-03T09:41:43.357481Z",
+          "ended_at": "2026-10-03T09:41:47.946157Z",
+          "termination_cause": "suggested",
+          "updated_at": "2026-10-03T09:41:47.947946Z"
+        },
+        {
+          "execution_id": "2660017d-6017-4917-855e-0ec0006f8fdc",
+          "event_record_id": "831056ca-eae8-4c5e-9a20-0bf523fc5904",
+          "incident_sys_id": "a3f0568847fb0710c148497f316d43c7",
+          "status": "succeeded",
+          "node_reached": null,
+          "model_name": null,
+          "agent_version": null,
+          "started_at": "2026-10-03T09:41:33.609515Z",
+          "ended_at": "2026-10-03T09:41:33.625944Z",
+          "termination_cause": "observed:incident.engineer_replied",
+          "updated_at": "2026-10-03T09:41:33.627248Z"
+        },
+        {
+          "execution_id": "139fcec5-1172-42e2-b87d-bf7c23858315",
+          "event_record_id": "0f97c3f0-767e-43fb-b331-92c23abc31fe",
+          "incident_sys_id": "a3f0568847fb0710c148497f316d43c7",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-03T09:41:23.337671Z",
+          "ended_at": "2026-10-03T09:41:28.418189Z",
+          "termination_cause": "suggested",
+          "updated_at": "2026-10-03T09:41:28.419616Z"
+        }
+      ],
+      "final": {
+        "close_code": null,
+        "assignment_group": "Network",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "1. Confirm with the user that they changed their password within the last 24 hours. [KB0001 v2.0 \u00a7Resolution]\n2. Verify the user's identity following the identity verification procedure. [KB0005 v4.0 \u00a7Resolution]\n3. Unlock the account in the identity console. [KB0005 v4.0 \u00a7Resolution]\n4. Ask the user to sign out of the corporate mail profile on their mobile device. [KB0005 v4.0 \u00a7Resolution]\n5. Ask the user to sign out of the VPN client completely, including the system tray icon. [KB0001 v2.0 \u00a7Resolution]\n6. Clear cached credentials on the laptop, including VPN and mapped drives. [KB0005 v4.0 \u00a7Resolution]\n7. Ask the user to sign in again and confirm access to two different services. [KB0005 v4.0 \u00a7Resolution]\n\nSources: KB0001 v2.0 \u2014 VPN AUTHENTICATION FAILS AFTER A PASSWORD CHANGE; KB0005 v4.0 \u2014 ACCOUNT IS LOCKED AFTER REPEATED FAILED SIGN-INS",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "true",
+        "close_notes": "",
+        "number": "INC0010327",
+        "resolved_by": "",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "1. Confirm with the user that they changed their password within the last 24 hours. [KB0001 v2.0 \u00a7Resolution]\n2. Verify the user's identity following the identity verification procedure. [KB0005 v4.0 \u00a7Resolution]\n3. Unlock the account in the identity console. [KB0005 v4.0 \u00a7Resolution]\n4. Ask the user to sign out of the corporate mail profile on their mobile device. [KB0005 v4.0 \u00a7Resolution]\n5. Ask the user to sign out of the VPN client completely, including the system tray icon. [KB0001 v2.0 \u00a7Resolution]\n6. Clear cached credentials on the laptop, including VPN and mapped drives. [KB0005 v4.0 \u00a7Resolution]\n7. Ask the user to sign in again and confirm access to two different services. [KB0005 v4.0 \u00a7Resolution]\n\nSources: KB0001 v2.0 \u2014 VPN AUTHENTICATION FAILS AFTER A PASSWORD CHANGE; KB0005 v4.0 \u2014 ACCOUNT IS LOCKED AFTER REPEATED FAILED SIGN-INS",
+        "x_2215032_ai_inc_0_ai_classification": "access",
+        "state": "In Progress",
+        "x_2215032_ai_inc_0_ai_confidence": "0.95",
+        "x_2215032_ai_inc_0_ai_processing_state": "Complete"
+      },
+      "checks": {
+        "engineer_reply_locked_the_agent_out": true,
+        "stood_down_note": true,
+        "engineer_reply_recorded": true,
+        "hand_back_note_with_instruction": true,
+        "agent_resumed": true,
+        "lock_cleared": true
+      },
+      "passed": true
+    },
+    "caller_reopens_ai_resolution": {
+      "incident": "INC0010328",
+      "sys_id": "1e31de8847fb0710c148497f316d43d4",
+      "runs": [
+        {
+          "execution_id": "cd92709a-fb4e-40da-b801-4c0eab060a36",
+          "event_record_id": "07e6da5d-3b28-44ef-9b0e-99ff97169f65",
+          "incident_sys_id": "1e31de8847fb0710c148497f316d43d4",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-03T09:43:13.690674Z",
+          "ended_at": "2026-10-03T09:43:20.540090Z",
+          "termination_cause": "skipped_ineligible",
+          "updated_at": "2026-10-03T09:43:20.541125Z"
+        },
+        {
+          "execution_id": "51cbccd6-c4b9-4ee6-915f-5e90dbe7dd2b",
+          "event_record_id": "b38be563-e560-4af8-80c2-24b7af11f8ce",
+          "incident_sys_id": "1e31de8847fb0710c148497f316d43d4",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-03T09:42:23.562096Z",
+          "ended_at": "2026-10-03T09:43:02.544783Z",
+          "termination_cause": "suggested",
+          "updated_at": "2026-10-03T09:43:02.545681Z"
+        }
+      ],
+      "final": {
+        "close_code": null,
+        "assignment_group": "Software",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "1. Ask the user to browse to the server path directly to verify if the share and permissions are functional. [KB0003 v2.0 \u00a7Resolution]\n2. If the path opens, re-run the mapping script or remap the drive with reconnect-at-sign-in enabled. [KB0003 v2.0 \u00a7Resolution]\n3. If the path is refused, check the user's group membership against the share's access group. [KB0003 v2.0 \u00a7Resolution]\n4. If group membership is missing, raise an access request without modifying the group membership from this incident. [KB0003 v2.0 \u00a7Resolution]\n5. Confirm the drive is present after a fresh sign-in. [KB0003 v2.0 \u00a7Resolution]\n\nSources: KB0003 v2.0 \u2014 MAPPED SHARED DRIVE IS MISSING AFTER SIGN-IN",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "true",
+        "close_notes": "",
+        "number": "INC0010328",
+        "resolved_by": "",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "1. Ask the user to browse to the server path directly to verify if the share and permissions are functional. [KB0003 v2.0 \u00a7Resolution]\n2. If the path opens, re-run the mapping script or remap the drive with reconnect-at-sign-in enabled. [KB0003 v2.0 \u00a7Resolution]\n3. If the path is refused, check the user's group membership against the share's access group. [KB0003 v2.0 \u00a7Resolution]\n4. If group membership is missing, raise an access request without modifying the group membership from this incident. [KB0003 v2.0 \u00a7Resolution]\n5. Confirm the drive is present after a fresh sign-in. [KB0003 v2.0 \u00a7Resolution]\n\nSources: KB0003 v2.0 \u2014 MAPPED SHARED DRIVE IS MISSING AFTER SIGN-IN",
+        "x_2215032_ai_inc_0_ai_classification": "network",
+        "state": "In Progress",
+        "x_2215032_ai_inc_0_ai_confidence": "0.9",
+        "x_2215032_ai_inc_0_ai_processing_state": "Complete"
+      },
+      "checks": {
+        "was_resolved_by_agent": false,
+        "reopened_to_in_progress": true,
+        "engineer_has_it": false,
+        "hand_over_note": false,
+        "reopen_recorded": false
+      },
+      "passed": false
+    }
+  },
+  "finished_at": "2026-10-03T09:45:12.233255+00:00"
+}

@@ -1,0 +1,63 @@
+{
+  "started_at": "2026-10-04T00:56:44.686729+00:00",
+  "scenarios": {
+    "approver_approves_on_page": {
+      "incident": "INC0010099",
+      "sys_id": "6382651073f3c7d02aedfed25ab8b774",
+      "message": "Execute operation on API 'ScriptableRESTResponse.getBody' from scope 'AI Incident Orchestrator' was denied. The application 'AI Incident Orchestrator' must declare a cross scope access privilege. Please contact the application author to update their privilege requests.",
+      "runs": [
+        {
+          "execution_id": "e209ffbf-660e-4253-bc16-8c7b83637d75",
+          "event_record_id": "0f84db2d-14d4-4e95-b753-454098033350",
+          "incident_sys_id": "6382651073f3c7d02aedfed25ab8b774",
+          "status": "awaiting_approval",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:56:55.901752Z",
+          "ended_at": null,
+          "termination_cause": null,
+          "updated_at": "2026-10-04T00:57:14.124063Z"
+        }
+      ],
+      "checks": {
+        "parked": true,
+        "engineer_has_no_approve_button": true,
+        "approver_pressed_approve": true,
+        "resolved_after_approval": false,
+        "edited_fix_applied": false,
+        "backend_run_finished": false
+      },
+      "passed": false
+    },
+    "engineer_takes_over_parked": {
+      "incident": "INC0010100",
+      "sys_id": "c983ad9073f3c7d02aedfed25ab8b757",
+      "message": "Execute operation on API 'ScriptableRESTResponse.getBody' from scope 'AI Incident Orchestrator' was denied. The application 'AI Incident Orchestrator' must declare a cross scope access privilege. Please contact the application author to update their privilege requests.",
+      "runs": [
+        {
+          "execution_id": "ceb82e9f-42cf-4e59-96f8-b9115affccf8",
+          "event_record_id": "0058a9e2-fb65-468f-b7d4-c49516162d59",
+          "incident_sys_id": "c983ad9073f3c7d02aedfed25ab8b757",
+          "status": "awaiting_approval",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T01:01:11.688862Z",
+          "ended_at": null,
+          "termination_cause": null,
+          "updated_at": "2026-10-04T01:01:27.801270Z"
+        }
+      ],
+      "checks": {
+        "parked": true,
+        "take_over_pressed": true,
+        "paused_run_closed": false,
+        "locked": false,
+        "nothing_resolved": true
+      },
+      "passed": false
+    }
+  },
+  "finished_at": "2026-10-04T01:04:21.949815+00:00"
+}

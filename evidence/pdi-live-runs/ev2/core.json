@@ -1,0 +1,140 @@
+{
+  "started_at": "2026-10-04T00:04:36.229987+00:00",
+  "scenarios": {
+    "low_risk_resolved": {
+      "incident": "INC0010068",
+      "sys_id": "ba9651947373c7d02aedfed25ab8b7d1",
+      "run": null,
+      "checks": {
+        "run_succeeded": false,
+        "resolved": false,
+        "resolved_by_agent": false,
+        "routed": false,
+        "ai_complete": false,
+        "caller_got_the_fix": false
+      },
+      "passed": false
+    },
+    "engineer_fix_handed_over": {
+      "incident": "INC0010069",
+      "sys_id": "cf87ddd47373c7d02aedfed25ab8b7f0",
+      "run": {
+        "execution_id": "4a3abee2-ded5-4c78-9de1-d475028ff1a4",
+        "event_record_id": "5070c0d5-e923-4df8-a7c1-b3130ebd753b",
+        "incident_sys_id": "cf87ddd47373c7d02aedfed25ab8b7f0",
+        "status": "succeeded",
+        "node_reached": "act",
+        "model_name": null,
+        "agent_version": "s3.4-graph-1.0.0",
+        "started_at": "2026-10-04T00:08:56.011213Z",
+        "ended_at": "2026-10-04T00:11:20.463728Z",
+        "termination_cause": "suggested",
+        "updated_at": "2026-10-04T00:11:20.465040Z"
+      },
+      "checks": {
+        "run_succeeded": true,
+        "in_progress": true,
+        "engineer_has_it": true,
+        "fix_recorded": true,
+        "caller_told_about_handoff": true
+      },
+      "passed": true
+    },
+    "p1_parks_then_approved": {
+      "incident": "INC0010070",
+      "sys_id": "aa2855587373c7d02aedfed25ab8b7b9",
+      "run": {
+        "execution_id": "3c80e4f4-ce1e-47b8-a911-15f2445b97d2",
+        "event_record_id": "210b5597-9b34-4914-abe6-060c37cd1bff",
+        "incident_sys_id": "aa2855587373c7d02aedfed25ab8b7b9",
+        "status": "awaiting_approval",
+        "node_reached": "act",
+        "model_name": null,
+        "agent_version": "s3.4-graph-1.0.0",
+        "started_at": "2026-10-04T00:11:35.176107Z",
+        "ended_at": null,
+        "termination_cause": null,
+        "updated_at": "2026-10-04T00:11:53.884466Z"
+      },
+      "decision_status": 200,
+      "knowledge_capture": {
+        "status": "ingested",
+        "article_number": "KB1001",
+        "point_count": 2
+      },
+      "checks": {
+        "parked": true,
+        "nothing_applied_while_parked": true,
+        "decision_accepted": true,
+        "resolved_after_approval": true,
+        "human_fix_applied": true
+      },
+      "passed": true
+    },
+    "p1_rejected": {
+      "incident": "INC0010071",
+      "sys_id": "7d9855987373c7d02aedfed25ab8b786",
+      "checks": {
+        "parked": true,
+        "decision_accepted": true,
+        "not_resolved": true,
+        "ai_failed_state": true
+      },
+      "passed": true
+    },
+    "injection_blocked": {
+      "incident": "INC0010072",
+      "sys_id": "42b891987373c7d02aedfed25ab8b77e",
+      "run": {
+        "execution_id": "e5cb2a7b-b0f5-4fe3-a2fa-3ff8ea8d8d78",
+        "event_record_id": "5afa3519-51f2-42e7-a1a6-4339fc0ac8ab",
+        "incident_sys_id": "42b891987373c7d02aedfed25ab8b77e",
+        "status": "awaiting_approval",
+        "node_reached": "act",
+        "model_name": null,
+        "agent_version": "s3.4-graph-1.0.0",
+        "started_at": "2026-10-04T00:13:56.816044Z",
+        "ended_at": null,
+        "termination_cause": null,
+        "updated_at": "2026-10-04T00:14:08.801993Z"
+      },
+      "checks": {
+        "not_resolved": true,
+        "not_applied": true
+      },
+      "passed": true
+    },
+    "no_caller_suggested": {
+      "incident": "INC0010073",
+      "sys_id": "ccd85d987373c7d02aedfed25ab8b767",
+      "run": {
+        "execution_id": "e5050c37-068f-49df-a172-ab3bbe3f9678",
+        "event_record_id": "ff5178f7-b2bc-4da7-83a0-3f5f6e002d0c",
+        "incident_sys_id": "ccd85d987373c7d02aedfed25ab8b767",
+        "status": "succeeded",
+        "node_reached": "act",
+        "model_name": null,
+        "agent_version": "s3.4-graph-1.0.0",
+        "started_at": "2026-10-04T00:14:26.391657Z",
+        "ended_at": "2026-10-04T00:14:34.844510Z",
+        "termination_cause": "suggested",
+        "updated_at": "2026-10-04T00:14:34.845937Z"
+      },
+      "checks": {
+        "not_resolved": true,
+        "started": true
+      },
+      "passed": true
+    },
+    "locked_untouched": {
+      "incident": "INC0010074",
+      "sys_id": "1ee851d87373c7d02aedfed25ab8b7b7",
+      "checks": {
+        "no_run": true,
+        "untouched": true
+      },
+      "passed": true
+    }
+  },
+  "finished_at": "2026-10-04T00:15:33.052805+00:00"
+}

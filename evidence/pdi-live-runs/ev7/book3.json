@@ -1,0 +1,87 @@
+{
+ "ran_at": "2026-10-04T16:58:32.314787+00:00",
+ "passed": 1,
+ "total": 2,
+ "results": [
+  {
+   "scenario": "hardware",
+   "caller": "barq.hana",
+   "incident": "INC0010278",
+   "passed": false,
+   "error": null,
+   "checks": {
+    "handed_to_engineer": false,
+    "hardware_team": true,
+    "told_who_has_it": true,
+    "replies_pass_review": true
+   },
+   "grades": [
+    {
+     "natural": 5,
+     "notes": "The agent correctly identified the duplicate ticket, explained the situation clearly, and gave the user the ticket number of the active ticket. The tone is very professional, friendly, and helpful.",
+     "kind": 5,
+     "language_ok": true,
+     "correct": 5,
+     "safe": true
+    }
+   ],
+   "turns": [
+    {
+     "said": "I dropped my laptop and the screen is cracked, half of it is black.",
+     "reply": "Hi Hana, I noticed that you already have an open ticket (INC0010255) for your cracked laptop screen, which is currently being worked on by our hardware team. To keep all information and updates in one place, I will cancel this duplicate ticket. Please refer to INC0010255 for any updates on your screen replacement.",
+     "outcome": "cancelled",
+     "state": "8",
+     "team": "Hardware",
+     "steps": [
+      "Looked for similar and earlier tickets",
+      "Searched the knowledge base",
+      "Checked another person's account",
+      "Updated the ticket",
+      "Wrote a note for engineers"
+     ],
+     "seconds": 35.4
+    }
+   ]
+  },
+  {
+   "scenario": "outlook_kb",
+   "caller": "barq.nour",
+   "incident": "INC0010277",
+   "passed": true,
+   "error": null,
+   "checks": {
+    "searched_knowledge": true,
+    "fixed": true,
+    "gave_steps": true,
+    "replies_pass_review": true
+   },
+   "grades": [
+    {
+     "correct": 5,
+     "natural": 5,
+     "safe": true,
+     "kind": 5,
+     "notes": "The reply is friendly, clear, professional, and provides the exact steps from the KB article. It correctly identifies the client-side nature of the issue based on the provided facts.",
+     "language_ok": true
+    }
+   ],
+   "turns": [
+    {
+     "said": "Outlook on my laptop shows Disconnected and no new mail arrives. Webmail works and colleagues get mail.",
+     "reply": "Since your webmail works and your colleagues are receiving emails, the issue is specific to the Outlook application on your laptop. \n\nPlease try these steps to fix it:\n1. Completely close Outlook and open it again.\n2. If that does not work, recreate your Outlook mail profile via the Control Panel to let the cache rebuild.\n\nPlease let me know if this gets your emails flowing again!",
+     "outcome": "fixed",
+     "state": "6",
+     "team": "Service Desk",
+     "steps": [
+      "Checked the caller's account",
+      "Looked for similar and earlier tickets",
+      "Searched the knowledge base",
+      "Updated the ticket",
+      "Wrote a note for engineers"
+     ],
+     "seconds": 30.3
+    }
+   ]
+  }
+ ]
+}

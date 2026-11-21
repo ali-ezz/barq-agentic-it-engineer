@@ -1,0 +1,237 @@
+{
+  "started_at": "2026-10-04T00:17:18.057472+00:00",
+  "scenarios": {
+    "ask_then_continue": {
+      "incident": "INC0010077",
+      "sys_id": "a589951c7373c7d02aedfed25ab8b7e1",
+      "runs": [
+        {
+          "execution_id": "e31afb32-26f8-4573-a858-d3df05521175",
+          "event_record_id": "78b794a1-f640-4d2a-a891-f6480dc6f1df",
+          "incident_sys_id": "a589951c7373c7d02aedfed25ab8b7e1",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:18:13.971280Z",
+          "ended_at": "2026-10-04T00:18:15.587891Z",
+          "termination_cause": "skipped_ineligible",
+          "updated_at": "2026-10-04T00:18:15.588539Z"
+        },
+        {
+          "execution_id": "e3878129-e63b-49d8-96a5-7b04ce62f0d8",
+          "event_record_id": "62d2fb93-32a1-41d0-9016-b15206cc7104",
+          "incident_sys_id": "a589951c7373c7d02aedfed25ab8b7e1",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:17:28.551622Z",
+          "ended_at": "2026-10-04T00:17:48.646522Z",
+          "termination_cause": "asked_caller",
+          "updated_at": "2026-10-04T00:17:48.647610Z"
+        }
+      ],
+      "final": {
+        "close_code": null,
+        "assignment_group": "Network",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "false",
+        "close_notes": "",
+        "number": "INC0010077",
+        "resolved_by": "",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "",
+        "x_2215032_ai_inc_0_ai_classification": "other",
+        "state": "In Progress",
+        "x_2215032_ai_inc_0_ai_confidence": "",
+        "x_2215032_ai_inc_0_ai_processing_state": "In Progress"
+      },
+      "checks": {
+        "first_run_finished": true,
+        "asked_one_question": true,
+        "waited_on_hold": true,
+        "reply_queued_the_agent_again": true,
+        "agent_continued_to_a_result": false,
+        "no_question_repeated": true
+      },
+      "passed": false
+    },
+    "engineer_takes_over_then_hands_back": {
+      "incident": "INC0010080",
+      "sys_id": "4cc9115c7373c7d02aedfed25ab8b79d",
+      "runs": [
+        {
+          "execution_id": "9309f728-83d4-412a-b10f-645cd6e9c6f2",
+          "event_record_id": "810d74e8-7254-417a-baff-704fcc99fdd8",
+          "incident_sys_id": "4cc9115c7373c7d02aedfed25ab8b79d",
+          "status": "succeeded",
+          "node_reached": null,
+          "model_name": null,
+          "agent_version": null,
+          "started_at": "2026-10-04T00:18:53.870490Z",
+          "ended_at": "2026-10-04T00:18:55.574878Z",
+          "termination_cause": "observed:incident.engineer_replied",
+          "updated_at": "2026-10-04T00:18:55.575850Z"
+        },
+        {
+          "execution_id": "894ce996-2b21-4b65-8700-5ad347aeb85c",
+          "event_record_id": "f4828485-9753-478f-8ebb-8b6d0127e75f",
+          "incident_sys_id": "4cc9115c7373c7d02aedfed25ab8b79d",
+          "status": "awaiting_approval",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:18:26.184654Z",
+          "ended_at": null,
+          "termination_cause": null,
+          "updated_at": "2026-10-04T00:18:45.649360Z"
+        }
+      ],
+      "final": {
+        "close_code": null,
+        "assignment_group": "Network",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "true",
+        "close_notes": "",
+        "number": "INC0010080",
+        "resolved_by": "",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "",
+        "x_2215032_ai_inc_0_ai_classification": "network",
+        "state": "In Progress",
+        "x_2215032_ai_inc_0_ai_confidence": "",
+        "x_2215032_ai_inc_0_ai_processing_state": "Awaiting Approval"
+      },
+      "checks": {
+        "engineer_reply_locked_the_agent_out": false,
+        "stood_down_note": false,
+        "engineer_reply_recorded": true,
+        "hand_back_button_offered_and_pressed": true,
+        "hand_back_note_with_instruction": false,
+        "agent_resumed": false,
+        "lock_cleared": true
+      },
+      "passed": false
+    },
+    "caller_reopens_ai_resolution": {
+      "incident": "INC0010085",
+      "sys_id": "836bd91073b3c7d02aedfed25ab8b781",
+      "runs": [
+        {
+          "execution_id": "ab49b9df-2771-4bfd-a43c-271d469723e1",
+          "event_record_id": "6b838160-b26a-4aa5-b50b-65df0846901f",
+          "incident_sys_id": "836bd91073b3c7d02aedfed25ab8b781",
+          "status": "succeeded",
+          "node_reached": null,
+          "model_name": null,
+          "agent_version": null,
+          "started_at": "2026-10-04T00:26:14.991407Z",
+          "ended_at": "2026-10-04T00:26:16.991017Z",
+          "termination_cause": "observed:incident.reopened",
+          "updated_at": "2026-10-04T00:26:16.995039Z"
+        },
+        {
+          "execution_id": "1b7f2b23-c708-48b4-bb29-e32f0d34492e",
+          "event_record_id": "c293505e-091c-4ef6-b069-eef56c3c0020",
+          "incident_sys_id": "836bd91073b3c7d02aedfed25ab8b781",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:25:45.613322Z",
+          "ended_at": "2026-10-04T00:26:02.355864Z",
+          "termination_cause": "suggested",
+          "updated_at": "2026-10-04T00:26:02.356996Z"
+        }
+      ],
+      "final": {
+        "close_code": "Solution provided",
+        "assignment_group": "Software",
+        "x_2215032_ai_inc_0_ai_failure_reason": "",
+        "x_2215032_ai_inc_0_ai_suggestion": "1. Ask whether colleagues are affected to verify it is not a wider service event. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for the user to confirm the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. Close the mail client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "priority": "5 - Planning",
+        "x_2215032_ai_inc_0_ai_human_review_required": "false",
+        "close_notes": "Resolved by BARQ AI Agent with confidence 0.95.\n\n1. Ask whether colleagues are affected to verify it is not a wider service event. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for the user to confirm the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. Close the mail client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "number": "INC0010085",
+        "resolved_by": "BARQ AI Agent",
+        "x_2215032_ai_inc_0_ai_human_lock": "false",
+        "x_2215032_ai_inc_0_ai_resolution": "1. Ask whether colleagues are affected to verify it is not a wider service event. [KB0002 v3.0 \u00a7Resolution]\n2. Check whether webmail works for the user to confirm the fault is client-side. [KB0002 v3.0 \u00a7Resolution]\n3. Close the mail client fully and reopen it. [KB0002 v3.0 \u00a7Resolution]\n4. If it still fails, recreate the mail profile and allow the cache to rebuild. [KB0002 v3.0 \u00a7Resolution]\n5. Confirm mail flow before closing. [KB0002 v3.0 \u00a7Resolution]\n\nSources: KB0002 v3.0 \u2014 OUTLOOK SHOWS DISCONNECTED AND NO MAIL IS DELIVERED",
+        "x_2215032_ai_inc_0_ai_classification": "software",
+        "state": "Resolved",
+        "x_2215032_ai_inc_0_ai_confidence": "0.95",
+        "x_2215032_ai_inc_0_ai_processing_state": "Complete"
+      },
+      "checks": {
+        "was_resolved_by_agent": true,
+        "reopened_to_in_progress": false,
+        "engineer_has_it": false,
+        "hand_over_note": false,
+        "reopen_recorded": true
+      },
+      "passed": false
+    },
+    "approver_approves_on_page": {
+      "incident": "INC0010086",
+      "sys_id": "26cbd15073b3c7d02aedfed25ab8b757",
+      "message": "Read operation on table 'incident' from scope 'AI Incident Orchestrator' was denied. The application 'AI Incident Orchestrator' must declare a cross scope access privilege. Please contact the application author to update their privilege requests. | Execute operation on API 'ScriptableRESTMessageClient.setHttpMethod' from scope 'AI Incident Orchestrator' was denied. The application 'AI Incident Orchestrator' must declare a cross scope access privilege. Please contact the application author to update their privilege requests.",
+      "runs": [
+        {
+          "execution_id": "1171f6ba-6c3a-4f68-8f43-7187a6a35332",
+          "event_record_id": "c55791b9-383e-4c5d-a8e2-de1d3c13dd94",
+          "incident_sys_id": "26cbd15073b3c7d02aedfed25ab8b757",
+          "status": "awaiting_approval",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:27:25.921010Z",
+          "ended_at": null,
+          "termination_cause": null,
+          "updated_at": "2026-10-04T00:27:45.702632Z"
+        }
+      ],
+      "checks": {
+        "parked": true,
+        "engineer_has_no_approve_button": false,
+        "approver_pressed_approve": true,
+        "resolved_after_approval": false,
+        "edited_fix_applied": false,
+        "backend_run_finished": false
+      },
+      "passed": false
+    },
+    "engineer_takes_over_parked": {
+      "incident": "INC0010087",
+      "sys_id": "6fbc99d073b3c7d02aedfed25ab8b717",
+      "message": "Read operation on table 'incident' from scope 'AI Incident Orchestrator' was denied. The application 'AI Incident Orchestrator' must declare a cross scope access privilege. Please contact the application author to update their privilege requests. | Execute operation on API 'ScriptableRESTMessageClient.setHttpMethod' from scope 'AI Incident Orchestrator' was denied. The application 'AI Incident Orchestrator' must declare a cross scope access privilege. Please contact the application author to update their privilege requests.",
+      "runs": [
+        {
+          "execution_id": "eb1cd316-7e14-47a3-86b6-b68ff1a716b9",
+          "event_record_id": "3de71d3d-b852-4aea-afea-589fadf271c8",
+          "incident_sys_id": "6fbc99d073b3c7d02aedfed25ab8b717",
+          "status": "awaiting_approval",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T00:31:44.677642Z",
+          "ended_at": null,
+          "termination_cause": null,
+          "updated_at": "2026-10-04T00:32:00.198579Z"
+        }
+      ],
+      "checks": {
+        "parked": true,
+        "take_over_pressed": true,
+        "paused_run_closed": false,
+        "locked": false,
+        "nothing_resolved": true
+      },
+      "passed": false
+    }
+  },
+  "finished_at": "2026-10-04T00:34:22.813419+00:00"
+}

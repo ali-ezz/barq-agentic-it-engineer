@@ -1,0 +1,88 @@
+{
+  "started_at": "2026-10-04T01:35:05.876464+00:00",
+  "cases": {
+    "outlook_resolved_fast": {
+      "sys_id": "a05b69547337c7d02aedfed25ab8b74b",
+      "checks": {
+        "run_succeeded": true,
+        "resolved_by_agent": true,
+        "ai_complete": true,
+        "caller_got_steps": true,
+        "caller_can_reply": true,
+        "routed_to_software": true,
+        "answered_within_60s": true
+      },
+      "caller": "edgardo.prudente",
+      "incidents": [
+        "INC0010128"
+      ],
+      "timings": {
+        "agent": 22.2
+      },
+      "seconds": 28.8,
+      "passed": true,
+      "final": {
+        "number": "INC0010128",
+        "state": "Resolved",
+        "assignment_group": "Software",
+        "resolved_by": "BARQ AI Agent",
+        "x_2215032_ai_inc_0_ai_processing_state": "Complete"
+      }
+    },
+    "mfa_new_phone": {
+      "sys_id": "736bad147337c7d02aedfed25ab8b738",
+      "checks": {
+        "run_finished": true,
+        "not_self_service": true,
+        "engineer_involved": true,
+        "caller_told": true
+      },
+      "caller": "candice.bruckman",
+      "incidents": [
+        "INC0010129"
+      ],
+      "timings": {
+        "agent": 36.3
+      },
+      "seconds": 40.3,
+      "passed": true,
+      "final": {
+        "number": "INC0010129",
+        "state": "In Progress",
+        "assignment_group": "Software",
+        "resolved_by": "",
+        "x_2215032_ai_inc_0_ai_processing_state": "Awaiting Approval"
+      }
+    },
+    "page_not_fixed_goes_to_engineer": {
+      "sys_id": "74ab25947337c7d02aedfed25ab8b7fd",
+      "checks": {
+        "reopened": true,
+        "engineer_has_it": true,
+        "page_says_engineer": true,
+        "ai_did_not_rerun": true,
+        "reopen_event_fast": true
+      },
+      "caller": "justina.dragaj",
+      "incidents": [
+        "INC0010130"
+      ],
+      "timings": {
+        "agent": 12.1,
+        "reopen_event": 2.0
+      },
+      "seconds": 32.4,
+      "passed": true,
+      "final": {
+        "number": "INC0010130",
+        "state": "In Progress",
+        "assignment_group": "Software",
+        "resolved_by": "",
+        "x_2215032_ai_inc_0_ai_processing_state": "Complete"
+      }
+    }
+  },
+  "finished_at": "2026-10-04T01:36:52.892506+00:00",
+  "passed": 3,
+  "total": 3
+}

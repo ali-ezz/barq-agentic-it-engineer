@@ -29,3 +29,4 @@ build/
 .presentation-edit/
 animation-validation-*.json
 tunnel_url.txt
+sync.log

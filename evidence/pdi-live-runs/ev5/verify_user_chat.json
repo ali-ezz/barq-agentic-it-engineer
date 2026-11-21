@@ -1,0 +1,146 @@
+{
+  "started_at": "2026-10-04T02:28:06.937217+00:00",
+  "caller": "lacy.belmont",
+  "incident": "INC0010170",
+  "sys_id": "e987319073b7c7d02aedfed25ab8b7b6",
+  "reply": {
+    "role": "assistant",
+    "citations": [
+      {
+        "article_id": "KB0009-v2.0",
+        "chunk_index": 0,
+        "article_number": "KB0009",
+        "section": "Symptom",
+        "title": "WI-FI DROPS REPEATEDLY ON THE 5 GHZ CORPORATE NETWORK",
+        "excerpt": "## Symptom  \nThe connection drops every few minutes and reconnects on its own. It is worse in some parts of the building and while moving between areas.",
+        "article_url": null,
+        "manual_section": null,
+        "version": "2.0"
+      },
+      {
+        "article_id": "KB0009-v2.0",
+        "chunk_index": 1,
+        "article_number": "KB0009",
+        "section": "Cause",
+        "title": "WI-FI DROPS REPEATEDLY ON THE 5 GHZ CORPORATE NETWORK",
+        "excerpt": "## Cause  \nAggressive roaming behaviour between access points, or a power-saving setting on the wireless adapter that suspends the radio during idle periods.",
+        "article_url": null,
+        "manual_section": null,
+        "version": "2.0"
+      },
+      {
+        "article_id": "KB0009-v2.0",
+        "chunk_index": 2,
+        "article_number": "KB0009",
+        "section": "Resolution",
+        "title": "WI-FI DROPS REPEATEDLY ON THE 5 GHZ CORPORATE NETWORK",
+        "excerpt": "## Resolution  \n1. Establish whether drops occur in one location or while moving. Drops only while moving indicate roaming; drops while stationary indicate the adapter.\n2. For a stationary user, disable power saving on the wireless adapter.\n3. Update the wireless adapter driver to the current supported version.\n4. Ask the user to forget and rejoin the corporate network so the profile is rebuilt.\n5. Confirm a stable connection for at least fifteen minutes before closing.",
+        "article_url": null,
+        "manual_section": null,
+        "version": "2.0"
+      },
+      {
+        "article_id": "KB0009-v2.0",
+        "chunk_index": 3,
+        "article_number": "KB0009",
+        "section": "Escalation",
+        "title": "WI-FI DROPS REPEATEDLY ON THE 5 GHZ CORPORATE NETWORK",
+        "excerpt": "## Escalation  \nDrops affecting several users in the same area are an infrastructure fault. Escalate to Network with the location and the approximate times.",
+        "article_url": null,
+        "manual_section": null,
+        "version": "2.0"
+      }
+    ],
+    "created_at": "2026-10-04T02:28:26.043560Z",
+    "id": "ce5ae90e-bad4-4368-a95f-3e29dd250409",
+    "seq": 2,
+    "content": "Based on your symptom of the Wi-Fi dropping repeatedly every few minutes on the 5 GHz corporate network, the issue is likely caused by aggressive roaming behavior between access points or a power-saving setting on your wireless adapter that suspends the radio during idle periods.\n\nTo resolve this, please follow these steps:\n\n1. **Determine the pattern**: Establish whether the connection drops occur in one location (stationary) or while you are moving. \n   * Drops while moving indicate a roaming issue.\n   * Drops while stationary indicate an issue with your wireless adapter.\n2. **For stationary drops**: Disable the power-saving setting on your wireless adapter.\n3. **Update drivers**: Update your wireless adapter driver to the currently supported version.\n4. **Rebuild the profile**: Forget the corporate network on your device and then rejoin it so the network profile is rebuilt.\n5. **Monitor**: Confirm that your connection remains stable for at least 15 minutes.\n\n**Note on Escalation**: If these drops are affecting multiple users in the same area, it points to an infrastructure fault. In this case, the issue should be escalated to the **Network** team, including the specific location and approximate times of the drops."
+  },
+  "proposal": {
+    "short_description": "Intermittent Wi-Fi connection drops on 5 GHz corporate network",
+    "description": "My Wi-Fi keeps dropping every few minutes on the 5 GHz corporate network.",
+    "category": "network"
+  },
+  "ticket": {
+    "tone": "info",
+    "can_cancel": true,
+    "description": "My Wi-Fi keeps dropping every few minutes on the 5 GHz corporate network.",
+    "can_ask_person": false,
+    "title": "[BARQ-TEST-2026-10-03] Intermittent Wi-Fi connection drops on 5 GHz corporate network",
+    "sys_id": "e987319073b7c7d02aedfed25ab8b7b6",
+    "number": "INC0010170",
+    "can_reply": true,
+    "working": false,
+    "closed": false,
+    "can_confirm": false,
+    "updated": "2026-10-03 19:29:06",
+    "conversation": [
+      {
+        "mine": false,
+        "agent": true,
+        "at": "2026-10-03 19:29:03",
+        "text": "Hello, this is BARQ AI Agent. I looked into your incident. The fix needs the network team, who now have it together with the steps to fix it. You will hear from them here, and you can add details at any time.",
+        "who": "BARQ AI Agent"
+      }
+    ],
+    "status": "An engineer is working on it"
+  },
+  "follow_up": {
+    "tone": "info",
+    "can_cancel": true,
+    "description": "My Wi-Fi keeps dropping every few minutes on the 5 GHz corporate network.",
+    "can_ask_person": false,
+    "title": "[BARQ-TEST-2026-10-03] Intermittent Wi-Fi connection drops on 5 GHz corporate network",
+    "sys_id": "e987319073b7c7d02aedfed25ab8b7b6",
+    "number": "INC0010170",
+    "can_reply": true,
+    "working": false,
+    "closed": false,
+    "can_confirm": false,
+    "updated": "2026-10-03 19:29:14",
+    "conversation": [
+      {
+        "mine": false,
+        "agent": true,
+        "at": "2026-10-03 19:29:03",
+        "text": "Hello, this is BARQ AI Agent. I looked into your incident. The fix needs the network team, who now have it together with the steps to fix it. You will hear from them here, and you can add details at any time.",
+        "who": "BARQ AI Agent"
+      },
+      {
+        "mine": true,
+        "agent": false,
+        "at": "2026-10-03 19:29:14",
+        "text": "It happens only on the 5 GHz network in the office, since Monday.",
+        "who": "Lacy Belmont"
+      }
+    ],
+    "status": "An engineer is working on it"
+  },
+  "run": {
+    "execution_id": "624e36f7-c41e-4151-85b7-7169c65a00da",
+    "event_record_id": "ed5dfcab-2e97-41f8-aab1-9d00373a85f6",
+    "incident_sys_id": "e987319073b7c7d02aedfed25ab8b7b6",
+    "status": "succeeded",
+    "node_reached": "act",
+    "model_name": null,
+    "agent_version": "s3.4-graph-1.0.0",
+    "started_at": "2026-10-04T02:28:34.646707Z",
+    "ended_at": "2026-10-04T02:29:07.616025Z",
+    "termination_cause": "suggested",
+    "updated_at": "2026-10-04T02:29:07.616948Z"
+  },
+  "checks": {
+    "page_loads_with_chat": true,
+    "new_caller_sees_no_tickets": true,
+    "chat_answers": true,
+    "problem_gets_ticket_proposal": true,
+    "ticket_created_as_the_caller": true,
+    "agent_worked_the_ticket": true,
+    "agent_message_visible_in_chat": true,
+    "no_work_notes_in_chat": true,
+    "follow_up_applied": true,
+    "other_users_ticket_refused": true
+  },
+  "passed": true,
+  "finished_at": "2026-10-04T02:29:16.869905+00:00"
+}

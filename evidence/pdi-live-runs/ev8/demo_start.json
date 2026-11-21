@@ -1,0 +1,131 @@
+{
+  "tickets": [
+    {
+      "person": "barq.omar",
+      "what": "says locked, is not",
+      "incident": "INC0010316",
+      "outcome": "fixed",
+      "team": "Service Desk",
+      "seconds": 41,
+      "error": null
+    },
+    {
+      "person": "barq.karim",
+      "what": "asks for a colleague's account",
+      "incident": "INC0010315",
+      "outcome": "security",
+      "team": "IT Securities",
+      "seconds": 37,
+      "error": null
+    },
+    {
+      "person": "barq.tarek",
+      "what": "wants admin rights",
+      "incident": "INC0010314",
+      "outcome": "security",
+      "team": "IT Securities",
+      "seconds": 33,
+      "error": null
+    },
+    {
+      "person": "barq.yousef",
+      "what": "injection attempt",
+      "incident": "INC0010313",
+      "outcome": "security",
+      "team": "IT Securities",
+      "seconds": 28,
+      "error": null
+    },
+    {
+      "person": "barq.mona",
+      "what": "password seen",
+      "incident": "INC0010317",
+      "outcome": "fixed",
+      "team": "Service Desk",
+      "seconds": 31,
+      "error": null
+    },
+    {
+      "person": "barq.rami",
+      "what": "VPN after password change",
+      "incident": "INC0010318",
+      "outcome": "fixed",
+      "team": "Service Desk",
+      "seconds": 34,
+      "error": null
+    },
+    {
+      "person": "barq.nour",
+      "what": "Outlook, fixed and confirmed",
+      "incident": "INC0010319",
+      "outcome": "closed",
+      "team": "Service Desk",
+      "seconds": 79,
+      "error": null
+    },
+    {
+      "person": "barq.layla",
+      "what": "Arabic",
+      "incident": "INC0010320",
+      "outcome": "fixed",
+      "team": "Software",
+      "seconds": 86,
+      "error": null
+    },
+    {
+      "person": "barq.hana",
+      "what": "broken hardware",
+      "incident": "INC0010321",
+      "outcome": "with_engineer",
+      "team": "Hardware",
+      "seconds": 44,
+      "error": null
+    },
+    {
+      "person": "barq.salma",
+      "what": "wants a person",
+      "incident": "INC0010322",
+      "outcome": "with_engineer",
+      "team": "Hardware",
+      "seconds": 93,
+      "error": null
+    },
+    {
+      "person": "barq.dina",
+      "what": "cancels",
+      "incident": "INC0010323",
+      "outcome": "closed",
+      "team": "Service Desk",
+      "seconds": 67,
+      "error": null
+    },
+    {
+      "person": "barq.ziad",
+      "what": "too vague",
+      "incident": "INC0010324",
+      "outcome": "waiting_for_caller",
+      "team": "Service Desk",
+      "seconds": 40,
+      "error": null
+    },
+    {
+      "person": "barq.ahmed",
+      "what": "duplicate ticket",
+      "incident": "INC0010325, INC0010327",
+      "outcome": "cancelled",
+      "team": "Hardware",
+      "seconds": 113,
+      "error": null
+    },
+    {
+      "person": "barq.mariam",
+      "what": "engineer gave an instruction",
+      "incident": "INC0010326",
+      "outcome": "with_engineer",
+      "team": "Service Desk",
+      "seconds": 87,
+      "error": null
+    }
+  ],
+  "desk_url": "https://dev434590.service-now.com/incident_list.do?sysparm_view=barq_engineer&sysparm_query=caller_id.user_nameSTARTSWITHbarq.%5Enumber%3E%3DINC0010313%5EORDERBYDESCnumber"
+}

@@ -1,0 +1,76 @@
+{
+  "started_at": "2026-10-04T01:04:42.624489+00:00",
+  "scenarios": {
+    "approver_approves_on_page": {
+      "incident": "INC0010101",
+      "sys_id": "5c642d1473f3c7d02aedfed25ab8b701",
+      "message": "Approved. BARQ AI Agent resumed and is applying the decision.",
+      "runs": [
+        {
+          "execution_id": "9640a6fe-4f95-49bc-9458-f787ba4eb07f",
+          "event_record_id": "0dfc1f66-962d-424a-9ce4-5e6342f1779d",
+          "incident_sys_id": "5c642d1473f3c7d02aedfed25ab8b701",
+          "status": "succeeded",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T01:04:55.650793Z",
+          "ended_at": "2026-10-04T01:06:25.216208Z",
+          "termination_cause": "interrupt_resume:escalated_high_risk",
+          "updated_at": "2026-10-04T01:06:25.217586Z"
+        }
+      ],
+      "checks": {
+        "parked": true,
+        "engineer_has_no_approve_button": true,
+        "approver_pressed_approve": true,
+        "resolved_after_approval": true,
+        "edited_fix_applied": true,
+        "backend_run_finished": true
+      },
+      "passed": true
+    },
+    "engineer_takes_over_parked": {
+      "incident": "INC0010102",
+      "sys_id": "2ef4e55473f3c7d02aedfed25ab8b7e6",
+      "message": "You have taken over this incident from BARQ AI Agent.",
+      "runs": [
+        {
+          "execution_id": "7742ccfe-81bb-4bf2-8c41-5d957f35c309",
+          "event_record_id": "d0feb135-f3cd-4032-8c10-6b8c9ef1110a",
+          "incident_sys_id": "2ef4e55473f3c7d02aedfed25ab8b7e6",
+          "status": "failed",
+          "node_reached": null,
+          "model_name": null,
+          "agent_version": null,
+          "started_at": "2026-10-04T01:08:24.088826Z",
+          "ended_at": "2026-10-04T01:08:27.570609Z",
+          "termination_cause": "unclassified failure: [409] Incident has a Human Lock; replay requires human intervention.",
+          "updated_at": "2026-10-04T01:08:27.571472Z"
+        },
+        {
+          "execution_id": "f64b175c-ef7e-47a4-92d6-50f7e0e77b0d",
+          "event_record_id": "2532c729-75af-4836-b796-9e1dbc8ec697",
+          "incident_sys_id": "2ef4e55473f3c7d02aedfed25ab8b7e6",
+          "status": "failed",
+          "node_reached": "act",
+          "model_name": null,
+          "agent_version": "s3.4-graph-1.0.0",
+          "started_at": "2026-10-04T01:07:35.095013Z",
+          "ended_at": "2026-10-04T01:08:19.417643Z",
+          "termination_cause": "human_rejected:interrupt_resume:escalated_high_risk",
+          "updated_at": "2026-10-04T01:08:19.418387Z"
+        }
+      ],
+      "checks": {
+        "parked": true,
+        "take_over_pressed": true,
+        "paused_run_closed": true,
+        "locked": true,
+        "nothing_resolved": true
+      },
+      "passed": true
+    }
+  },
+  "finished_at": "2026-10-04T01:08:37.702824+00:00"
+}

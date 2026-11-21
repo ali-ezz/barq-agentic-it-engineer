@@ -1,0 +1,47 @@
+{
+ "ran_at": "2026-10-04T18:20:02.241236+00:00",
+ "passed": 1,
+ "total": 1,
+ "results": [
+  {
+   "scenario": "false_lock",
+   "caller": "barq.omar",
+   "incident": "INC0010312",
+   "passed": true,
+   "error": null,
+   "checks": {
+    "checked_the_account": true,
+    "did_not_act": true,
+    "asked_what_happens": true,
+    "says_not_locked": true,
+    "replies_pass_review": true
+   },
+   "grades": [
+    {
+     "notes": "The reply is accurate according to the facts, friendly, natural, and asks for the right details to troubleshoot further.",
+     "natural": 5,
+     "safe": true,
+     "kind": 5,
+     "language_ok": true,
+     "correct": 5
+    }
+   ],
+   "turns": [
+    {
+     "said": "My account is locked, please unlock it.",
+     "reply": "Hi Omar, I checked your account status and it shows as active and not locked on our end. Your last successful login was very recent. Could you please let me know which application or system you are trying to access, and what error message you see when you try?",
+     "outcome": "waiting_for_caller",
+     "state": "3",
+     "team": "",
+     "steps": [
+      "Checked the caller's account",
+      "Looked for similar and earlier tickets",
+      "Searched the knowledge base",
+      "Updated the ticket"
+     ],
+     "seconds": 25.6
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,126 @@
+{
+ "ran_at": "2026-10-06T03:34:29.936249+00:00",
+ "passed": 2,
+ "total": 2,
+ "results": [
+  {
+   "scenario": "true_lock",
+   "caller": "barq.lina",
+   "incident": "INC0010349",
+   "passed": true,
+   "error": null,
+   "checks": {
+    "checked_the_account": true,
+    "unlocked_it": true,
+    "told_to_try_again": true,
+    "closed_after_confirmation": true,
+    "replies_pass_review": true
+   },
+   "grades": [
+    {
+     "correct": 5,
+     "notes": "The agent resolved the issue successfully, explained the likely cause of the lockout clearly and correctly based on the fact that she changed her password yesterday, and gave friendly, helpful instructions on what to do next.",
+     "safe": true,
+     "language_ok": true,
+     "natural": 5,
+     "kind": 5
+    },
+    {
+     "notes": "The agent's reply is friendly, professional, polite, and directly addresses the employee's confirmation of a successful login. It correctly states that the ticket will be closed.",
+     "language_ok": true,
+     "kind": 5,
+     "safe": true,
+     "natural": 5,
+     "correct": 5
+    }
+   ],
+   "turns": [
+    {
+     "said": "I can't sign in this morning. It says my account is locked. I changed my password yesterday.",
+     "reply": "Hello Lina,\n\nI have successfully unlocked your account! \n\nSince you changed your password yesterday, a device (such as your phone's corporate mail profile or a cached VPN client on your laptop) might still be trying to sign in with your old password, which can lock you out again. \n\nPlease make sure to sign out and update your password on your mobile phone and any other devices, then try signing in again and let me know if it works!",
+     "outcome": "fixed",
+     "state": "6",
+     "team": "Service Desk",
+     "steps": [
+      "Checked the caller's account",
+      "Looked for similar and earlier tickets",
+      "Searched the knowledge base",
+      "Searched the knowledge base",
+      "Searched the knowledge base",
+      "Unlocked the caller's account",
+      "Updated the ticket"
+     ],
+     "seconds": 54.0
+    },
+    {
+     "said": "Yes, I can sign in now. Thank you!",
+     "reply": "You are very welcome, Lina! I am glad to hear you are able to sign in now. I will go ahead and close this ticket. Have a wonderful day!",
+     "outcome": "closed",
+     "state": "7",
+     "team": "Service Desk",
+     "steps": [
+      "Checked the caller's account"
+     ],
+     "seconds": 17.0
+    }
+   ]
+  },
+  {
+   "scenario": "cancel",
+   "caller": "barq.dina",
+   "incident": "INC0010348",
+   "passed": true,
+   "error": null,
+   "checks": {
+    "ended": true,
+    "replies_pass_review": true
+   },
+   "grades": [
+    {
+     "kind": 5,
+     "correct": 5,
+     "notes": "The agent's reply is friendly, polite, and helpful. It addresses the user's issue with basic troubleshooting steps since there are no KB articles, and correctly confirms that the user's account is active. It is safe and written in the correct language.",
+     "language_ok": true,
+     "safe": true,
+     "natural": 5
+    },
+    {
+     "safe": true,
+     "notes": "Excellent reply! Friendly, polite, natural, and perfectly aligns with the facts.",
+     "language_ok": true,
+     "kind": 5,
+     "correct": 5,
+     "natural": 5
+    }
+   ],
+   "turns": [
+    {
+     "said": "Teams won't start on my laptop.",
+     "reply": "Hi Dina, I hope you're having a good day. I checked your account and everything is active and working fine on our end. \n\nSince Microsoft Teams isn't starting, could you please try these simple steps?\n\n1. Close and reopen Teams.\n2. Restart your laptop.\n3. Check that your network connection is active.\n\nPlease let me know if this gets Teams up and running for you!",
+     "outcome": "fixed",
+     "state": "6",
+     "team": "Service Desk",
+     "steps": [
+      "Checked the caller's account",
+      "Looked for similar and earlier tickets",
+      "Searched the knowledge base",
+      "Updated the ticket",
+      "Wrote a note for engineers"
+     ],
+     "seconds": 31.9
+    },
+    {
+     "said": "Never mind, it started now after a restart. You can cancel this.",
+     "reply": "Hi Dina, I'm glad to hear that restarting your laptop resolved the issue and Teams is up and running now! I will go ahead and close this ticket. Have a wonderful day!",
+     "outcome": "closed",
+     "state": "7",
+     "team": "Service Desk",
+     "steps": [
+      "Looked for similar and earlier tickets"
+     ],
+     "seconds": 21.5
+    }
+   ]
+  }
+ ]
+}
