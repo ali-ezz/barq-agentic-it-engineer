@@ -298,7 +298,7 @@ Cloud. ServiceNow was in-memory for these first runs; the real-ServiceNow runs f
 | INC0010047 printer | `escalated_no_evidence` (no hardware article at `internal`) | … → retrieve → act | 10 | 3.4 s | $0.0026 | `7905ad8c9865a92830ad9b4b2bfde2e2` |
 | W0.3 leave request | `escalated_no_evidence` (label `other`, no search) | … → retrieve → act | 10 | 2.7 s | $0.0027 | `10100e82a815acabce9422c6d1a7f782` |
 
-### Real ServiceNow (PDI `dev434590`, integration user `ai_orchestrator_svc`)
+### Real ServiceNow (PDI `dev000001`, integration user `ai_orchestrator_svc`)
 
 An admin created four AI-enabled test incidents; the admin login was used for that
 setup only. The agent read and wrote them as the non-admin integration user, with
@@ -414,7 +414,7 @@ so both sides assert the same value.
 ## 10. Live re-verification after the review fixes (2026-09-18)
 
 The §8 runs predate the §9 fixes, so the whole path was re-run on the current code.
-Instance: PDI `dev434590`, as the non-admin integration user `ai_orchestrator_svc`.
+Instance: PDI `dev000001`, as the non-admin integration user `ai_orchestrator_svc`.
 
 | Run | Outcome | Nodes in `path` | Observations | Trace |
 |---|---|---|---|---|

@@ -168,7 +168,7 @@ def compose_article(
     #
     # The model was trusted unconditionally, and it guessed: a staff-directory
     # title correction was captured as "software" because the fix was performed
-    # with a console (dev407364, 2026-09-28, KB1011). The incident's category was
+    # with a console (dev000002, 2026-09-28, KB1011). The incident's category was
     # "inquiry". Retrieval only found the article afterwards because the wide pass
     # ignores category, so the wrong label was invisible until it was inspected —
     # and an article the retriever cannot reach by category is one the category

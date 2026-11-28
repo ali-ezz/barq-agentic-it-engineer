@@ -1,7 +1,7 @@
 # BARQ agentic incident platform — what is built, how it works, how to run it
 
 Status 2026-10-03. Everything here is on PR #213 (branch `feat/admin-chatbot`), deployed by
-hand to the shared EC2 and installed on the shared ServiceNow instance `dev407364`. Nothing
+hand to the shared EC2 and installed on the shared ServiceNow instance `dev000002`. Nothing
 is merged to `main`. The target and the plan behind it: `barq_target_and_changes.md`.
 
 ## 1. What the system does
@@ -118,11 +118,11 @@ only. Evidence of the latest full run: `docs/evidence/agentic_live_2026-10-03/`.
 
 ## 5A. Try it yourself (about 15 minutes)
 
-Log in to `https://dev407364.service-now.com` as admin, then use **Impersonate user** (user
+Log in to `https://dev000002.service-now.com` as admin, then use **Impersonate user** (user
 menu) for each role. Label your test tickets so they are easy to find and clean up.
 
 1. **As a user** (impersonate `Abel Tuter` or any caller without roles), open
-   `https://dev407364.service-now.com/esc?id=barq_ai`.
+   `https://dev000002.service-now.com/esc?id=barq_ai`.
    * Ask "How do I fix Outlook showing Disconnected?" → an answer with its sources, no ticket.
    * Describe a problem ("My Outlook says Disconnected since this morning, webmail works")
      → *Open the ticket* → the ticket appears under My tickets; within a minute BARQ AI Agent

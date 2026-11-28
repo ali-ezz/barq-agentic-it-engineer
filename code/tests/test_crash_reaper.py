@@ -1,6 +1,6 @@
 """Crash reaper, against the real migrated schema.
 
-Reproduces the defect this exists to fix. On dev407364, 2026-09-28, the Celery
+Reproduces the defect this exists to fix. On dev000002, 2026-09-28, the Celery
 worker was SIGKILLed while an execution sat at the ``validate`` node. After the
 worker restarted the row was still ``running`` at that node 90 seconds later and
 never moved again; 96 such rows had already accumulated. ``abandoned`` was in

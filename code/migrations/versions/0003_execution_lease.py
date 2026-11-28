@@ -3,7 +3,7 @@
 A worker that dies mid-graph leaves its execution row at ``running`` forever.
 Nothing in the schema could tell that run apart from a live one, so the crash
 reaper had no signal to act on: a SIGKILL of the Celery worker during ``validate``
-on dev407364 (2026-09-28) left the row ``running`` at that node indefinitely, and 96
+on dev000002 (2026-09-28) left the row ``running`` at that node indefinitely, and 96
 such rows had already accumulated. ``abandoned`` was in the status enum the whole
 time; nothing ever set it.
 

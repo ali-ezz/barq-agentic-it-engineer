@@ -57,7 +57,7 @@ async def trigger_eval_run(
     Refuses unless ``eval_benchmarks`` is enabled, and says so plainly. The flag ships
     ``False``; the previous implementation accepted the request, returned 202 with a
     generated ``run_id``, and then discarded it — the run never appeared in
-    ``/results`` and produced no worker activity (dev407364, 2026-09-28).
+    ``/results`` and produced no worker activity (dev000002, 2026-09-28).
     """
     if not settings.active_feature_flags.get("eval_benchmarks", False):
         logger.warning(

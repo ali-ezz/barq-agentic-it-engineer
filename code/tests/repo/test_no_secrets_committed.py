@@ -132,7 +132,7 @@ def test_code_paths_urls_and_templates_are_not_findings() -> None:
         "SecretStr",
         "${ADMIN_PASS}",
         "/api/v1/oauth/token",
-        "https://dev407364.service-now.com",
+        "https://dev000002.service-now.com",
         "_build_client",
         "changeme",
     ]

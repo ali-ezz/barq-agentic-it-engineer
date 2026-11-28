@@ -1,11 +1,11 @@
-"""Read-only ServiceNow helper for dev434590 (Ali PDI) (admin login, GET only)."""
+"""Read-only ServiceNow helper for dev000001 (Ali PDI) (admin login, GET only)."""
 import os, sys, json, urllib.request, urllib.parse, base64
 env={}
 for line in open(__import__("os").environ.get("BARQ_ENV_FILE", ".secrets/barq-g1.env")):
     line=line.strip()
     if "=" in line and not line.startswith("#"):
         k,v=line.split("=",1); env[k]=v.strip().strip("'\"")
-BASE="https://dev434590.service-now.com"
+BASE="https://dev000001.service-now.com"
 AUTH="Basic "+base64.b64encode(f"{env['SN_ADMIN_USER']}:{env['SN_ADMIN_PASS']}".encode()).decode()
 def get(table, query="", fields="", limit=200, display="false"):
     q=urllib.parse.urlencode({"sysparm_query":query,"sysparm_fields":fields,"sysparm_limit":limit,"sysparm_display_value":display,"sysparm_exclude_reference_link":"true"})

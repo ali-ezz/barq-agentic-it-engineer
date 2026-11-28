@@ -2,7 +2,7 @@
 
 ## Result
 
-The final `ai_incident_orchestrator_s1_1.xml` package was imported into authorized teammate PDI `dev204871`, running the same ServiceNow Australia release as the source PDI. The package previewed and committed cleanly without collision resolution, skipped-record handling, manual configuration, or repair.
+The final `ai_incident_orchestrator_s1_1.xml` package was imported into authorized teammate PDI `dev000003`, running the same ServiceNow Australia release as the source PDI. The package previewed and committed cleanly without collision resolution, skipped-record handling, manual configuration, or repair.
 
 | Verification point | Result |
 |---|---|
@@ -34,6 +34,6 @@ The committed record shows state **Committed**, the commit timestamp, 39 inserte
 
 ### Post-import functional verification
 
-An existing Incident on `dev204871` displayed the imported AI Incident Orchestrator section and fields. The imported Client Script displayed the expected range error for an out-of-range confidence value. The onChange script restores the field to its previous value (blank only if it was blank before) and onSubmit blocks the save without altering the field. The captured screenshot shows the error while `1.1` is still displayed, so the restore itself is not captured.
+An existing Incident on `dev000003` displayed the imported AI Incident Orchestrator section and fields. The imported Client Script displayed the expected range error for an out-of-range confidence value. The onChange script restores the field to its previous value (blank only if it was blank before) and onSubmit blocks the save without altering the field. The captured screenshot shows the error while `1.1` is still displayed, so the restore itself is not captured.
 
 ![Imported Incident form and confidence validation](screenshots/09-secondary-import-verification.png)

@@ -87,12 +87,12 @@ For a live proof, create one eligible AI-enabled incident and confirm, in order:
 
 ## Live proof — 2026-09-26
 
-Run by `ali-ezz` on PDI **dev434590** against the deployed backend host, steps 1–5
+Run by `ali-ezz` on PDI **dev000001** against the deployed backend host, steps 1–5
 in the order above.
 
 | | |
 |---|---|
-| Instance | `dev434590` |
+| Instance | `dev000001` |
 | Incident | `INC0010028`, sys_id `ba0081f1736b83902aedfed25ab8b7c5`, created `2026-09-26 04:01:14 UTC` (07:01:14 Cairo) |
 | Eligibility event | `x_2215032_ai_inc_0.s1_3_outbound_event`, queued `04:01:15`, processed `04:01:25`, sys_id `030081f1736b83902aedfed25ab8b7c8` |
 | Emitted event | `event_id` `cb0081f1736b83902aedfed25ab8b7c7`, `event_type` `incident.created` |
@@ -120,7 +120,7 @@ correlation `7338ec1d-107a-42e9-a66e-86c7d9de4c04`.
 Steps 1–3 pass. Step 4 resolves to a terminal outcome: the worker recorded
 `terminal failure: ServiceNow refused the request: ServiceNowNotFoundError` and
 dead-lettered the event, because the backend's `SERVICENOW_INSTANCE_URL` points at
-`dev407364` while this incident lives on `dev434590`, so the graph's read-back of the
+`dev000002` while this incident lives on `dev000001`, so the graph's read-back of the
 incident 404s. That mismatch is downstream of ingestion — it is an environment
 configuration, not an authentication or acceptance failure — and step 5 (AI fields
 and work note on the incident) is consequently not reached in this run.
@@ -136,7 +136,7 @@ branch (`91a5991`), because `main` still rejects the four-field payload; the
 container was swapped onto the backend's published port for the few minutes the run
 needed, then removed and `barq-api` restarted — `/ready` returned `200` from the
 host and from the public address immediately afterwards. `barq-api` runs `main` at
-`fc59b9c` throughout. The ServiceNow records on `dev434590` are exactly the setup
+`fc59b9c` throughout. The ServiceNow records on `dev000001` are exactly the setup
 described above (token URL, client id and secret, endpoint property); they were
 configured before this run and not altered during it.
 

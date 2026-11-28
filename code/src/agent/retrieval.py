@@ -226,7 +226,7 @@ class QdrantRetriever:
         # filtered pass can succeed *with the wrong article* — 'Outlook shows
         # Disconnected' labelled 'network' returned KB0003 at 0.67, over the 0.55
         # threshold, so no fallback keyed on "found nothing" would ever fire, while
-        # KB0002 sat unreachable (dev407364, 2026-09-20). Searching the whole
+        # KB0002 sat unreachable (dev000002, 2026-09-20). Searching the whole
         # published, in-tier corpus alongside it puts both candidates in front of the
         # ranking and lets relevance decide.
         candidate_k = max(top_k * 2, 10)

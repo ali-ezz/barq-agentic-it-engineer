@@ -3,7 +3,7 @@
 # BARQ Agentic Incident Resolution Platform — Sprint 2 End-to-End Demo
 # =============================================================================
 # This script demonstrates the live graph and ServiceNow write-back:
-#   1. Creates a real incident on ServiceNow (dev407364)
+#   1. Creates a real incident on ServiceNow (dev000002)
 #   2. Enables AI processing on it
 #   3. Runs the 11-node LangGraph agent LIVE (writes back to ServiceNow)
 #   4. Reads back the incident fields to prove they are populated

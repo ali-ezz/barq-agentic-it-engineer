@@ -4,7 +4,7 @@ These cover the gap that made the product look broken: a straight-through run le
 the incident at ``ai_processing_state=awaiting_approval`` but had no interrupt, so
 the existing approval routes 404'd and 409'd on it. Nothing could accept a draft,
 and because no code wrote ``ai_resolution`` or ``ai_processing_end``, the
-``complete`` state was unreachable (dev407364, verified 2026-09-28 across 12
+``complete`` state was unreachable (dev000002, verified 2026-09-28 across 12
 incidents).
 
 The behaviours pinned here are the ones a reviewer would otherwise have to take on
@@ -613,7 +613,7 @@ async def test_an_operator_resolution_is_captured_to_the_kb(app_with_db) -> None
 
     A straight-through acceptance is the most common way a human supplies a fix, and
     it taught the platform nothing: the approval came back with
-    ``knowledge_capture: null`` (dev407364, 2026-09-28, INC0010160). Capture used to
+    ``knowledge_capture: null`` (dev000002, 2026-09-28, INC0010160). Capture used to
     be reachable only from the paused-approval route, which had an interrupt payload
     to hand over, and that coupling confined learning to one of several paths.
     """

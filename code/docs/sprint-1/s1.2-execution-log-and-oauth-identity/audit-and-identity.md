@@ -11,10 +11,10 @@
 - **Update Set**: `AI Incident Orchestrator - S1.2 Execution Log and ACLs`
 - **Service Account**: `ai_orchestrator_svc` (Machine identity, non-admin, Web Service Access Only)
 - **Primary Integration Role**: `x_2215032_ai_inc_0.integration_writer`
-- **Target Instance**: `dev407364.service-now.com`
+- **Target Instance**: `dev000002.service-now.com`
 - **Verification Harness**: [`scripts/verify_permissions.py`](../../../scripts/verify_permissions.py)
 - **Machine-Readable Report**: [`scripts/verification_report.json`](../../../scripts/verification_report.json)
-- **Verification Status**: **28 / 28 PASS** on a clean install (`dev434590`, 2026-09-16)
+- **Verification Status**: **28 / 28 PASS** on a clean install (`dev000001`, 2026-09-16)
 
 ---
 
@@ -61,7 +61,7 @@ The application runs with runtime access tracking set to **Enforcing** (set in t
 | `ScriptableRESTMessageClient.execute` | S1.3 event script action |
 | `ScriptableRESTResponse.getStatusCode` | S1.3 event script action |
 
-Verified on a clean install (`dev434590`) by switching to Enforcing, running the eligibility rule through to the outbound call, and confirming that no further privilege was requested. The earlier read privileges on `sys_security_acl`, `sys_security_acl_role`, `sys_user_role` and `sys_scope`, and the execute privileges on `GlideRecord.insert` and `GlideRecord.setValue`, are removed: no app script uses them.
+Verified on a clean install (`dev000001`) by switching to Enforcing, running the eligibility rule through to the outbound call, and confirming that no further privilege was requested. The earlier read privileges on `sys_security_acl`, `sys_security_acl_role`, `sys_user_role` and `sys_scope`, and the execute privileges on `GlideRecord.insert` and `GlideRecord.setValue`, are removed: no app script uses them.
 
 #### OAuth 2.0 Lifecycle & Mid-Run Recovery (FR-06)
 
@@ -210,9 +210,9 @@ Record-level `incident` read and write come from the app's own scoped ACLs, not 
 
 Three links from the original export are removed, because they were wrong on a clean install:
 
-- **`2429f728…` on `24baff9a…`.** That ACL is a platform *deny-unless* rule. Adding a role to a deny-unless rule makes the role a requirement for everyone, so every `itil` user lost incident write. Verified on `dev434590`: `itil` could not write an incident until the link was removed.
+- **`2429f728…` on `24baff9a…`.** That ACL is a platform *deny-unless* rule. Adding a role to a deny-unless rule makes the role a requirement for everyone, so every `itil` user lost incident write. Verified on `dev000001`: `itil` could not write an incident until the link was removed.
 - **`a90525b8…` on `e7c3abcc…`** (`audit_viewer` journal read). It let the integration role read every table's journal (#50). A scoped, conditioned read ACL replaces it.
-- **`68632db4…` and `a4636db4…`.** They pointed at ACLs (`a4dee42c…`, `d785ac28…`) that were created by hand on `dev407364` and never exported, so a clean install could not commit them (#49).
+- **`68632db4…` and `a4636db4…`.** They pointed at ACLs (`a4dee42c…`, `d785ac28…`) that were created by hand on `dev000002` and never exported, so a clean install could not commit them (#49).
 
 > [!NOTE]
 > **Integration Identity & OAuth Secrets Handling**:
@@ -262,7 +262,7 @@ ServiceNow evaluates the ACL on the server for every write, against the stored r
 
 The integration role cannot clear the lock itself: `incident.x_2215032_ai_inc_0_ai_human_lock` has its own write ACL for `admin` only (`LOCK-01`). The role choice is recorded in the S1.1 field model (#69).
 
-Who can set the two human-controlled fields, checked on `dev434590` on 2026-09-17 against incident `INC0008001`:
+Who can set the two human-controlled fields, checked on `dev000001` on 2026-09-17 against incident `INC0008001`:
 
 | Identity | `ai_human_lock` | `ai_enabled` | `ai_retry_count` | Incident record |
 |---|---|---|---|---|
@@ -273,7 +273,7 @@ Who can set the two human-controlled fields, checked on `dev434590` on 2026-09-1
 The `admin` row is a real `PATCH` over the Table API. The other two rows come from `GlideRecordSecure.canWrite()` in a background script that impersonates each user. The harness covers the `ai_orchestrator_svc` row (`LOCK-01`, `LOCK-02`, `DENY-06`). It has no admin credential by design, so the `admin` row is recorded here rather than tested by the harness.
 
 > [!NOTE]
-> **Why not a Business Rule.** The first version used a `before update` Business Rule calling `current.setAbortAction(true)`. Built inside the app scope, that rule fires but cannot abort a write to the Global `incident` table: on `dev434590` the rule ran, its conditions were all true, and the work note was still written. The earlier export worked around this by shipping the rule in the Global scope, which a clean install refuses to commit (#48). The ACL condition needs neither.
+> **Why not a Business Rule.** The first version used a `before update` Business Rule calling `current.setAbortAction(true)`. Built inside the app scope, that rule fires but cannot abort a write to the Global `incident` table: on `dev000001` the rule ran, its conditions were all true, and the work note was still written. The earlier export worked around this by shipping the rule in the Global scope, which a clean install refuses to commit (#48). The ACL condition needs neither.
 
 #### Defense-in-Depth Layering
 | Layer | Control Mechanism | Protection Provided |
@@ -286,7 +286,7 @@ The `admin` row is a real `PATCH` over the Table API. The other two rows come fr
 
 ### 5. Empirical Verification Matrix (100% PASS)
 
-The test harness [`scripts/verify_permissions.py`](../../../scripts/verify_permissions.py) was run against a clean install of the four update sets (§8) on `dev434590.service-now.com`, using incident `INC0008001` (opened by another user, so creator-based ACLs cannot grant access). The same harness on `dev407364` passes 27 of 28 until the §8 update steps are applied there; `DENY-07` fails because the journal read is not yet narrowed. Every test performs real HTTP transactions with read-after-write database queries.
+The test harness [`scripts/verify_permissions.py`](../../../scripts/verify_permissions.py) was run against a clean install of the four update sets (§8) on `dev000001.service-now.com`, using incident `INC0008001` (opened by another user, so creator-based ACLs cannot grant access). The same harness on `dev000002` passes 27 of 28 until the §8 update steps are applied there; `DENY-07` fails because the journal read is not yet narrowed. Every test performs real HTTP transactions with read-after-write database queries.
 
 #### Complete Test Run Results (28 of 28 Passed)
 
@@ -331,7 +331,7 @@ In response to architectural review on test harness integrity, the `LOCK` test s
 1. **Elimination of Fail-Open Fallback (`LOCK-03`)**:
    - In earlier iterations, if no incident had `ai_human_lock=true`, the harness returned a provisional `PASS`, so the suite could pass without exercising the safety stop.
    - **Fix**: The fallback branch now explicitly returns `verdict="FAIL"`. The test strictly requires an active, locked incident on the target instance.
-   - **Live Evidence**: Incident `INC0010041` (`sys_id: 0db9760f47870b10c148497f316d4320`) was locked via `ai_human_lock=true` by the administrator on `dev407364`. When `ai_orchestrator_svc` attempted an automated patch with `work_notes`, the server refused the transaction with `HTTP 403 Forbidden` and 0 entries in `sys_journal_field`.
+   - **Live Evidence**: Incident `INC0010041` (`sys_id: 0db9760f47870b10c148497f316d4320`) was locked via `ai_human_lock=true` by the administrator on `dev000002`. When `ai_orchestrator_svc` attempted an automated patch with `work_notes`, the server refused the transaction with `HTTP 403 Forbidden` and 0 entries in `sys_journal_field`.
 
 2. **Hardened Invariant Checks for Baseline and Post-Patch GET Queries (`LOCK-01`, `LOCK-02`)**:
    - Previously, baseline and post-update state checks defaulted `before` and `after` to `"false"` on missing keys or failed queries, meaning an HTTP error on GET could evaluate `after == before` and produce an accidental `PASS`.
@@ -399,11 +399,11 @@ Import each file under **System Update Sets > Retrieved Update Sets > Import Upd
 
 The S1.3 preview reports one duplicate `GlideRecord.setValue` privilege; it is removed by step 4 and can be skipped. Then provision the integration user and OAuth client (§2) and run `uv run python scripts/verify_permissions.py`.
 
-Verified on a clean PDI (`dev434590`, 2026-09-16): all four committed, and the harness passed **28 / 28** ([report](clean-install-verification-report.json)).
+Verified on a clean PDI (`dev000001`, 2026-09-16): all four committed, and the harness passed **28 / 28** ([report](clean-install-verification-report.json)).
 
 #### Updating an instance that has the earlier S1.2 set
 
-`dev407364` was configured by hand before the export was cleaned up, so it holds Global changes that no scoped update set can undo. After importing step 4 there, an admin runs this once as a background script (global scope):
+`dev000002` was configured by hand before the export was cleaned up, so it holds Global changes that no scoped update set can undo. After importing step 4 there, an admin runs this once as a background script (global scope):
 
 ```javascript
 // Re-enable the platform deny-unless read rule on sys_journal_field (it was deactivated).
@@ -423,4 +423,4 @@ if (br.get('2f5038f9475f8b10c148497f316d43f5')) { br.deleteRecord(); }
 
 Step 4 also deletes a duplicate `admin` role link on the Human Lock write ACL (`c3f8aba4…`); the re-exported S1.2 set no longer contains it.
 
-The other three Global ACLs in the earlier export (`a2a3e94e…`, `91b7ec2c…`, `66f0fbc6…`) match the platform baseline in content and need no change. Afterwards, re-run the harness: `DENY-07` fails on `dev407364` until the journal changes are in place.
+The other three Global ACLs in the earlier export (`a2a3e94e…`, `91b7ec2c…`, `66f0fbc6…`) match the platform baseline in content and need no change. Afterwards, re-run the harness: `DENY-07` fails on `dev000002` until the journal changes are in place.

@@ -90,7 +90,7 @@ class TestRowMapping:
             # its ServiceNow write succeeded. It used to record awaiting_approval,
             # which is the state a paused thread has, so the row asserted a pause that
             # did not exist — 24 such rows sat at awaiting_approval with zero matching
-            # approvals (dev407364, 2026-09-28). "Waiting for a person" is still true
+            # approvals (dev000002, 2026-09-28). "Waiting for a person" is still true
             # and is recorded on the incident's processing_state, which this test also
             # pins, plus in the suggestion review route.
             ("suggested", "succeeded"),

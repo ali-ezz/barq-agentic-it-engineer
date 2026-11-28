@@ -10,7 +10,7 @@
 - Owner: Ali Ezz
 - Human reviewer: Aya Ashraf
 - Deadline: Sunday, September 13, 2026 at 11:59 PM Cairo time
-- Status: Implemented, exported, verified on source PDI `dev434590` and secondary PDI `dev204871`, and merged through PR #1 on September 9, 2026
+- Status: Implemented, exported, verified on source PDI `dev000001` and secondary PDI `dev000003`, and merged through PR #1 on September 9, 2026
 
 ## Design contract
 
@@ -162,7 +162,7 @@ The W0.5 CAD notes remain useful for comparison, but their absence does not bloc
 
 ## Verification record
 
-- Source PDI: `dev434590` (Australia release)
+- Source PDI: `dev000001` (Australia release)
 - Application scope: `x_2215032_ai_inc_0`
 - Final published update set: `AI Incident Orchestrator`
 - Final update set sys_id: `a76c850473170b502aedfed25ab8b7bc`
@@ -171,7 +171,7 @@ The W0.5 CAD notes remain useful for comparison, but their absence does not bloc
 - Export verification: 39 update records; zero `DELETE` actions
 - Source verification Incident: `INC0010018`
 - Source verification date: `2026-09-08`
-- Secondary test PDI: `dev204871` (authorized teammate instance)
+- Secondary test PDI: `dev000003` (authorized teammate instance)
 - Secondary preview: Passed with 39 inserts, zero updates, zero deletes, zero collisions, and no unresolved errors.
 - Secondary commit: Completed successfully on `2026-09-08` without manual configuration or repair.
 - Secondary functional verification: Passed on `2026-09-08`; the Incident form displayed the imported section/fields and showed the expected range error for an out-of-range confidence value.

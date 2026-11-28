@@ -176,7 +176,7 @@ class Execution(Base):
     # A worker claims a run by stamping heartbeat_at; anything still 'running' with a
     # heartbeat older than the staleness window was orphaned by a crash and is
     # reclaimed. Without these two columns nothing could tell a live run from a dead
-    # one, and the row stayed 'running' forever: a SIGKILL mid-validate on dev407364
+    # one, and the row stayed 'running' forever: a SIGKILL mid-validate on dev000002
     # left 96 such rows accumulated.
     heartbeat_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),

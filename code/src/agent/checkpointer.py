@@ -141,7 +141,7 @@ def summarize(
             # thread has. A straight-through run has no interrupt to approve —
             # /api/v1/approvals/pending/{id} returns 404 for it — so the row asserted
             # a pause that did not exist: 24 act rows sat at awaiting_approval with
-            # zero matching approvals (dev407364, 2026-09-28).
+            # zero matching approvals (dev000002, 2026-09-28).
             #
             # The incident's processing state also completes when no gate requires
             # approval; genuine interrupts retain their resumable parked state.

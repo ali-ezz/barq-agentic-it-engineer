@@ -20,7 +20,7 @@ Before committing the XML:
 
 ## Which artifact is authoritative
 
-`ai_incident_orchestrator_s1_1.xml` is. It is what was previewed and committed on `dev434590` and `dev204871`, and its record sys_ids are the ones live on those instances.
+`ai_incident_orchestrator_s1_1.xml` is. It is what was previewed and committed on `dev000001` and `dev000003`, and its record sys_ids are the ones live on those instances.
 
 The official SDK source under `sdk-app/` is the reproducible implementation source, and it is not a substitute for the mentor-required exported update-set XML. "Reproducible" is a claim with a verified version attached to it:
 

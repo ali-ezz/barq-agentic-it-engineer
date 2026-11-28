@@ -76,15 +76,14 @@ led to building the engineer view and card from scratch, with server-side calls 
 
 ## 5. System audit (2 Oct 2026)
 
-Full record: `archive/audit-2026-10-02/` (`audit_2026-10-02.md`, `operations_runbook.md`, and two patches:
-`audit-fixes.patch` for code/test/docs fixes, `infra-hardening.patch` for compose hardening).
+The full report and patches are not included in this repository; this is the summary.
 Highlights: a follower of a reused answer completed without risk/approval (P1 bypass) and secrets in JSON
 reached model inputs and traces; fixes were a follower-reuse governance gate, approvals returning 409
 without an interrupt, 28/30 redaction gaps closed, hard/soft injection screening, ineligible incidents
 skipping all model layers, a faithfulness backstop, security headers, bounded decision input, and a red-team
 corpus and runner. 1,941 unit tests passed in random order. Compose: datastores bound to loopback,
 admin tools behind a profile, log rotation, pinned images. Not done: live approve/reject loop on that
-system, forced-crash test, CI evaluation gate, and several lower-severity findings listed in the audit.
+system, forced-crash test, CI evaluation gate, and several lower-severity findings.
 
 ## 6. Earlier retrieval, caching and HITL work (Sept-Oct 2026, merged into the team repo)
 

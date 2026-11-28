@@ -581,7 +581,7 @@ class TestSecretScan:
         [
             "Authorization: Basic dXNlcjpwYXNzd29yZA==",
             "client_secret: abcdEFGH1234",
-            "https://svc:Sup3rS3cret@dev407364.service-now.com",
+            "https://svc:Sup3rS3cret@dev000002.service-now.com",
             "token=ghp_abcdefghijklmnopqrstuvwxyz0123",
             "AKIAABCDEFGHIJKLMNOP",
             "-----BEGIN RSA PRIVATE KEY-----\nMIIE\n-----END RSA PRIVATE KEY-----",

@@ -84,7 +84,7 @@ Field dictionary: https://github.com/MoHatemTC/barq-sprints-agentic-incident-res
 Clean-import verification: https://github.com/MoHatemTC/barq-sprints-agentic-incident-resolution-platform-g1/blob/main/docs/sprint-1/s1.1-scoped-app-and-field-model/secondary-import-verification.md
 Screenshots: https://github.com/MoHatemTC/barq-sprints-agentic-incident-resolution-platform-g1/tree/main/docs/sprint-1/s1.1-scoped-app-and-field-model/screenshots
 
-The update set previewed and committed on authorized teammate PDI dev204871 with 39 inserts, zero updates, zero deletions, zero collisions, and no manual repair. The imported form and confidence validation were retested successfully.
+The update set previewed and committed on authorized teammate PDI dev000003 with 39 inserts, zero updates, zero deletions, zero collisions, and no manual repair. The imported form and confidence validation were retested successfully.
 
 Please let me know if you need any clarification. Thank you.
 ```

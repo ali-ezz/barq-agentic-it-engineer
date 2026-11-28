@@ -723,7 +723,7 @@ class TestQdrantRetriever:
         knowledge-capture trigger *is* the no-evidence interrupt, so every article the
         platform learns comes out of this population and was then invisible to it.
         KB1011-v1.0 was indexed and a near-identical incident still returned
-        hit_count=0 (dev407364, 2026-09-28).
+        hit_count=0 (dev000002, 2026-09-28).
 
         The gate still holds: a query with no real match does not clear
         ``threshold + OUT_OF_CATEGORY_EVIDENCE_MARGIN``, so the no-evidence interrupt
@@ -851,7 +851,7 @@ class TestQdrantRetriever:
         return found
 
     def test_wrong_label_does_not_hide_the_right_article(self, corpus_qdrant: QdrantClient) -> None:
-        """The case seen live on dev407364, 2026-09-20.
+        """The case seen live on dev000002, 2026-09-20.
 
         Gemini labels an Outlook mail fault ``network``. KB0002 is filed under
         ``software``, so the category pass cannot return it — and it does not

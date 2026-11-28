@@ -1,4 +1,4 @@
-"""Prepare Ali's PDI (dev434590) for the BARQ copy: event/token addresses -> our tunnel,
+"""Prepare Ali's PDI (dev000001) for the BARQ copy: event/token addresses -> our tunnel,
 approver role, agent field ACLs (uploaded update set), backend properties.
 Admin login for setup only. Idempotent. Usage: python setup_pdi.py <tunnel-url>"""
 import base64, json, sys, time, urllib.error, urllib.request, uuid

@@ -1,4 +1,4 @@
-# Live regression, 2026-10-03 (shared dev407364 + shared EC2 at `569c4a9`)
+# Live regression, 2026-10-03 (shared dev000002 + shared EC2 at `569c4a9`)
 
 One fresh full run after the afternoon fixes; fixtures are labelled `[BARQ-TEST-2026-10-03]`.
 

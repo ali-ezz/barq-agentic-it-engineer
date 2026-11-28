@@ -31,3 +31,8 @@ build/
 animation-validation-*.json
 tunnel_url.txt
 sync.log
+# editors and AI tool folders
+.vscode/
+.idea/
+.claude/
+.cursor/

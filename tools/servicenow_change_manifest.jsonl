@@ -4,7 +4,7 @@
 {"op": "create", "table": "sys_ui_action", "sys_id": "5405281073fb87d02aedfed25ab8b7eb", "at": "2026-10-03T20:27:54.942439+00:00"}
 {"op": "create", "table": "sys_ui_action", "sys_id": "3405681073fb87d02aedfed25ab8b74f", "at": "2026-10-03T20:27:57.022043+00:00"}
 {"op": "create", "table": "sys_ui_action", "sys_id": "5105281073fb87d02aedfed25ab8b775", "at": "2026-10-03T20:27:59.612359+00:00"}
-{"op": "update", "table": "sys_properties", "sys_id": "34242c5c73bb87d02aedfed25ab8b705", "before": {"name": "x_2215032_ai_inc_0.agent_user_name", "description": "", "sys_scope": {"link": "https://dev434590.service-now.com/api/now/table/sys_scope/51a63bbf738bc7502aedfed25ab8b789", "value": "51a63bbf738bc7502aedfed25ab8b789"}, "type": "string", "value": "ai_orchestrator_svc"}, "at": "2026-10-03T20:28:07.983205+00:00"}
+{"op": "update", "table": "sys_properties", "sys_id": "34242c5c73bb87d02aedfed25ab8b705", "before": {"name": "x_2215032_ai_inc_0.agent_user_name", "description": "", "sys_scope": {"link": "https://dev000001.service-now.com/api/now/table/sys_scope/51a63bbf738bc7502aedfed25ab8b789", "value": "51a63bbf738bc7502aedfed25ab8b789"}, "type": "string", "value": "ai_orchestrator_svc"}, "at": "2026-10-03T20:28:07.983205+00:00"}
 {"op": "create", "table": "sysevent_register", "sys_id": "9825ec1073fb87d02aedfed25ab8b749", "at": "2026-10-03T20:28:28.832161+00:00"}
 {"op": "create", "table": "sysevent_script_action", "sys_id": "c925ec1073fb87d02aedfed25ab8b7b2", "at": "2026-10-03T20:28:31.615772+00:00"}
 {"op": "create", "table": "sys_script", "sys_id": "7525205073fb87d02aedfed25ab8b75b", "at": "2026-10-03T20:28:34.723610+00:00"}

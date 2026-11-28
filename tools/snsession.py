@@ -1,4 +1,4 @@
-"""Logged-in ServiceNow session for dev434590 (Ali PDI) setup steps the Table API cannot do
+"""Logged-in ServiceNow session for dev000001 (Ali PDI) setup steps the Table API cannot do
 (update-set preview/commit through the instance's own GlideAjax processors)."""
 import http.cookiejar, re, urllib.parse, urllib.request
 from sn import BASE, env

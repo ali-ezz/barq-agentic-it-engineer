@@ -88,7 +88,7 @@ async def resolve_incident_sys_id(number: str) -> str:
 async def run(args: argparse.Namespace) -> None:
     servicenow_host = urlsplit(str(get_settings().servicenow_instance_url)).hostname
     qdrant_host = urlsplit(get_retrieval_settings().qdrant_url).hostname
-    if servicenow_host == "dev407364.service-now.com" and qdrant_host in {
+    if servicenow_host == "dev000002.service-now.com" and qdrant_host in {
         "localhost",
         "127.0.0.1",
         "::1",

@@ -1,12 +1,12 @@
 # Running the BARQ local PDI demo yourself
 
-This runbook targets the `dev434590` PDI and the API and worker on your Mac.
+This runbook targets the `dev000001` PDI and the API and worker on your Mac.
 The seeded Outlook run was repeated on 2026-09-27 and passed against the real
 ServiceNow PDI, PostgreSQL, Redis, Celery, Qdrant and Gemini services. The
 2026-09-27 trace evidence for earlier runs is in `docs/evidence/`.
 Creating an incident in ServiceNow alone does not send it to the local API;
 the demo script sends the authenticated webhook event itself.
-Do not point this script at the shared `dev407364` instance: its Business Rule
+Do not point this script at the shared `dev000002` instance: its Business Rule
 sends the event automatically, and the script's reset would create a second
 execution and replace the first suggestion. The script refuses that instance.
 
@@ -49,7 +49,7 @@ points, and seven Postgres tables (`events`, `executions`, `idempotency_keys`,
 
 ## 1 · Point the run at the instance you want
 
-Use the test PDI (`dev434590`). Its non-admin integration identity and the
+Use the test PDI (`dev000001`). Its non-admin integration identity and the
 local service settings are in `../.secrets/barq-g1.env`. Source the helper in
 **each** terminal; it reads the actual PostgreSQL and Redis passwords from the
 running containers and does not print or save credentials:

@@ -6,7 +6,7 @@ extending the current platform, every scenario it must handle, and how each chan
 undone.
 
 Facts about the current system were checked live on 2026-10-03 against the shared
-ServiceNow instance `dev407364`, the shared EC2 backend and this repository (branch base:
+ServiceNow instance `dev000002`, the shared EC2 backend and this repository (branch base:
 PR #213 head `d7548ea`, which is `main` `e065df9` plus the admin chatbot).
 
 ---
@@ -283,7 +283,7 @@ feature flag; this is the design behind it.
 
 ### 7A.1 What the instance can execute (verified 2026-10-03)
 
-| Capability on `dev407364` | What it gives the agent |
+| Capability on `dev000002` | What it gives the agent |
 |---|---|
 | Flow Designer + Flow Engine + Flow Trigger, scriptable flow API | run a named subflow from our scope with typed inputs and read its outputs |
 | **ITSM Spoke** actions | Create Standard Change Request from Incident, Create Normal / Emergency Change from Incident, Create Problem from Incident, Create Request, Create Catalog Task, Create Incident Task, Update Assignment Group, Assign Incident to CI Support Group, Add Comment / Work Note |

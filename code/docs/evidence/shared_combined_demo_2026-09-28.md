@@ -1,6 +1,6 @@
 # Shared BARQ sprint demo audit — 2026-09-28
 
-Checked at 17:14 Cairo (14:14 UTC) against the shared `dev407364` ServiceNow
+Checked at 17:14 Cairo (14:14 UTC) against the shared `dev000002` ServiceNow
 instance, the deployed EC2 API/worker, PostgreSQL, Redis, Qdrant, GitHub, and
 Airtable. These are observations of the deployed `main`, not a claim that the
 unmerged S3.4 code is live there.
@@ -61,7 +61,7 @@ temporarily show `pending` and empty AI fields.
   The separate live-service integration run passed 20/20, and the expanded
   isolated DB suite passed 40/40. The 30 default skips were also run
   explicitly: 18 database cases passed with the isolated DB URL, 11 ServiceNow
-  integration cases passed against the local `dev434590` PDI, and the real-PDF extraction
+  integration cases passed against the local `dev000001` PDI, and the real-PDF extraction
   case passed using the reference manual at its expected test path. Crash
   recovery, interrupt/resume, guardrails, and tool permissions passed 163/163
   in a focused run.
@@ -70,4 +70,4 @@ temporarily show `pending` and empty AI fields.
   points and the captured point's text intact.
 - Earlier local-PDI S3.4 proof is in `s34_hitl_demo.json`: the graph parks
   before a write, resumes after approval, and rejects a second decision. That
-  proof used `dev434590` and the local stack, not shared EC2.
+  proof used `dev000001` and the local stack, not shared EC2.

@@ -13,7 +13,7 @@ over or hand back with one button, tell it what to do next, and undo any change.
 
 | Part | Where | What you see |
 |---|---|---|
-| **Caller's chat** | `https://dev434590.service-now.com/esc?id=barq_ai` | Conversations on the left, chat on the right. A live line ("Checking your account…") while the agent works; answers type themselves in. No buttons — you just write ("it works", "still broken", "cancel", "I want a person"). |
+| **Caller's chat** | `https://dev000001.service-now.com/esc?id=barq_ai` | Conversations on the left, chat on the right. A live line ("Checking your account…") while the agent works; answers type themselves in. No buttons — you just write ("it works", "still broken", "cancel", "I want a person"). |
 | **Engineer's card** | open any incident (view **BARQ AI**) | One summary line · what the caller said vs. what BARQ AI found · what it did (with **Undo**) · red flags · recommendation · "how BARQ AI worked" timeline · link to the full Langfuse trace · one button **Take over / Hand back** · a box to **tell BARQ AI what to do next** (e.g. "save this fix as knowledge"). |
 | **The agent** | backend on your Mac (Docker) + Langfuse project "chatbot only" | Every turn traced step by step: each model step, each check, each action, the reviewer's verdict. |
 

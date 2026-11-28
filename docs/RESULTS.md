@@ -1,6 +1,6 @@
 # BARQ on Ali's PDI — test results, 2026-10-04
 
-Everything below ran live on the PDI `dev434590` against our own backend (Mac + tunnel),
+Everything below ran live on the PDI `dev000001` against our own backend (Mac + tunnel),
 on the final copy (`code`, branch `pdi`, commit `36793ad`). Raw output: `evidence/pdi-live-runs/ev6/`.
 
 | Suite | What it checks | Result |

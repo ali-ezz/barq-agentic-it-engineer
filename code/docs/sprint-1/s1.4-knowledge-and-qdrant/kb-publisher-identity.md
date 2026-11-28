@@ -41,11 +41,11 @@ ServiceNow always creates an article as a draft, so the publisher creates it and
    ```
    The publish report's `username` shows who published.
 
-On `dev407364` the articles were created by a hand-made user named `kb_publisher` whose roles are not in the repository. Give that user the role above, remove any other roles it has, and re-run the publisher to confirm.
+On `dev000002` the articles were created by a hand-made user named `kb_publisher` whose roles are not in the repository. Give that user the role above, remove any other roles it has, and re-run the publisher to confirm.
 
 ## Verification
 
-On `dev434590` (clean install plus this set), 2026-09-16, with `.env` holding `ai_orchestrator_svc` and the `SERVICENOW_KB_*` publisher credentials:
+On `dev000001` (clean install plus this set), 2026-09-16, with `.env` holding `ai_orchestrator_svc` and the `SERVICENOW_KB_*` publisher credentials:
 
 | Check | Result |
 |---|---|

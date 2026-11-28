@@ -8,7 +8,7 @@ broker had already acked as lost, or the reaper has to cope with a row whose
 delivery is long gone) nothing else in the system ever revisits the row, and it
 stays ``running`` indefinitely.
 
-Measured on dev407364, 2026-09-28: SIGKILL of the Celery worker while an execution
+Measured on dev000002, 2026-09-28: SIGKILL of the Celery worker while an execution
 sat at the ``validate`` node left it ``running`` at that node 90 seconds after the
 worker was restarted, and it never moved again. 96 such rows had already
 accumulated. ``abandoned`` was in ``ck_executions_status`` the whole time; nothing

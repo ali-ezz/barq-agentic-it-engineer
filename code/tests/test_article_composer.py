@@ -110,7 +110,7 @@ class TestComposeArticle:
 
         The model guessed "software" for a staff-directory title correction because
         the fix was done in a console, and the article was indexed under a category
-        the incident never belonged to (dev407364 2026-09-28, KB1011). It was only
+        the incident never belonged to (dev000002 2026-09-28, KB1011). It was only
         ever retrievable because the wide pass ignores category.
         """
         incident = INCIDENT.model_copy(update={"category": "Inquiry"})

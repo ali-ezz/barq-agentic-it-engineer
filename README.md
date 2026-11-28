@@ -2,7 +2,7 @@
   <img src="media/inflow-logo.png" alt="Inflow logo" width="180">
 </p>
 
-# barq-agentic-it-engineer
+# servicenow-incident-agent
 
 An agentic IT engineer for ServiceNow incidents. A ticket arrives, the agent investigates it
 like a human engineer would (reads the ticket, searches the knowledge base, checks the caller's
@@ -16,20 +16,19 @@ changes live inside it; see [Provenance and licence](#provenance-and-licence).
 
 ## Demo
 
-[![Demo: a caller chats with the agent in ServiceNow](media/demo-preview.gif)](https://github.com/ali-ezz/barq-agentic-it-engineer/releases/tag/v1.0-demo)
+[![Demo: a caller chats with the agent in ServiceNow](media/demo-preview.gif)](https://github.com/ali-ezz/servicenow-incident-agent/releases/tag/v1.0-demo)
 
 The preview above is the first 28 seconds. The full recordings are release assets (too large for git):
 
-- [`inflow-demo-focused.mp4`](https://github.com/ali-ezz/barq-agentic-it-engineer/releases/download/v1.0-demo/inflow-demo-focused.mp4), 2 min 30 s, the cut shown on demo day (25 MB)
-- [`inflow-demo.mp4`](https://github.com/ali-ezz/barq-agentic-it-engineer/releases/download/v1.0-demo/inflow-demo.mp4), 2 min 34 s, full version (98 MB)
-- [`demo-day-draft-decks.zip`](https://github.com/ali-ezz/barq-agentic-it-engineer/releases/download/v1.0-demo/demo-day-draft-decks.zip), earlier deck drafts; the final deck is [`slides/Inflow-G1.pptx`](slides/Inflow-G1.pptx)
+- [`inflow-demo-focused.mp4`](https://github.com/ali-ezz/servicenow-incident-agent/releases/download/v1.0-demo/inflow-demo-focused.mp4), 2 min 30 s, the cut shown on demo day (25 MB)
+- [`inflow-demo.mp4`](https://github.com/ali-ezz/servicenow-incident-agent/releases/download/v1.0-demo/inflow-demo.mp4), 2 min 34 s, full version (98 MB)
 
-The release links work for everyone once the repository is public. The recordings have no narration and show
+The demo-day deck is [`slides/Inflow-G1.pptx`](slides/Inflow-G1.pptx). The recordings have no narration and show
 test data only: made-up employees and test tickets on my personal ServiceNow developer instance. The story, in order:
 a locked account is checked and unlocked, then the caller confirms; an account that is *not* locked is not touched;
 someone asking for a colleague's account, for admin rights, or injecting instructions is routed to security;
 a hardware problem and a "let me talk to a person" request are handed to an engineer; then the Langfuse trace of a ticket
-shows search, proposal, evidence check and the written result. Written talking points: [`docs/demo/`](docs/demo/).
+shows search, proposal, evidence check and the written result.
 
 ## Architecture
 
@@ -62,7 +61,8 @@ flowchart LR
 Needs Docker, [`uv`](https://docs.astral.sh/uv/), Python 3.12+ and a ServiceNow instance (I used a personal developer instance).
 
 ```bash
-cd code
+git clone https://github.com/ali-ezz/servicenow-incident-agent.git
+cd servicenow-incident-agent/code
 cp .env.engineer.example .env.pdi        # fill in the placeholders; never commit it
 ./pdi.sh up -d                           # api, worker, postgres, redis, qdrant (own containers, ports 18000/15432/16379/16333)
 # ServiceNow must reach the API: expose it, e.g. cloudflared tunnel --url http://127.0.0.1:18000
@@ -84,7 +84,7 @@ uv run pytest -q
 
 ## How it was tested
 
-All numbers are from `docs/RESULTS.md` and the raw output in `evidence/` (live runs on my developer instance, October 2026):
+These numbers were recorded in October 2026 from live runs on my developer instance (see `docs/RESULTS.md` and the raw output in `evidence/`). They have not been re-run since this repository was tidied:
 
 | Check | Result |
 |---|---|
@@ -95,7 +95,7 @@ All numbers are from `docs/RESULTS.md` and the raw output in `evidence/` (live r
 | Unit tests at the time | 2,144 passed |
 | Agent turn time | about 15-45 s |
 
-The live suites need a configured instance and are in `code/scripts/live/`. Run from a fresh clone of this repo: ruff, ruff format and mypy are clean and `uv run pytest -q` gives 2,147 passed, 50 skipped, 30 deselected (the notes said 2,144 at the time of the live runs).
+The live suites need a configured instance and are in `code/scripts/live/`. An earlier run from a fresh clone of this repo recorded ruff, ruff format and mypy as clean, and `uv run pytest -q` as 2,147 passed, 50 skipped, 30 deselected (the notes said 2,144 at the time of the live runs). No log of that run is stored here, and it has not been re-run.
 
 ## Layout
 
@@ -103,11 +103,10 @@ The live suites need a configured instance and are in `code/scripts/live/`. Run 
 |---|---|
 | `code/` | The working system: `src/` (API, workers, agent, engineer loop), `tests/`, `migrations/`, `servicenow/` (scoped app), `docker-compose*.yml`, `pdi.sh`, team docs under `code/docs/` (including the agentic platform design, `barq_agentic_platform_design.md`) |
 | `tools/` | Instance setup and ops helpers: `setup_pdi.py`, `users_pdi.py`, `install_engineer_sn.py`, `allow_privs.py`, `trace.sh` (follow one ticket end to end), `sync_team.sh`, `servicenow_change_manifest.jsonl` (what the installer created) |
-| `docs/` | `DEMO_GUIDE.md`, `HOW_IT_WORKS.md`, `PLAN.md`, `RESULTS.md`, `VIDEO_PLAN.md`, `PROJECT_NOTES.md` (technical history and decisions); `demo/` (demo-day talking points in Arabic and English, storyboards, two extra decks) |
+| `docs/` | `DEMO_GUIDE.md`, `HOW_IT_WORKS.md`, `RESULTS.md`, `PROJECT_NOTES.md` (technical history and decisions) |
 | `evidence/` | Raw output and screenshots of the live test runs (`pdi-live-runs/ev*`, `regression-2026-10-03/`) |
 | `slides/` | The demo-day deck |
 | `media/` | Preview GIF and poster for this README |
-| `archive/` | Earlier work kept for reference: `audit-2026-10-02/` (system audit, fixes as patches, runbook, PR descriptions), `shared-instance-audit/`, `servicenow-revert/`, `servicenow-research/`, `team-repo-stash0.patch` |
 
 Scripts in `tools/` were written in a working folder laid out as `PDI/barq`, `PDI/tools`, `PDI/ev*`; their paths
 now point at `code/`, `tools/` and `evidence/pdi-live-runs/`. `sync_team.sh` expects a git remote named `team`
@@ -120,14 +119,14 @@ for the team repository, which is not set up here.
 - Model calls go through a LiteLLM proxy; a free-tier Google AI Studio key is the fallback. Daily budgets limited how many live runs were possible.
 - Not built: per-engineer identity for operator routes (a shared operator client is used), a CI evaluation gate, a forced-crash test, and remediation beyond account actions (runbooks, standard changes are designed in `code/docs/barq_agentic_platform_design.md`, not implemented).
 - Numbers on the demo-day deck for caching savings are illustrative scenarios, not measured benchmarks; the deck says so.
-- All values in `.env*.example` files and docs are placeholders. The instance name `dev434590` is my own developer instance.
+- All values in `.env*.example` files and docs are placeholders. ServiceNow instance names such as `dev000001` and `dev000002` are placeholders too: replace them with your own instance.
 
 ## Provenance and licence
 
 The base platform is the BARQ x Sprints team repository; its contributors wrote most of the original
 pipeline, retrieval, tracing and ServiceNow app. My additions are the engineer loop and its policy
 and report layers, the chat-only UI and engineer card, the ServiceNow installers in `tools/`, the
-live scenario book and browser walk, and the audit work in `archive/`. The team repository carries
+live scenario book and browser walk, and the audit work summarised in `docs/PROJECT_NOTES.md`. The team repository carries
 no licence file, so **no licence is granted here yet**; all rights stay with the respective authors.
 
 ## Credits

@@ -40,7 +40,7 @@ The token URL and the client secret are not in the repository. After installing,
 | `oauth_entity` BARQ Webhook OAuth → **Client Secret** | the backend's `WEBHOOK_OAUTH_CLIENT_SECRET` |
 | Property `x_2215032_ai_inc_0.s1_3_event_endpoint` | `{backend}/api/v1/webhook/incident` |
 
-Re-importing the update set resets the token URL to its placeholder (`https://example.invalid/…`), so set it again afterwards. A Fluent deploy (`now-sdk install`) leaves both the URL and the secret untouched; this was checked on `dev434590`.
+Re-importing the update set resets the token URL to its placeholder (`https://example.invalid/…`), so set it again afterwards. A Fluent deploy (`now-sdk install`) leaves both the URL and the secret untouched; this was checked on `dev000001`.
 
 ## Backend side
 
@@ -62,7 +62,7 @@ The S2.1 webhook includes the token router and uses `bearer_dependency` in place
 
 ## Verification
 
-On `dev434590` (S1.1, S1.2, S1.3, the S1.2 security fixes and this set; access tracking Enforcing), against a receiver built from `webhook_oauth.py` and reached through a temporary tunnel, 2026-09-16:
+On `dev000001` (S1.1, S1.2, S1.3, the S1.2 security fixes and this set; access tracking Enforcing), against a receiver built from `webhook_oauth.py` and reached through a temporary tunnel, 2026-09-16:
 
 | Check | Result |
 |---|---|

@@ -8,7 +8,7 @@ interrupt to approve: ``/api/v1/approvals/pending/{id}`` returns 404 and
 ``/api/v1/approvals/{id}/decide`` returns 409 for such a run. The incident therefore
 sat on "Awaiting Approval" with no way to ever leave it, and ``ai_resolution`` and
 ``ai_processing_end`` were never written by anything, so ``complete`` was
-unreachable (dev407364, verified 2026-09-28 across 12 incidents).
+unreachable (dev000002, verified 2026-09-28 across 12 incidents).
 
 This module closes that: it reviews a completed draft and, on acceptance, writes the
 one payload that the S1.1 field model has always required for ``complete`` — a

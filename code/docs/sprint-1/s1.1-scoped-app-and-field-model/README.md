@@ -19,7 +19,7 @@ This folder is the final evidence package for BARQ G1 Sprint 1 task S1.1. The Se
 - [Implementation runbook](implementation-runbook.md)
 - [Submission checklist](submission-checklist.md)
 
-The final XML was previewed and committed on authorized teammate PDI `dev204871`, on the same Australia release as source PDI `dev434590`. The secondary preview reported 39 inserts, zero updates, zero deletions, and zero collisions. Commit and post-import form/validation testing completed without manual repair.
+The final XML was previewed and committed on authorized teammate PDI `dev000003`, on the same Australia release as source PDI `dev000001`. The secondary preview reported 39 inserts, zero updates, zero deletions, and zero collisions. Commit and post-import form/validation testing completed without manual repair.
 
 ## Scope boundary
 

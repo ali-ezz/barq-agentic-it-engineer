@@ -50,8 +50,7 @@ def main() -> int:
         type=Path,
         default=DEFAULT_STRESSORS,
         help=(
-            "Path to the stressor articles JSON array produced by "
-            f"scripts/extract_stressors.py (default: {DEFAULT_STRESSORS}). "
+            f"Path to an extra stressor articles JSON array (default: {DEFAULT_STRESSORS}). "
             "Silently skipped if the file does not exist."
         ),
     )
@@ -103,7 +102,6 @@ def main() -> int:
                 "stressor_articles_skipped",
                 reason="file not found",
                 path=str(args.stressors),
-                remedy="run scripts/extract_stressors.py first",
             )
 
     engine = FastEmbedEngine()

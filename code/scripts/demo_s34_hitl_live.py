@@ -681,7 +681,7 @@ async def run_one(
 async def main_async(args: argparse.Namespace) -> int:
     base = args.base.rstrip("/")
     settings = get_settings()
-    if urlsplit(str(settings.servicenow_instance_url)).hostname == "dev407364.service-now.com":
+    if urlsplit(str(settings.servicenow_instance_url)).hostname == "dev000002.service-now.com":
         say(
             "This reset-and-replay harness is for the local PDI only. The shared "
             "ServiceNow Business Rule sends its own event; resetting an incident "

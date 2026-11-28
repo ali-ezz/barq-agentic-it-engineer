@@ -45,7 +45,7 @@ only as its caller, opener or watcher (existing instance ACL, checked 2026-10-03
 applies the same filter again on the server, so a user can never see another user's ticket,
 even by asking the AI.
 
-### 2B. Roles (each with a real test user on dev407364)
+### 2B. Roles (each with a real test user on dev000002)
 
 | Role | Test user | Can | Cannot |
 |---|---|---|---|
@@ -150,14 +150,14 @@ three copies.
 
 ## 5. Rules while doing it
 
-Shared systems only (dev407364 + shared EC2). The agent never uses an admin account. Every
+Shared systems only (dev000002 + shared EC2). The agent never uses an admin account. Every
 ServiceNow change lives in the repo and the tracked update set and can be undone. Nothing on
 the instance is changed without Ali's go-ahead for that step. One working session at a time.
 Teammates are asked not to merge to `main` while the EC2 runs our branch.
 
 ## 6. Scenarios (what the tests prove)
 
-Each scenario becomes a unit test and, where marked **L**, a live test on dev407364 with the
+Each scenario becomes a unit test and, where marked **L**, a live test on dev000002 with the
 role's real test user. "AI" = BARQ AI Agent. The older catalogue in
 `barq_agentic_platform_design.md` §8 remains as extra detail; these are the ones this round
 must pass.

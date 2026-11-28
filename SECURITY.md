@@ -13,17 +13,16 @@ answer as soon as I can; this is a personal prototype, so there is no service-le
 - Every credential-like value in this repository is a **placeholder**: the `.env*.example` files,
   the docs, the test fixtures and the evidence logs. Real settings live in git-ignored files
   (`.env`, `.env.pdi`, `.secrets/`) that were never committed.
-- The code and evidence refer to my own ServiceNow developer instance by name. Test people and test
-  tickets in the evidence are made up.
+- ServiceNow instance names in the code, docs and evidence are placeholders (`dev000001` and similar).
+  Test people and test tickets in the evidence are made up.
 - Treat any key, token or password you might find in the history or in the team's base code as
   **compromised**: do not reuse it, and rotate your own keys before running this against anything real.
   If you deploy the system, generate fresh values for every secret in `code/.env.engineer.example`
   (operator secret, webhook token, database and Redis passwords, model and tracing keys).
-- The scripts in `tools/` and `archive/` that talk to a ServiceNow instance read credentials from a local
+- The scripts in `tools/` that talk to a ServiceNow instance read credentials from a local
   environment file. They were written for setup and testing; the agent itself never authenticates as an administrator.
 
 ## Scope and known limits
 
 This is a prototype built and tested on a developer instance. It has not had an independent security
-review. Known open items are listed in the README ("Status and limitations") and in
-`archive/audit-2026-10-02/audit_2026-10-02.md`.
+review. Known open items are listed in the README ("Status and limitations").

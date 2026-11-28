@@ -43,7 +43,7 @@ Caller sees the answer on the page · engineers see the BARQ AI card and buttons
 
 | Setting | Shared (before) | Your PDI |
 |---|---|---|
-| `SERVICENOW_INSTANCE_URL` | dev407364 | `https://dev434590.service-now.com` |
+| `SERVICENOW_INSTANCE_URL` | dev000002 | `https://dev000001.service-now.com` |
 | `SERVICENOW_USERNAME` / password / client id+secret | shared agent login | the PDI's own `ai_orchestrator_svc` + OAuth client (already exist, in `.secrets` as `PDI_SERVICENOW_*`) |
 | `AGENT_ASSIGNMENT_GROUPS` | shared group ids | your PDI's Network / Software / Hardware / Service Desk group ids |
 | `AGENT_SERVICE_ACCOUNT_IDS` | shared ids | your PDI's agent user id |

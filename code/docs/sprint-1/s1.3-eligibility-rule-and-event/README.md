@@ -37,7 +37,7 @@ that already holds the update set updates those records in place. It does not ad
 second rule or a second event.
 
 The Fluent build emits the scripts as modules rather than inline code, so a deploy
-replaces the inline scripts with the module versions. Both were run on `dev434590`
+replaces the inline scripts with the module versions. Both were run on `dev000001`
 under Enforcing access tracking: eligibility passed, the event was queued, and the
 script action sent its `POST`.
 

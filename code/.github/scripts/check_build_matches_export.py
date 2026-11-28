@@ -2,7 +2,7 @@
 """Check the SDK build still reproduces the exported update set.
 
 Issue #54. ``ai_incident_orchestrator_s1_1.xml`` is the authoritative artifact: it is
-what was imported and committed on dev434590 and dev204871 (39 records, 0 collisions).
+what was imported and committed on dev000001 and dev000003 (39 records, 0 collisions).
 The Fluent source is only trustworthy while a build reproduces it.
 
 SDK 4.11.2 breaks that. It marks all five processing-state choice sys_ids

@@ -1,6 +1,6 @@
 # S1.1 Source-PDI Verification
 
-Verification performed on September 8, 2026 against source PDI `dev434590` on the Australia release.
+Verification performed on September 8, 2026 against source PDI `dev000001` on the Australia release.
 
 ## Verified application metadata
 
@@ -23,4 +23,4 @@ Verification performed on September 8, 2026 against source PDI `dev434590` on th
 
 ## Secondary-instance verification
 
-The exported XML was previewed and committed on authorized teammate PDI `dev204871`. Preview reported 39 inserts, zero updates, zero deletes, and zero collisions. Commit completed without manual repair. An existing Incident then displayed the imported AI Incident Orchestrator section, fields, processing-state default, and confidence validation; an out-of-range value produced the expected range error.
+The exported XML was previewed and committed on authorized teammate PDI `dev000003`. Preview reported 39 inserts, zero updates, zero deletes, and zero collisions. Commit completed without manual repair. An existing Incident then displayed the imported AI Incident Orchestrator section, fields, processing-state default, and confidence validation; an out-of-range value produced the expected range error.
